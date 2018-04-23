@@ -1,0 +1,23 @@
+/* XPM */
+static char *text[]={
+"16 16 4 1",
+". c None",
+"a c None",
+"# c #000000",
+"b c #ffffc0",
+"..############aa",
+"..#bbbbbbbbbb#aa",
+"..#b########b#aa",
+"..#bbbbbbbbbb#aa",
+"..#b########b#aa",
+"..#bbbbbbbbbb#aa",
+"..#b######bbb#aa",
+"a.#bbbbbbbbbb#aa",
+"..#b########b#aa",
+"aa#bbbbbbbbbb#aa",
+"aa#b########b#aa",
+"aa#bbbbbbbbbb#aa",
+"aa#b######bbb#.a",
+"aa#bbbbbbbbbb#.a",
+"aa#bbbbbbbbbb#aa",
+"aa############aa"};

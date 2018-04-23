@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE lumina>
+<lumina version="0.3">
+    <node name="Node">
+        <shader name="Vertexshader" type="vertex">#version 120
+
+
+void main(){
+	gl_Position.xy =  gl_Vertex.xy;
+	gl_Position.zw = vec2( 0.0, 1.0);
+	}
+</shader>
+        <shader name="Fragmentshader" type="fragment">
+void main(void){
+	gl_FragColor = gl_Color;
+	}</shader>
+        <shader name="Geometryshader" type="vertex">#version 120
+#extension EXT_gpu_shader4 : require
+#extension EXT_geometry_shader4 : require
+
+void main(){
+	//Route to Layer 0	
+	gl_Layer = 0;
+	for (int i = 0; i &lt; 3; i++){
+		gl_Position = gl_PositionIn[i];	
+		gl_FrontColor = vec4(1.0, 0.0, 0.0,1.0);
+		EmitVertex();
+		}
+	EndPrimitive();
+
+	gl_Layer = 511;
+	for (int i = 0; i &lt; 3; i++){
+		gl_Position = gl_PositionIn[i];
+		gl_Position.xy = -gl_Position.xy;
+		gl_FrontColor = vec4(0.0, 1.0, 0.0,1.0);
+		EmitVertex();
+		}
+	EndPrimitive();
+	}
+</shader>
+        <script name="Script" run="true">shader = gl.Shader(Vertexshader, Geometryshader, Fragmentshader, gl.TRIANGLES, gl.TRIANGLES,6);
+
+
+shader2 = gl.Shader(Node.Vertexshader, Node.Fragmentshader);
+
+
+Texture.Image2dArray(512,512,512);
+
+
+function render (){
+	shader.Bind();
+
+	Texture.BindFBO();
+	
+	gl.Begin(gl.TRIANGLES);
+	 gl.Vertex(-0.5,-0.5,0.0);
+	 gl.Vertex(0.5,0.0,0.0);
+	 gl.Vertex(-0.5,0.5,0.0);
+	gl.End();
+
+	Texture.UnbindFBO();
+	Texture.Bind(0);
+	shader2.Bind()
+
+	gl.Begin(gl.QUADS);
+	 gl.Vertex(1,0);
+	 gl.Vertex(1,1);
+	 gl.Vertex(0,1);
+	 gl.Vertex(0,0);
+
+	gl.End();
+
+	}
+</script>
+        <node name="Node">
+            <shader name="Vertexshader" type="vertex">#version 120
+
+#extension EXT_gpu_shader4 : require
+
+
+void main() 
+{
+	//Using glOrtho hence the following is eqvivalent to ftransform
+	gl_Position.xy = gl_Vertex.xy * 2.0 - 1.0;
+	gl_Position.zw = vec2( 0.0, 1.0);
+	
+	//Will use these Texture Coords for asigning the viewport manually
+	gl_TexCoord[0].x = gl_Vertex.x * 2.0 - 1.0;
+	gl_TexCoord[0].y = gl_Vertex.y;
+}</shader>
+            <shader name="Fragmentshader" type="fragment">#version 120
+
+#extension EXT_gpu_shader4 : require
+sampler2DArray samp;
+
+void main(){
+	vec3 coord = vec3(0.0);
+	if ( gl_TexCoord[0].x &lt; 0.0){
+		coord.z = 0.0; 
+		coord.xy = gl_TexCoord[0].xy + vec2( 1, 0);
+		}
+	else{
+		coord.z = 511.0; 
+		coord.xy = gl_TexCoord[0].xy + vec2( 0, 0);
+		}
+	gl_FragColor = texture2DArray( samp, coord);
+	}
+</shader>
+        </node>
+        <texture name="Texture" filename="" >
+        </texture>
+    </node>
+</lumina>

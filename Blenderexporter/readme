@@ -1,0 +1,35 @@
+README
+------
+
+This exporter for Blender exports meshes to lumina files.
+Put it in your Blender script directory.
+All quads will be converted into triangles.
+To export a model mark all needed objects and select the exporter
+ from the export menu.
+
+Position and Normal
+
+Both will be exported every time.
+
+
+UVcoords, Tangend and TexSpace quaternion
+
+All will be exported/generated if UVCoords are present. Tangent is the
+Tangendvector that is needed for many bumpmapping algorithms. 
+The TexSpace quaternion is a quaternion that is generated from 
+a TBN Matrix. It's usefull for quaternion based bumpmapping.
+
+Bonedepencys
+
+Will be exported if a mesh has a armature as parent. 
+The Bone number is added to the weight (range 0.0 - 0.9999)
+
+RelToJoint
+An alternate position relative to joints. Usefull for quaternion based
+Bonesystems. Only created with bones.
+
+Softbody (experimental)
+
+Softinit1 and Softinit2 are the edges connected neighbor vertexnumbers.
+(maximum 8 connections)
+Softbody is a new and experimental read the exporter code

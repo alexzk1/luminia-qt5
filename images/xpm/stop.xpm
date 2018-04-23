@@ -1,0 +1,23 @@
+/* XPM */
+static char *stop[]={
+"16 16 4 1",
+". c None",
+"# c #000000",
+"a c #ff0000",
+"b c #ffffff",
+".....######.....",
+"....#aaaaaa#....",
+"...#aaaaaaaa#...",
+"..#aaaaaaaaaa#..",
+".#aaaaaaaaaaaa#.",
+"#ababbbabbaabba#",
+"#baaababaababab#",
+"#baaababaababab#",
+"#abaababaababba#",
+"#aabababaababaa#",
+"#aabababaababaa#",
+".#baabaabbaaba#.",
+"..#aaaaaaaaaa#..",
+"...#aaaaaaaa#...",
+"....#aaaaaa#....",
+".....######....."};

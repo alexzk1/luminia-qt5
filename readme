@@ -1,0 +1,116 @@
+README
+======
+
+Thanks for testing Lumina.
+
+Install
+=======
+
+Lumina requires QT-4.3.2
+
+"qmake && make && doxygen"
+
+for compiling and generating the documentation.
+
+Glew is now included, so a a QT installation with compiler should be 
+enough.
+
+Doxygen is used to generate the XML documentation that can be
+parsed by Lumina. If it's not build the script reference won't
+work.
+
+It is important, that luminas working directory is the the lumina
+base directory, elsewhere the scripts won't work.
+
+It's recommend to start the program from a shell to see the
+debugging messages and shader compiler outputs. Shader compiler
+errors will be reported with popups.
+
+
+Documantation and Tutorial
+==========================
+
+Look at the project website for documentation and tutorials.
+http://lumina.sourceforge.net/
+(included in this package in the doc subdirectory)
+The media directory contains some shaders, textures and scripts.
+Some lum files are located in the root directory. This are
+examples, but some of them needs addition files.
+
+IRC Client
+==========
+
+This version of Lumina includes a very simple IRC client, it can be
+used for feed back, bug reports, sugestions and to chat with other
+lumina users. The default chanel is #lumina on irc.freenode.net.
+(If the IRC Button is nor visible, check the working directory)
+
+Importer
+========
+
+Currently are importer available for OBJ, 3DS, X, MD2 and MD3:
+
+OBJ:
+Should be abli to import all files
+
+3DS:
+only Position and Texcoords, normals can be generated with
+a normal generator but smothing groups are ignored.
+
+X:
+The current version merge al meshes of a frame into a single lumina
+mesh and creates one index per material.
+
+MD2:
+This format can be imported without data loss (except the frame names).
+A simple script and vertex shader are required, to handle the keyframe
+interpolation.
+
+MD3:
+This format is used by Quake 3 to store Model parts. The Tags are stored
+into buffer objects, so it may be possible to animated quake3 models,
+with a script and vertexshader too (currently not tested)
+
+CMF:
+Importing of cal3d binary mesh files is supported in Lumina 0.3.0-r2.
+Each material will has it's own index. Limitations are  only the first 
+set of UVCoords will be imported and a maximum of 4 influences per vertex.
+Springs are not supported jet.
+
+CR2:
+Currently only a parser. Currently not enough documantation about the
+blending zones available.
+
+Generators
+==========
+
+Normal generator:
+Only a mesh with vertex positions and indices is required. Generates 
+interpolated normals
+
+Tangent generator:
+Creates Tangents requires ; Vertex position, Normal, and texcoords.
+
+Texturespace Quaternion:
+requires Normal and Tangent. It can be used to quaternion based
+bumpmapping, that can be combined with BRDFs.
+
+Known Bugs:
+===========
+
+
+
+Differences to common naming conventions :
+==========================================
+Many script functions starts with capital letters, they can be allways
+used in scripts. Function names with small letters are used for propertys,
+internal Signal and Slots and editing. Sometimes they could be used in scripts,
+but they may be not avaible in a future framework, that can use the Lumina files.
+The OpenGL prefixes are "gl" and "GL_" replaced by "gl."
+
+Blenderexporter
+===============
+
+The blender exporter should be moved/copied/linked in blenders script
+directory.
+It exports a selected meshes as *.lum file.
