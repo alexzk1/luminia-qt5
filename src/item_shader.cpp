@@ -20,7 +20,7 @@
 *********************************************************************************/
 #include "item.h"
 #include "sourceedit.h"
-#include <QtGui>
+
 
 void Item_shader::create( QObject* obj, int id , void** args){
 	QObject* r;

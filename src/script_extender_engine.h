@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007  oc2k1
@@ -31,6 +31,7 @@
 #include "item.h"
 
 #include <QtScript>
+#include <QMessageBox>
 
 Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
 
@@ -39,64 +40,64 @@ Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
 class SEngine: public QObject{
 Q_OBJECT
 public:
-	
-	SEngine(QObject *o, const QString& fn){
-		obj = o;
-		filename = fn;
-		connect(obj,SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
-		QFile file(filename);
-		if (!file.open(QIODevice::ReadOnly | QIODevice::Text )) {
-			qDebug() << "Error launching script";
-			return ;
-			}
-		QString script(file.readAll());
+    SEngine(QObject *o, const QString& fn){
+        obj = o;
+        filename = fn;
+        connect(obj,SIGNAL(destroyed()), this, SLOT(deleteLater()));
 
-
-
-		QScriptValue obj_sv = eng.newQObject(obj);
-		eng.globalObject().setProperty("obj" , obj_sv );
-
-
-		ogl = new glwrapper(this,"gl");
-		QScriptValue ogl_sv = eng.newQObject(ogl);
-		ogl_sv.setPrototype(eng.scriptValueFromQMetaObject<glwrapper>());
-		eng.globalObject().setProperty("gl" , ogl_sv );
-
-		eng.globalObject().setProperty("World" ,eng.newQObject(Item::world));
-
-
-		Factory::Factory(eng);
-
-		QScriptValue r = eng.evaluate(script);
-		if (eng.hasUncaughtException()) {
-			int line = eng.uncaughtExceptionLineNumber();
-			QMessageBox::critical ( 0, QString("Script error"), QString("Error processing Script %1 at Line %2 ").arg(filename).arg(line));
-			}
+        QFile file(filename);
+        if (!file.open(QIODevice::ReadOnly | QIODevice::Text )) {
+            qDebug() << "Error launching script";
+            return ;
+            }
+        QString script(file.readAll());
 
 
 
-		}
+        QScriptValue obj_sv = eng.newQObject(obj);
+        eng.globalObject().setProperty("obj" , obj_sv );
 
-	~SEngine(){
-		ScriptExtender::engineList.removeAll (this);
-		qDebug() << "SEngine destroyed";
-		delete ogl;
-		}
 
-	bool is(QObject *o, const QString& fn){
-		return (o==obj && fn == filename);
+        ogl = new glwrapper(this,"gl");
+        QScriptValue ogl_sv = eng.newQObject(ogl);
+        ogl_sv.setPrototype(eng.scriptValueFromQMetaObject<glwrapper>());
+        eng.globalObject().setProperty("gl" , ogl_sv );
 
-		}
+        eng.globalObject().setProperty("World" ,eng.newQObject(Item::world));
 
-	QScriptEngine eng;
 
-	QObject *obj; // assigned object
-	QString filename; //script filename
-	
-	glwrapper *ogl;
+        Factory::Factory(eng);
 
-	};
+        QScriptValue r = eng.evaluate(script);
+        if (eng.hasUncaughtException()) {
+            int line = eng.uncaughtExceptionLineNumber();
+            QMessageBox::critical ( 0, QString("Script error"), QString("Error processing Script %1 at Line %2 ").arg(filename).arg(line));
+            }
+
+
+
+        }
+
+    ~SEngine(){
+        ScriptExtender::engineList.removeAll (this);
+        qDebug() << "SEngine destroyed";
+        delete ogl;
+        }
+
+    bool is(QObject *o, const QString& fn){
+        return (o==obj && fn == filename);
+
+        }
+
+    QScriptEngine eng;
+
+    QObject *obj; // assigned object
+    QString filename; //script filename
+
+    glwrapper *ogl;
+
+    };
 
 
 

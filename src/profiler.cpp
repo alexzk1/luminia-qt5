@@ -1,5 +1,5 @@
  /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007-2008  oc2k1
@@ -21,8 +21,14 @@
 
 #include "profiler.h"
 
-#include <GL/glew.h>
-#include <QtGui>
+
+#include "incgl.h"
+
+#include <QTextEdit>
+#include <QGLWidget>
+#include <QDockWidget>
+#include <QMainWindow>
+#include <QApplication>
 
 #define GL_CHECK_ERROR()                         \
           do                                              \
@@ -36,112 +42,112 @@
 
 
 Profiler::Profiler() : QObject(){
-	active = false;
+    active = false;
 
-	text = new QTextEdit();
-	text->setReadOnly(true);
+    text = new QTextEdit();
+    text->setReadOnly(true);
 
-	dock = new QDockWidget("Profiler");
-	dock->setAllowedAreas(Qt::RightDockWidgetArea);
-	dock->setWidget(text);
+    dock = new QDockWidget("Profiler");
+    dock->setAllowedAreas(Qt::RightDockWidgetArea);
+    dock->setWidget(text);
 
-	QWidgetList l = QApplication::topLevelWidgets();
-	for (int i = 0; i < l.size(); i++){
-		if (QMainWindow* w = dynamic_cast<QMainWindow*>(l.at(i))) w->addDockWidget(Qt::RightDockWidgetArea, dock);
-		}
+    QWidgetList l = QApplication::topLevelWidgets();
+    for (int i = 0; i < l.size(); i++){
+        if (QMainWindow* w = dynamic_cast<QMainWindow*>(l.at(i))) w->addDockWidget(Qt::RightDockWidgetArea, dock);
+        }
 
-	dock->hide();
+    dock->hide();
 
-	registered =0;
-	count = 0;
-	queries = NULL;
+    registered =0;
+    count = 0;
+    queries = nullptr;
 
-	}
+    }
 
 Profiler::~Profiler(){
-	delete text;
-	delete dock;
+    delete text;
+    delete dock;
 
-	glDeleteQueries(registered*2,queries);
-	delete[] queries;
-	}
+    glDeleteQueries(registered*2,queries);
+    delete[] queries;
+    }
 
 void Profiler::newFrame(){
-	
 
-	if (active && count > registered){
-		if (queries != NULL){
-			glDeleteQueries(registered*2,queries);
-			delete[] queries;
-			}
-		registered = count ;
-		queries = new GLuint[registered*2];
-		glGenQueries (registered*2,queries);
-		}
-	count = 0;
-	}
+
+    if (active && count > registered){
+        if (queries != nullptr){
+            glDeleteQueries(registered*2,queries);
+            delete[] queries;
+            }
+        registered = count ;
+        queries = new GLuint[registered*2];
+        glGenQueries (registered*2,queries);
+        }
+    count = 0;
+    }
 
 void Profiler::start(){
-	if (active && (count < registered) ){
-		glBeginQuery(GL_SAMPLES_PASSED_ARB, queries[count * 2]);
-		glBeginQuery(GL_TIME_ELAPSED_EXT, queries[count * 2 + 1]);
-		//qDebug() << " start";
-		}
-	}
- 
+    if (active && (count < registered) ){
+        glBeginQuery(GL_SAMPLES_PASSED_ARB, queries[count * 2]);
+        glBeginQuery(GL_TIME_ELAPSED_EXT, queries[count * 2 + 1]);
+        //qDebug() << " start";
+        }
+    }
+
 
 void Profiler::stop(){
-	if (active && count < registered ){
-		glEndQuery(GL_TIME_ELAPSED_EXT);
-		glEndQuery(GL_SAMPLES_PASSED_ARB);
-		}
-	count++;
-	}
+    if (active && count < registered ){
+        glEndQuery(GL_TIME_ELAPSED_EXT);
+        glEndQuery(GL_SAMPLES_PASSED_ARB);
+        }
+    count++;
+    }
 
 
 
 void Profiler::toggle(bool b){
-	active = b;
-		if (active){
-		//w->renderText ( 10, 20, QString ("test") ); //overlay 
-		dock->show();
-		}
-	else{
-		dock->hide();
-		}
-	}
+    active = b;
+        if (active){
+        //w->renderText ( 10, 20, QString ("test") ); //overlay
+        dock->show();
+        }
+    else{
+        dock->hide();
+        }
+    }
 
 
 void Profiler::render(QGLWidget* /* w*/){
-	if (active && count != 0){
-		//w->renderText ( 10, 20, QString ("test") ); //incompatible overlay .
-		QString t;
+    if (active && count != 0){
+        //w->renderText ( 10, 20, QString ("test") ); //incompatible overlay .
+        QString t;
 
-		GLuint time,fragments;
-		GL_CHECK_ERROR();
-	
-		GLint available=0;
+        GLuint time,fragments;
+        GL_CHECK_ERROR();
+
+        GLint available=0;
 
 
-		while(available==0){ 
-			glGetQueryObjectiv(queries[count * 2  -1 ], GL_QUERY_RESULT_AVAILABLE, &available);
-			//usleep(10);
-			//qDebug() << "wait";
-			}
+        while(available==0){
+            glGetQueryObjectiv(queries[count * 2  -1 ], GL_QUERY_RESULT_AVAILABLE, &available);
+            //usleep(10);
+            //qDebug() << "wait";
+            }
 
-		for(int i = 0; i < count;i++){
-			
-			glGetQueryObjectuivARB (queries[i * 2], GL_QUERY_RESULT, &fragments);//GL_CHECK_ERROR();
-			glGetQueryObjectuivARB (queries[i * 2 + 1], GL_QUERY_RESULT, &time);//GL_CHECK_ERROR();
+        for(int i = 0; i < count;i++){
 
-			//qDebug() << fragments << "  " << time;
+            glGetQueryObjectuivARB (queries[i * 2], GL_QUERY_RESULT, &fragments);//GL_CHECK_ERROR();
+            glGetQueryObjectuivARB (queries[i * 2 + 1], GL_QUERY_RESULT, &time);//GL_CHECK_ERROR();
 
-			t += QString("%1 %2ns/pixel\t  %3 µs\t %4 pixel \n").arg(i+1).arg(float(time)/float(fragments)).arg(time/1000.0).arg(fragments);
-			}
+            //qDebug() << fragments << "  " << time;
 
-		text->setText(t); 
+            t += QString("%1 %2ns/pixel\t  %3 ï¿½s\t %4 pixel \n").arg(i+1).arg(float(time)/float(fragments)).arg(time/1000.0).arg(fragments);
+            }
 
-		}
-	}
+        text->setText(t);
+
+        }
+    }
 
 

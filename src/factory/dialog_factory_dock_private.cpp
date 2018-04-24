@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** This code based on Trolltechs QSA input dialog factory.
@@ -22,189 +22,189 @@
 *********************************************************************************/
 
 #include "dialog_factory_private.h"
-
-#include <QtGui>
+#include <QFrame>
+#include <QMainWindow>
 
 namespace QS{
 
-DockPrivate::DockPrivate(QWidget *parent) : QFrame(parent), width(0), lastWidget(0), invisibleButtonGroup(0), tabWidget(0), groupBox(0){
-	setFrameStyle(QFrame::Panel | QFrame::Sunken);
-	this->parent = this;
+    DockPrivate::DockPrivate(QWidget *parent) : QFrame(parent), width(0), lastWidget(0), invisibleButtonGroup(0), tabWidget(0), groupBox(0){
+        setFrameStyle(QFrame::Panel | QFrame::Sunken);
+        this->parent = this;
 
-	QVBoxLayout *vbox = new QVBoxLayout(this);
-	setLayout(vbox);
-	//vbox->setMargin(0);
-	hbox = new QHBoxLayout;
-	vbox->addLayout(hbox);
-
-
-	grid = new QGridLayout;
-	hbox->addLayout(grid);
-	grid->setAlignment(Qt::AlignTop);
- 
-	dock = new QDockWidget("Script Dock");
-	dock->setAllowedAreas(Qt::RightDockWidgetArea); // lumina specific
-	dock->setWidget(this);
-
-	//search MainWindow
-	QWidgetList l = QApplication::topLevelWidgets();
-	for (int i = 0; i < l.size(); i++){
-		if (QMainWindow* w = dynamic_cast<QMainWindow*>(l.at(i))) w->addDockWidget(Qt::RightDockWidgetArea, dock);
-		}
-
-	}
-
-DockPrivate::~DockPrivate(){
-	dock->deleteLater();
-	}
+        QVBoxLayout *vbox = new QVBoxLayout(this);
+        setLayout(vbox);
+        //vbox->setMargin(0);
+        hbox = new QHBoxLayout;
+        vbox->addLayout(hbox);
 
 
-void DockPrivate::addSpace(int space){
-	QSpacerItem *spacer = new QSpacerItem(0, qMax(space,0), QSizePolicy::Fixed, QSizePolicy::Fixed);
-	grid->addItem(spacer, grid->rowCount(), 1);
-	invisibleButtonGroup = 0;
-	}
+        grid = new QGridLayout;
+        hbox->addLayout(grid);
+        grid->setAlignment(Qt::AlignTop);
 
-void DockPrivate::add(Widget *widget){
-	QWidget *w = widget->widget;
-	int row = grid->rowCount();
-	if (qobject_cast<Labeled *>(widget)) {
-		QLabel *label = ((Labeled*)widget)->labelWidget;
-		label->setShown(!label->text().isEmpty());
-		grid->addWidget(label, row, 0);
-		grid->addWidget(w, row, 1);
-		}
-	else{
-		grid->addWidget(w, row, 0,  1, 2);
-		}
-	if (w && qobject_cast<QRadioButton *>(w)) {
-		if (!invisibleButtonGroup)
-			invisibleButtonGroup = new QButtonGroup(this);
-		invisibleButtonGroup->addButton(qobject_cast<QRadioButton *>(w));
-		}
-	lastWidget = w;
-	}
+        dock = new QDockWidget("Script Dock");
+        dock->setAllowedAreas(Qt::RightDockWidgetArea); // lumina specific
+        dock->setWidget(this);
 
-void DockPrivate::show(){
-	dock->show();
-	}
+        //search MainWindow
+        QWidgetList l = QApplication::topLevelWidgets();
+        for (int i = 0; i < l.size(); i++){
+            if (QMainWindow* w = dynamic_cast<QMainWindow*>(l.at(i))) w->addDockWidget(Qt::RightDockWidgetArea, dock);
+        }
 
-void DockPrivate::hide(){
-	dock->hide();
-	}
+    }
 
-void DockPrivate::setTitle(const QString &title){
-	dock->setWindowTitle(title);
-	setWindowTitle(title);
-	}
+    DockPrivate::~DockPrivate(){
+        dock->deleteLater();
+    }
 
-Dock::Dock(const QString &title, QWidget *parent){
-	d = new DockPrivate(parent);
-	widget = d;
-	if (!title.isEmpty())
-		setTitle(title);
-	}
 
-Dock::Dock(QObject*){
-	d = new DockPrivate(NULL);
-	widget = d;
-	}
+    void DockPrivate::addSpace(int space){
+        QSpacerItem *spacer = new QSpacerItem(0, qMax(space,0), QSizePolicy::Fixed, QSizePolicy::Fixed);
+        grid->addItem(spacer, grid->rowCount(), 1);
+        invisibleButtonGroup = nullptr;
+    }
 
-Dock::~Dock(){
-	delete d;
-	}
+    void DockPrivate::add(Widget *widget){
+        QWidget *w = widget->widget;
+        int row = grid->rowCount();
+        if (qobject_cast<Labeled *>(widget)) {
+            QLabel *label = ((Labeled*)widget)->labelWidget;
+            label->setVisible(!label->text().isEmpty());
+            grid->addWidget(label, row, 0);
+            grid->addWidget(w, row, 1);
+        }
+        else{
+            grid->addWidget(w, row, 0,  1, 2);
+        }
+        if (w && qobject_cast<QRadioButton *>(w)) {
+            if (!invisibleButtonGroup)
+                invisibleButtonGroup = new QButtonGroup(this);
+            invisibleButtonGroup->addButton(qobject_cast<QRadioButton *>(w));
+        }
+        lastWidget = w;
+    }
 
-void Dock::setTitle(const QString &title){
-	d->setTitle(title);
-	}
+    void DockPrivate::show(){
+        dock->show();
+    }
 
-/*!
+    void DockPrivate::hide(){
+        dock->hide();
+    }
+
+    void DockPrivate::setTitle(const QString &title){
+        dock->setWindowTitle(title);
+        setWindowTitle(title);
+    }
+
+    Dock::Dock(const QString &title, QWidget *parent){
+        d = new DockPrivate(parent);
+        widget = d;
+        if (!title.isEmpty())
+            setTitle(title);
+    }
+
+    Dock::Dock(QObject*){
+        d = new DockPrivate(NULL);
+        widget = d;
+    }
+
+    Dock::~Dock(){
+        delete d;
+    }
+
+    void Dock::setTitle(const QString &title){
+        d->setTitle(title);
+    }
+
+    /*!
 title property
 */
-QString Dock::title() const {
-	return d->windowTitle();
-	}
+    QString Dock::title() const {
+        return d->windowTitle();
+    }
 
-void Dock::setWidth(int width){
-	d->width = width;
-	}
+    void Dock::setWidth(int width){
+        d->width = width;
+    }
 
-/*!
+    /*!
 width property
 */
-int Dock::width() const {
-	return d->width;
-	}
-/*!
+    int Dock::width() const {
+        return d->width;
+    }
+    /*!
 void newTab(String name)\n
 add a new tab with name "name"
 */
-void Dock::newTab(const QString &label){
-	if (!d->tabWidget) {
-		d->tabWidget = new QTabWidget(d);
-		int row = d->grid->rowCount();
-		d->grid->addWidget(d->tabWidget, row, 0, 1, 2);
-		}
-	QWidget *w = new QWidget;
-	d->tabWidget->addTab(w, label);
-	d->parent = w;
-	d->hbox = new QHBoxLayout(w);
-	d->grid = new QGridLayout(0);
-	d->hbox->addLayout(d->grid);
-	d->grid->setAlignment(Qt::AlignTop);
-	}
-/*!
+    void Dock::newTab(const QString &label){
+        if (!d->tabWidget) {
+            d->tabWidget = new QTabWidget(d);
+            int row = d->grid->rowCount();
+            d->grid->addWidget(d->tabWidget, row, 0, 1, 2);
+        }
+        QWidget *w = new QWidget;
+        d->tabWidget->addTab(w, label);
+        d->parent = w;
+        d->hbox = new QHBoxLayout(w);
+        d->grid = new QGridLayout(0);
+        d->hbox->addLayout(d->grid);
+        d->grid->setAlignment(Qt::AlignTop);
+    }
+    /*!
 String currentTab()\n
 returns the name of the current active Tab.
 */
-QString Dock::currentTab() const{
-	if (!d->tabWidget) {
-		return QString("");
-		}
-	return d->tabWidget->tabText(d->tabWidget->currentIndex ());
-	}
-/*!
+    QString Dock::currentTab() const{
+        if (!d->tabWidget) {
+            return QString("");
+        }
+        return d->tabWidget->tabText(d->tabWidget->currentIndex ());
+    }
+    /*!
 newColumn();\n
 start a new column of widgets
 */
-void Dock::newColumn(){
-	if (d->grid->rowCount()) {
-		d->hbox->addSpacing(17);
-		d->grid = new QGridLayout(0);
-		d->hbox->addLayout(d->grid);
-		d->grid->setAlignment(Qt::AlignTop);
-    		}
-	}
-/*!
+    void Dock::newColumn(){
+        if (d->grid->rowCount()) {
+            d->hbox->addSpacing(17);
+            d->grid = new QGridLayout(0);
+            d->hbox->addLayout(d->grid);
+            d->grid->setAlignment(Qt::AlignTop);
+        }
+    }
+    /*!
 addSpace(number);\n
 add a Spacer
 */
-void Dock::addSpace(int space){
-	d->addSpace(space);
-	}
+    void Dock::addSpace(int space){
+        d->addSpace(space);
+    }
 
-/*!
+    /*!
 add(Widget);\n
 add a Widget to the dialog
 */
-void Dock::add(Widget *widget){
-	d->add(widget);
-	}
+    void Dock::add(Widget *widget){
+        d->add(widget);
+    }
 
-/*!
+    /*!
 show();\n
 show the dock.
 */
-void Dock::show(){
-	d->show();
-	}
-/*!
+    void Dock::show(){
+        d->show();
+    }
+    /*!
 hide();\n
 hide the dock.
 */
-void Dock::hide(){
-	d->hide();
-	}
+    void Dock::hide(){
+        d->hide();
+    }
 
 } // namespace QS
 

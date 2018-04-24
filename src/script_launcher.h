@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007  oc2k1
@@ -22,34 +22,39 @@
 #ifndef SCRIPT_LAUNCHER_H
 #define SCRIPT_LAUNCHER_H
 
-#include <QtGui>
+
+#include <QObject>
+#include <QAction>
+#include <QRegExp>
+#include <QScriptEngine>
 
 class Item;
 class QSInterpreter;
 class QScriptEngine;
 class glwrapper;
 
-class ScriptLauncher : public QObject {
+class ScriptLauncher : public QObject
+{
  Q_OBJECT
 public:
-	ScriptLauncher(QString fn, QObject * parent = 0);
-	~ScriptLauncher();
+    ScriptLauncher(QString fn, QObject * parent = nullptr);
+    virtual ~ScriptLauncher()override;
 
-	static Item *world;
-	QAction *a;
-	QRegExp *filter;
+    static Item *world;
+    QAction *a;
+    QRegExp *filter;
 
-public slots: 
-	void terminate();
+public slots:
+    void terminate();
 private slots:
-	void toggled(bool);
-	void launch();
+    void toggled(bool);
+    void launch();
 
 protected:
-	bool toggle;
-	QString fileName;
+    bool toggle;
+    QString fileName;
 
-	glwrapper *ogl;
-	QScriptEngine *ip;
-	};
+    glwrapper *ogl;
+    QScriptEngine *ip;
+    };
 #endif

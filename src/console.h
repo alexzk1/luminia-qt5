@@ -1,5 +1,5 @@
- /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+/********************************************************************************
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007  oc2k1
@@ -21,10 +21,9 @@
 
 #ifndef CONSOLE_H
 #define CONSOLE_H
-#include <QtGui>
 
 #include "sourceedit.h" //reuse the completationbox
-
+#include <QLineEdit>
 
 class QGLWidget;
 class QDockWidget;
@@ -37,81 +36,84 @@ class ConsoleLine;
 
 
 
-
 class ConsoleLine;
 /*!
 CompletionBox for the console
 */
-class ConsoleCompletionBox : public AbstractCompletionBox{
-Q_OBJECT
+class ConsoleCompletionBox : public AbstractCompletionBox
+{
+    Q_OBJECT
 public:
-	ConsoleCompletionBox (ConsoleLine *line, const QStringList& completions, const QString& searchstring);
-	virtual ~ConsoleCompletionBox();
+    ConsoleCompletionBox (ConsoleLine *line, const QStringList& completions, const QString& searchstring);
+    virtual ~ConsoleCompletionBox()override;
 protected:
-	void finishCompletion();
-	ConsoleLine *line;
-	};
+    void finishCompletion() override;
+    ConsoleLine *line;
+};
 
 
 class Console;
 /*!
 LineEdit with history and completion box
 */
-class ConsoleLine : public QLineEdit{
-Q_OBJECT
-friend class ConsoleCompletionBox;
+class ConsoleLine : public QLineEdit
+{
+    Q_OBJECT
+    friend class ConsoleCompletionBox;
 public:
-	ConsoleLine(Console *parent):QLineEdit(){
-		completationOpen=false;
-		console = parent;
-		meta = NULL;
-		}
-	~ConsoleLine(){}
-	void keyPressEvent(QKeyEvent *e);
+    ConsoleLine(Console *parent):QLineEdit()
+    {
+        completationOpen=false;
+        console = parent;
+        meta = nullptr;
+    }
+    virtual ~ConsoleLine()override = default;
+    void keyPressEvent(QKeyEvent *e) override;
 public slots:
-	void helpHandler(const QString& string);
+    void helpHandler(const QString& string);
 signals:
-	void setHelpString(const QString& string);
+    void setHelpString(const QString& string);
 protected:
-	const QMetaObject *meta;
-	Console *console;
-	bool completationOpen;
-	int count;
-	QString temp;
-	QStringList history;
-	};
+    const QMetaObject *meta;
+    Console *console;
+    bool completationOpen;
+    int count;
+    QString temp;
+    QStringList history;
+};
 
 
 
 
-class Console : public QObject{
-Q_OBJECT
-friend class ConsoleLine;
+class Console : public QObject
+{
+    Q_OBJECT
+    friend class ConsoleLine;
 public:
-	Console(QObject *root);
-	~Console();
+    Console(QObject *root);
+    virtual ~Console() override;
 
 public slots:
-	void toggle(bool);
+    void toggle(bool);
 
 private slots:
-	void returnPressed();
+    void returnPressed();
 
 protected:
-	QWidget *widget;
-	QVBoxLayout *layout;
-	QTextEdit *out;
-	ConsoleLine *in;
+    QWidget *widget;
+    QVBoxLayout *layout;
+    QTextEdit *out;
+    ConsoleLine *in;
 
-	QObject *root;
-	QDockWidget *dock;
+    QObject *root;
+    QDockWidget *dock;
 
-	QScriptEngine *eng;
-	//QScriptValue *global;
-	QObject *world;
+    QScriptEngine *eng;
+    //QScriptValue *global;
+    QObject *world;
 
-	QString code;
-	bool active;
-	};
+    QString code;
+    bool active;
+};
 
 #endif

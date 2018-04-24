@@ -1,4 +1,4 @@
- /****************************************************************************
+/****************************************************************************
 **
 ** Copyright (C) 2005-2006 Trolltech AS. All rights reserved.
 **
@@ -30,26 +30,26 @@
 class Item;
 class Item_world;
 
-class TreeView : public QTreeWidget{
-Q_OBJECT
+class TreeView : public QTreeWidget
+{
+    Q_OBJECT
 public:
-	TreeView ( QWidget * parent = 0 );
-	~TreeView ();
-	
-	Item_world* world;
+    TreeView ( QWidget * parent = nullptr );
+    virtual ~TreeView ()override = default;
+
+    Item_world* world;
 
 protected:
-	virtual void contextMenuEvent ( QContextMenuEvent * event );
-	
-	virtual void dragEnterEvent ( QDragEnterEvent * event );
-	virtual void dropEvent ( QDropEvent * event );
-	virtual void dragMoveEvent ( QDragMoveEvent * event );
-	virtual void mousePressEvent(QMouseEvent*);
-	virtual void mouseMoveEvent ( QMouseEvent *);
+    virtual void contextMenuEvent ( QContextMenuEvent * event )override;
+    virtual void dragEnterEvent ( QDragEnterEvent * event )override;
+    virtual void dropEvent ( QDropEvent * event )override;
+    virtual void dragMoveEvent ( QDragMoveEvent * event )override;
+    virtual void mousePressEvent(QMouseEvent*)override;
+    virtual void mouseMoveEvent ( QMouseEvent *)override;
 private:
-	Item* dragSource;
+    Item* dragSource;
 
-	};
+};
 
 
 #endif

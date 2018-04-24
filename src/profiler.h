@@ -1,5 +1,5 @@
- /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+/********************************************************************************
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007-2008  oc2k1
@@ -21,36 +21,38 @@
 
 #ifndef PROFILER_H
 #define PROFILER_H
-#include <QtGui>
-#include <GL/glew.h>
+
+#include "incgl.h"
+#include <QObject>
 
 class QGLWidget;
 class QDockWidget;
 class QTextEdit;
 
-class Profiler : public QObject{
-Q_OBJECT
+class Profiler : public QObject
+{
+    Q_OBJECT
 public:
-	Profiler();
-	~Profiler();
-	void newFrame();
-	void start();
-	void stop();
-	void render(QGLWidget *w);
+    Profiler();
+    virtual ~Profiler()override;
+    void newFrame();
+    void start();
+    void stop();
+    void render(QGLWidget *w);
 
 public slots:
-	void toggle(bool);
+    void toggle(bool);
 
 
 protected:
-	bool active;
-	int count;
-	int registered;
+    bool active;
+    int  count;
+    int  registered;
 
-	GLuint* queries;
+    GLuint* queries;
 
-	QDockWidget *dock;
-	QTextEdit *text;
-	};
+    QDockWidget *dock;
+    QTextEdit *text;
+};
 
 #endif

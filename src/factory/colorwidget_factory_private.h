@@ -22,7 +22,7 @@
 *********************************************************************************/
 
 #include "factory.h"
-#include <QtGui>
+
 #include "dialog_factory_private.h"
 
 

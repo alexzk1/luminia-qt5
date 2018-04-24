@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007  oc2k1
@@ -21,39 +21,43 @@
 
 #ifndef TIMEWIDGET_H
 #define TIMEWIDGET_H
-#include <QtGui>
+
 
 /*!
 The time widget is a combination of slider play and config button, to controll the time
-*/ 
-class TimeWidget : public QWidget{
-	Q_OBJECT
+*/
+#include <QHBoxLayout>
+#include <QSlider>
+#include <QPushButton>
+#include <QTime>
+
+class TimeWidget : public QWidget
+{
+    Q_OBJECT
 public:
-	TimeWidget(QWidget *parent);
-	~TimeWidget();
-	bool isPlaying(){return playing;}
+    TimeWidget(QWidget *parent);
+    ~TimeWidget();
+    bool isPlaying(){return playing;}
 
 private slots:
-	void valueChanget(int);
-	void playPressed();
-	void timeconfig();
-
-
+    void valueChanget(int);
+    void playPressed();
+    void timeconfig();
 
 protected:
-	QSlider *timeslider;
-	QHBoxLayout *layout;
-	QPushButton *play;
-	QPushButton *config;
-	
-	int fps;
-	bool loop;
-	bool playing;
-	QTime len;
+    QSlider *timeslider;
+    QHBoxLayout *layout;
+    QPushButton *play;
+    QPushButton *config;
 
-	void timerEvent( QTimerEvent * );
-	
+    int fps;
+    bool loop;
+    bool playing;
+    QTime len;
+
+    virtual void timerEvent( QTimerEvent * ) override;
+
 signals:
-	void timeChanged(double);
-	};
+    void timeChanged(double);
+};
 #endif

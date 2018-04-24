@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007-2008  oc2k1
@@ -22,35 +22,35 @@
 #include "parsercodec.h"
 
 QString ParserCodec::convertToUnicode ( const char * chars, int len, ConverterState* /*state*/) const{
-	QString result;
-	for (int i = 0; i < len; i++) {
-		switch(chars[i]){
-			case '{': result +=  QString(" { "); break;
-			case '}': result +=  QString(" } "); break;
-			case '(': result +=  QString(" ( "); break;
-			case ')': result +=  QString(" ) "); break;
-			case ';': result +=  QString(" ; "); break;
-			case ',': result +=  QString(" , "); break;
-			case ':': result +=  QString(" : "); break;
-				default: result += QLatin1Char(chars[i]);
-			}
-		}
-	return result;
-	}
+    QString result;
+    for (int i = 0; i < len; i++) {
+        switch(chars[i]){
+            case '{': result +=  QString(" { "); break;
+            case '}': result +=  QString(" } "); break;
+            case '(': result +=  QString(" ( "); break;
+            case ')': result +=  QString(" ) "); break;
+            case ';': result +=  QString(" ; "); break;
+            case ',': result +=  QString(" , "); break;
+            case ':': result +=  QString(" : "); break;
+                default: result += QLatin1Char(chars[i]);
+            }
+        }
+    return result;
+    }
 
 QByteArray ParserCodec::convertFromUnicode(const QChar* c, int len, ConverterState*) const{
-	return QString(len, *c).toAscii(); //dummy
-	}
+    return QString(len, *c).toUtf8(); //dummy
+    }
 
 QByteArray ParserCodec::fromUnicode ( const QString & str ) const{
-	return str.toAscii(); //dummy
-	}
+    return str.toUtf8(); //dummy
+    }
 
 QByteArray ParserCodec::name() const{
-	return QByteArray("ParserCodec");
-	}
+    return QByteArray("ParserCodec");
+    }
 
 int ParserCodec::mibEnum() const{
-	return 999999;
-	}
+    return 999999;
+    }
 

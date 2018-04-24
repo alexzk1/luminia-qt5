@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007-2008  oc2k1
@@ -23,51 +23,54 @@
 #ifndef GLCAM_H
 #define GLCAM_H
 
-#include <GL/glew.h>
-#include <QtOpenGL>
+#include "incgl.h"
 #include <qlistview.h>
+#include <QGLWidget>
+#include <QPoint>
+
 //#define VIEW_ORTHO 1
 //#define VIEW_FRUSTUM 0
 
-class GLCam : public QGLWidget{
-Q_OBJECT
-	friend class Item_cam;
+class GLCam : public QGLWidget
+{
+    Q_OBJECT
+    friend class Item_cam;
 public:
-	GLCam(QWidget* parent,Item_cam* cam); //, const QGLWidget * shareWidget = NULL);
-	~GLCam();
+    GLCam(QWidget* parent,Item_cam* cam); //, const QGLWidget * shareWidget = NULL);
+    virtual ~GLCam() override;
 public slots:
 
 protected:
-	void resizeEvent(QResizeEvent* /* event */);
-	void initializeGL();
-	void paintGL();
-	void mousePressEvent (QMouseEvent *ev);
-	void mouseMoveEvent (QMouseEvent *ev);
-	void mouseReleaseEvent (QMouseEvent *ev);
-	void wheelEvent (QWheelEvent *ev);
-	virtual void keyPressEvent(QKeyEvent *e);
+    void resizeEvent(QResizeEvent* /* event */)override;
+    void initializeGL()override;
+    void paintGL()override;
+    void mousePressEvent (QMouseEvent *ev)override;
+    void mouseMoveEvent (QMouseEvent *ev)override;
+    void mouseReleaseEvent (QMouseEvent *ev)override;
+    void wheelEvent (QWheelEvent *ev)override;
+    virtual void keyPressEvent(QKeyEvent *e)override;
 public:
-	void resizeGL( int w, int h );
+    void resizeGL( int w, int h )override;
 
-	void setNear(double val);
-	void setFar(double val);
+    void setNear(double val);
+    void setFar(double val);
 
-public: 
-	int view_projection_mode;
+public:
+    int view_projection_mode;
 
-	static QGLWidget* shareWidget;
+    static QGLWidget* shareWidget;
 
 private:
 
-	Item_cam* cam;
-	QPoint startpoint;
-	float zoom;
-	GLuint object;
+    Item_cam* cam;
+    QPoint startpoint;
+    float zoom;
+    GLuint object;
 
-	GLfloat readpixel[4];
+    GLfloat readpixel[4];
 
-	double near_plane;
-	double far_plane;
-	};
+    double near_plane;
+    double far_plane;
+};
 
 #endif

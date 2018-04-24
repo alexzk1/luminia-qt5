@@ -24,7 +24,7 @@ http://www.kuroyumes-developmentzone.com/poser/poserfilespec/products_poser_cr2.
 
 *********************************************************************************/
 
-#include <QtGui>
+
 #include "../item.h"
 #include "../item_mesh.h"
 

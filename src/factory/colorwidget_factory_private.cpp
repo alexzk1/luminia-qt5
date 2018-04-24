@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** This code based on Trolltechs QSA input dialog factory.
@@ -26,7 +26,9 @@
 *********************************************************************************/
 
 #include "colorwidget_factory_private.h"
-
+#include <QMouseEvent>
+#include <QPainter>
+#include <qdrawutil.h>
 
 int QColorLuminancePicker::y2val(int y)
 {
@@ -69,7 +71,7 @@ void QColorLuminancePicker::setVal(int v)
     if (val == v)
         return;
     val = qMax(0, qMin(v,255));
-    delete pix; pix=0;
+    delete pix; pix=nullptr;
     repaint();
     emit newHsv(hue, sat, val);
 }
@@ -120,7 +122,7 @@ void QColorLuminancePicker::setCol(int h, int s , int v)
     val = v;
     hue = h;
     sat = s;
-    delete pix; pix=0;
+    delete pix; pix=nullptr;
     repaint();
 }
 
@@ -145,13 +147,13 @@ void QColorPicker::setCol(const QPoint &pt)
 
 
 QColorPicker::QColorPicker(QWidget* parent) : QFrame(parent){
-	hue = 0; sat = 0;
-	setCol(150, 255);
-	pix = NULL;
-	resize (width(), height());
-	  //setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed) );
-	setMinimumSize(150,100);
-	setAttribute(Qt::WA_NoSystemBackground);
+    hue = 0; sat = 0;
+    setCol(150, 255);
+    pix = NULL;
+    resize (width(), height());
+      //setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed) );
+    setMinimumSize(150,100);
+    setAttribute(Qt::WA_NoSystemBackground);
 
 }
 
@@ -172,12 +174,12 @@ void QColorPicker::resizeEvent ( QResizeEvent *e){
             img.setPixel(x, y, c.rgb());
         }
 
-	if(pix)delete pix;
+    if(pix)delete pix;
     pix = new QPixmap(QPixmap::fromImage(img));
 
 
 
-	}
+    }
 
 
 QSize QColorPicker::sizeHint() const

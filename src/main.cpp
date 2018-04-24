@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007  oc2k1
@@ -18,8 +18,10 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************************/
+#include "incgl.h"
+
 #include <QApplication>
-#include <QtGui>
+
 
 #include "mainwindow.h"
 
@@ -29,22 +31,22 @@
 #endif
 
 #include "setup.h"
-
+#include <QFileInfo>
 
 int main(int argc, char **argv){
 
-	qDebug() << "main()";
+    qDebug() << "main()";
 
-	QApplication app(argc, argv);
-	Q_INIT_RESOURCE(lumina);
-	setup();
-	app.setWindowIcon(QIcon(":/images/lumina.png"));
+    QApplication app(argc, argv);
+    Q_INIT_RESOURCE(lumina);
+    setup();
+    app.setWindowIcon(QIcon(":/images/lumina.png"));
 
-	MainWindow mainWin;
+    MainWindow mainWin;
 #ifdef Q_WS_X11
-	QObject::connect(&app,SIGNAL(spaceballEvent(int *)),&mainWin,SLOT(spaceballEvent(int *)));
+    QObject::connect(&app,SIGNAL(spaceballEvent(int *)),&mainWin,SLOT(spaceballEvent(int *)));
 #endif
-	mainWin.show();
-qDebug() << "xxxxxxx " << QFileInfo( QCoreApplication::arguments().at(0) ).absolutePath ();
-	return app.exec();
-	}
+    mainWin.show();
+    qDebug() << "xxxxxxx " << QFileInfo( QCoreApplication::arguments().at(0) ).absolutePath ();
+    return app.exec();
+    }

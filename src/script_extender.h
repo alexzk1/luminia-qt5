@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007  oc2k1
@@ -22,7 +22,7 @@
 
 #include "dqobject.h"
 
-#include <QtGui>
+
 #include <QRegExp>
 
 #ifndef _SCRIPT_EXTENDER_H
@@ -30,60 +30,62 @@
 
 class SAction{
 public:
-public:	
-	SAction(const char ** _icon, const QString& _text, const QString& _slot, const QRegExp& _filter){
-		icon = _icon;
-		text = _text;
-		slot = _slot;
-		filter = _filter;
-		}
+public:
+    SAction(const char ** _icon, const QString& _text, const QString& _slot, const QRegExp& _filter)
+    {
+        icon = _icon;
+        text = _text;
+        slot = _slot;
+        filter = _filter;
+        }
 
-	~SAction(){
-		//delete[] icon[0]; //xpm data
-		//delete[] icon;  //xpm ptr
-		} 
-		
-	const char **icon;	//xpm storage
-	QString text;		//Action text
-	QString slot;		//Slot to call
-	QRegExp filter;		//filter for the class name
-	};
+    ~SAction()
+    {
+        //delete[] icon[0]; //xpm data
+        //delete[] icon;  //xpm ptr
+    }
+
+    const char **icon;	//xpm storage
+    QString text;		//Action text
+    QString slot;		//Slot to call
+    QRegExp filter;		//filter for the class name
+    };
 
 class SEngine;
 
 class SSlot{
 friend class SEngine;
 public:
-	SSlot(const QString& _type, const QString& _signature, int _id, QRegExp _filter, const QString& _filename){
-		type = _type;
-		signature = _signature;
-		id = _id;
-		filter = _filter;
-		filename = _filename;
-		}
+    SSlot(const QString& _type, const QString& _signature, int _id, QRegExp _filter, const QString& _filename){
+        type = _type;
+        signature = _signature;
+        id = _id;
+        filter = _filter;
+        filename = _filename;
+        }
 
 
-	QString type;			//slot type
-	QString signature;		//Slot to call
-	QRegExp filter;		//filter for the class name
-	int 	id;			//callback id
+    QString type;			//slot type
+    QString signature;		//Slot to call
+    QRegExp filter;		//filter for the class name
+    int 	id;			//callback id
 
-	QString filename;
-	};
+    QString filename;
+    };
 
 class ScriptExtender{
 public:
 
-	static void scanFile(const QString& filename);
-	static const char** xpm(const QString& in); //move to SAction later
-	static void callback(QObject* obj, int id , void** args);
-	static void setup();
-	static QList<SAction> actionlist;
-	static QList<SSlot> slotlist;
+    static void scanFile(const QString& filename);
+    static const char** xpm(const QString& in); //move to SAction later
+    static void callback(QObject* obj, int id , void** args);
+    static void setup();
+    static QList<SAction> actionlist;
+    static QList<SSlot> slotlist;
 //private:
-	static QList<SEngine*> engineList;
+    static QList<SEngine*> engineList;
 
-	};
+    };
 
 #endif
 
