@@ -1,4 +1,4 @@
- /********************************************************************************
+/********************************************************************************
 ** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
@@ -31,12 +31,12 @@
 ConsoleCompletionBox::ConsoleCompletionBox(ConsoleLine *_line, const QStringList& _completions, const QString& _searchString) :	AbstractCompletionBox( _line, _completions, _searchString){
     line = _line;
     line->completationOpen = true;
-    }
+}
 
 
 ConsoleCompletionBox::~ConsoleCompletionBox(){
     line->completationOpen = false;
-    }
+}
 
 void ConsoleCompletionBox::finishCompletion(){
     QListWidgetItem *item = listwidget->currentItem();
@@ -44,7 +44,7 @@ void ConsoleCompletionBox::finishCompletion(){
         return;
     QString s = item->data(Qt::UserRole).toString().mid(searchString.length());
     line->insert(s.replace(QRegExp("\\(.+\\)"),"("));
-    }
+}
 
 //***********************ConsoleLine*********************************
 /*!
@@ -55,28 +55,28 @@ void ConsoleLine ::keyPressEvent(QKeyEvent *e){
     int size = history.size();
     if (!completationOpen){
         switch (e->key()) {
-        case Qt::Key_Down:
-            if (count == 1){
-                this->setText(temp);
+            case Qt::Key_Down:
+                if (count == 1){
+                    this->setText(temp);
                 }
-            else if (count > 1){
+                else if (count > 1){
 
-                setText(history.at(size-count));
+                    setText(history.at(size-count));
                 }
-            count =  count != 0 ? count-1:0;
-            break;
-        case Qt::Key_Up:
-            count = count < size ? count+1:size;
-            if (count == 1)temp = text();
-            if (count != 0)setText(history.at(size-count));
-            break;
-        case Qt::Key_Return:
-            count = 0;
-            history.append(text());
-            break;
+                count =  count != 0 ? count-1:0;
+                break;
+            case Qt::Key_Up:
+                count = count < size ? count+1:size;
+                if (count == 1)temp = text();
+                if (count != 0)setText(history.at(size-count));
+                break;
+            case Qt::Key_Return:
+                count = 0;
+                history.append(text());
+                break;
 
         }
-        }
+    }
     QLineEdit::keyPressEvent(e);
 
     if (completationOpen) return; // don't open a second completationbox
@@ -98,7 +98,7 @@ void ConsoleLine ::keyPressEvent(QKeyEvent *e){
     for (int i = 0; i < objnames.size() -1 ; i ++){
         qDebug() << obj.isValid() << objnames.at(i);
         obj = obj.property(objnames.at(i));
-        }
+    }
 
     if (last.endsWith(".")){
         comp.clear();
@@ -108,17 +108,17 @@ void ConsoleLine ::keyPressEvent(QKeyEvent *e){
             if (qobj == NULL)return; //Fix for deleted objects
             for (int i = 0; i < qobj->children().size(); i++){
                 comp << qobj->children().at(i)->objectName();
-                }
+            }
             meta = qobj->metaObject();
 
-            }
+        }
         //append propertys
         QScriptValueIterator it(obj);
         while (it.hasNext()) {
             it.next();
             comp.append(it.name() );//.replace(QRegExp("\\(.*\\)"),"")) ;
-            }
         }
+    }
 
     QString s = last.split(".").last();
 
@@ -129,7 +129,7 @@ void ConsoleLine ::keyPressEvent(QKeyEvent *e){
     connect(box,SIGNAL(requestHelpString(const QString&)), this, SLOT(helpHandler(const QString&)));
 
 
-    }
+}
 
 /*!
 handler that reads the doxygen XML documentation an pass the help to the consoles complettation box. Similar code like for the script editor,
@@ -141,7 +141,7 @@ void ConsoleLine::helpHandler(const QString& _string){
     if (meta == NULL){
         emit setHelpString("");
         return;
-        }
+    }
 
     static QString cacheFilename("");
     static QString lines("");
@@ -159,7 +159,7 @@ void ConsoleLine::helpHandler(const QString& _string){
 
         lines = in.readAll();
         cacheFilename = Filename;
-        }
+    }
 
     QRegExp parser1(QString("<memberdef.*<name>") + string + "</name>.*</memberdef>");
     parser1.setMinimal(true);
@@ -174,14 +174,16 @@ void ConsoleLine::helpHandler(const QString& _string){
     QRegExp remove("<.*>");
     remove.setMinimal(true);
     emit setHelpString(parser2.cap(1).replace(remove,""));
-    }
+}
 
 
 //***********************Console*********************************
 
 Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
 
-Console::Console(QObject *_world) : QObject(){
+Console::Console(QObject *_world) :
+    QObject()
+{
     world = _world;
     active = false;
 
@@ -207,36 +209,37 @@ Console::Console(QObject *_world) : QObject(){
     QWidgetList l = QApplication::topLevelWidgets();
     for (int i = 0; i < l.size(); i++){
         if (QMainWindow* w = dynamic_cast<QMainWindow*>(l.at(i))) w->addDockWidget(Qt::RightDockWidgetArea, dock);
-        }
+    }
 
     dock->hide();
 
     connect(in,SIGNAL(returnPressed()),this,SLOT(returnPressed()));
 
     eng = new QScriptEngine();
-    eng->globalObject().setProperty("World" , eng->newQObject(world));
+    eng->globalObject().setProperty("World" , eng->newQObject(world, QScriptEngine::ValueOwnership::QtOwnership));
     Factory::Factory(*eng);
 
     eng->globalObject().setProperty("gl" , eng->scriptValueFromQMetaObject<glwrapper>());
-    }
+}
 
-Console::~Console(){
+Console::~Console()
+{
     delete in;
     delete out;
     delete dock;
     delete eng;
-    }
+}
 
 
 void Console::toggle(bool b){
     active = b;
-        if (active){
+    if (active){
         dock->show();
-        }
+    }
     else{
         dock->hide();
-        }
     }
+}
 
 void Console::returnPressed(){
     out->setTextColor (QColor(Qt::blue));
@@ -252,18 +255,18 @@ void Console::returnPressed(){
         eng->globalObject().setProperty("World" , eng->newQObject(world));
         Factory::Factory(*eng);
         return;
-        }
+    }
 
 
-        code += line;
-        code += QLatin1Char('\n');
+    code += line;
+    code += QLatin1Char('\n');
 
     if (line.trimmed().isEmpty()){
         return;
-        }
+    }
     else if (! eng->canEvaluate(code)){
         in->setText("   ");
-        }
+    }
     else {
         QScriptValue result = eng->evaluate(code, QLatin1String("typein"));
         code.clear();
@@ -272,10 +275,10 @@ void Console::returnPressed(){
             out->setTextColor (QColor(Qt::darkGreen));
             if (result.toString().contains("Error:")){
                 out->setTextColor (QColor(Qt::red));
-                }
+            }
             out->append(result.toString());
-            }
-            }
-        eng->collectGarbage();
+        }
     }
+    eng->collectGarbage();
+}
 

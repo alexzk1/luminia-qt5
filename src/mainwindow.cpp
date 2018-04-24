@@ -34,7 +34,6 @@
 
 MainWindow::MainWindow()
 {
-
     setWindowTitle(tr("Lumina-Qt5-0.5.0"));
     treeview = new TreeView (this);
     setCentralWidget(treeview);
@@ -50,13 +49,16 @@ MainWindow::MainWindow()
 
     timeToolBar = addToolBar(tr("Time"));
     time = new TimeWidget(this);
-
     timeToolBar->addWidget(time);
-
     connect(time, SIGNAL(timeChanged(double)), treeview->world, SLOT(setTime(double)));
+}
 
-
-
+MainWindow::~MainWindow()
+{
+    delete time;
+    delete timeToolBar;
+    delete console;
+    delete treeview;
 }
 
 void MainWindow::createScriptToolBar( QList<ScriptLauncher*>  launcher)
@@ -164,8 +166,6 @@ void MainWindow::clear(){
 
 
 }
-
-
 
 void MainWindow::about(){
     QMessageBox::about(this, tr("About Lumina"),tr("Lumina is a flexible plattform independent development envrionment for GLSL shaders. It uses ECMA-script for tools and emulating opengl engines. This code is distibuted under GNU/GPL license and are made by oc2k1. <br> Contact: <a href='mailto:oc2k1@users.sourceforge.net'>oc2k1@users.sourceforge.net</a><br>Homepage with Tutorials:<a href='http://lumina.sourceforge.net'>http://lumina.sourceforge.net</a>"));

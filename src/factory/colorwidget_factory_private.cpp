@@ -149,7 +149,7 @@ void QColorPicker::setCol(const QPoint &pt)
 QColorPicker::QColorPicker(QWidget* parent) : QFrame(parent){
     hue = 0; sat = 0;
     setCol(150, 255);
-    pix = NULL;
+    pix = nullptr;
     resize (width(), height());
     //setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed) );
     setMinimumSize(150,100);

@@ -188,7 +188,8 @@ constexpr char qt_meta_stringdata_DQObject[] = {
 
 typedef void (*Callback)( QObject* obj, int id , void** args);
 
-class CallBackSlot{
+class CallBackSlot
+{
 public:
     CallBackSlot(Callback _callback, int _id, int _slot_id){
         callback = _callback;
@@ -202,7 +203,8 @@ public:
 };
 
 
-class Action{
+class Action
+{
 public:
     Action(const char * _icon, const char * _text, const char * _member){
         icon = _icon;
