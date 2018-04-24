@@ -1,3 +1,41 @@
+QT += opengl xml network script gui
+greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+TEMPLATE = app
+
+RESOURCES = lumina.qrc
+DEFINES += QTSCRIPT
+LIBS += -lGLEW
+
+MOC_DIR = .build/moc
+UI_DIR = .build/uic
+OBJECTS_DIR = .build/obj
+RCC_DIR = .build/qrc
+
+exists($$[QT_INSTALL_HEADERS]/QtScript){
+        message(Lumina configured for QT with QtScript)
+        }
+
+
+debug:QMAKE_CXXFLAGS += -march=native
+QMAKE_CXXFLAGS +=  -std=c++14 -Wall -frtti -fexceptions -Werror=return-type
+
+#original code heavy uses overloaded virtuals
+#QMAKE_CXXFLAGS +=-Werror=overloaded-virtual
+
+QMAKE_CXXFLAGS +=  -Wctor-dtor-privacy -Werror=delete-non-virtual-dtor -fstrict-aliasing
+QMAKE_CXXFLAGS +=  -Werror=strict-aliasing -Wstrict-aliasing=2
+
+CONFIG += c++14
+
+#using new C++ libs for macos http://blog.michael.kuron-germany.de/2013/02/using-c11-on-mac-os-x-10-8/
+#that may not work with C++14 though, Apple is slow
+macx: QMAKE_CXXFLAGS += -stdlib=libc++
+macx: QMAKE_LFLAGS += -lc++
+macx: QMAKE_CXXFLAGS += -mmacosx-version-min=10.10
+macx: QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10
+
+
+
 HEADERS	=	src/mainwindow.h \
                 src/glcam.h src/tree.h \
                 src/item.h \
@@ -76,41 +114,4 @@ SOURCES =	src/main.cpp \
                 src/factory/file_factory_private.cpp \
                 src/factory/colorwidget_factory_private.cpp \
                 src/factory/factory.cpp
-
-
-RESOURCES =	lumina.qrc
-QT += opengl xml network script
-CONFIG += console
-DEFINES += QTSCRIPT GLEW_STATIC
-INCLUDEPATH += src/glew
-LIBS += -lGLEW
-
-MOC_DIR = .build/moc
-UI_DIR = .build/uic
-OBJECTS_DIR = .build/obj
-RCC_DIR = .build/qrc
-
-exists($$[QT_INSTALL_HEADERS]/QtScript){
-        message(Lumina configured for QT with QtScript)
-        }
-
-
-debug:QMAKE_CXXFLAGS += -march=native
-
-QMAKE_CXXFLAGS +=  -std=c++14 -Wall -frtti -fexceptions -Werror=return-type
-
-#original code heavy uses overloaded virtuals
-#QMAKE_CXXFLAGS +=-Werror=overloaded-virtual
-
-QMAKE_CXXFLAGS +=  -Wctor-dtor-privacy -Werror=delete-non-virtual-dtor -fstrict-aliasing
-QMAKE_CXXFLAGS +=  -Werror=strict-aliasing -Wstrict-aliasing=2
-
-CONFIG += c++14
-
-#using new C++ libs for macos http://blog.michael.kuron-germany.de/2013/02/using-c11-on-mac-os-x-10-8/
-#that may not work with C++14 though, Apple is slow
-macx: QMAKE_CXXFLAGS += -stdlib=libc++
-macx: QMAKE_LFLAGS += -lc++
-macx: QMAKE_CXXFLAGS += -mmacosx-version-min=10.10
-macx: QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10
 

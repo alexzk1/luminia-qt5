@@ -21,19 +21,12 @@
 #include "incgl.h"
 
 #include <QApplication>
-
-
 #include "mainwindow.h"
-
-#ifdef Q_WS_X11
-#include "x11/spaceball.h"
-#define QApplication QXiApplication
-#endif
-
 #include "setup.h"
 #include <QFileInfo>
 
-int main(int argc, char **argv){
+int main(int argc, char **argv)
+{
 
     qDebug() << "main()";
 
@@ -49,4 +42,4 @@ int main(int argc, char **argv){
     mainWin.show();
     qDebug() << "xxxxxxx " << QFileInfo( QCoreApplication::arguments().at(0) ).absolutePath ();
     return app.exec();
-    }
+}

@@ -75,7 +75,7 @@ public:
         memcpy ( tmpStringData + old_len + sig_len + par_len, type , typ_len * sizeof(char)); // parameters
 
         //insert function
-        tmpData[4]++; //adjust other stuff too....
+        auto r = tmpData[4]++; //adjust other stuff too....
 
         auto ofs = 5 * d.data[4] + d.data[5];
         tmpData[ofs + 0] = old_len; //signature
@@ -89,7 +89,6 @@ public:
         deleteValues();
         setValues(tmpStringData, tmpData);
 
-        auto r = tmpData[4] - 1;
         delete [] tmpData;
         delete [] tmpStringData;
 
@@ -124,15 +123,15 @@ private:
         d.data = tmp;
 
         s = stringDataSize(stringdata, data);
-        QByteArrayData *sd = QByteArrayData::allocate(sizeof (char), alignof(char), s);
-        if (stringdata)
-            memcpy (sd->data(),  stringdata, s * sizeof(char));
+        QByteArrayData *sd = QByteArrayData::allocate(sizeof (char), alignof(char), s, QByteArrayData::AllocationOption::RawData);
+        void *dest = sd->data();
+        memcpy (dest, stringdata, s);
         d.stringdata = sd;
     }
 
     uint stringDataSize(decltype(d.stringdata) _stringdata, const uint *meta_data)
     {
-        return stringDataSize(static_cast<const char *>((d.stringdata) ? _stringdata->data() : nullptr), meta_data);
+        return stringDataSize(static_cast<const char *>(_stringdata->data()), meta_data);
     }
 
     uint stringDataSize(const char *_stringdata, const uint *meta_data)
@@ -147,9 +146,7 @@ private:
             }
         }
         //add properties and enums/sets handling here if required
-
-        //qDebug()  <<  _stringdata + maxindex <<   maxindex  <<  maxindex + strlen(_stringdata + maxindex);
-        return static_cast<uint>(maxindex + ((_stringdata)?strlen(_stringdata + maxindex):0) + 1);
+        return static_cast<uint>(maxindex + strlen(_stringdata + maxindex) + 1);
     }
 
     uint dataSize(const uint *meta_data)
@@ -164,7 +161,7 @@ private:
 };
 
 
-static const uint qt_meta_data_DQObject[] = {
+constexpr uint qt_meta_data_DQObject[] = {
     // content:
     1,       // revision
     0,       // classname
@@ -179,7 +176,7 @@ static const uint qt_meta_data_DQObject[] = {
     0        // eod
 };
 
-static const char qt_meta_stringdata_DQObject[] = {
+constexpr char qt_meta_stringdata_DQObject[] = {
     "DQObject\0\0name\0createSlot(QString)\0"
 };
 
@@ -257,7 +254,7 @@ private:
     }
 
     void* qt_metacast(const char *_clname){
-        if (!_clname) return 0;
+        if (!_clname) return nullptr;
         if (!strcmp(_clname, qt_meta_stringdata_DQObject)){
             return static_cast<void*>(const_cast< DQObject*>(this));
         }
@@ -272,7 +269,7 @@ private:
             switch (_id) {
                 case 0:
                     qDebug() << "call createSlot(...)";
-                    createSlot((*reinterpret_cast< const QString(*)>(_a[1])));
+                    createSlot((*reinterpret_cast< const QString*>(_a[1])));
                     break;
                 default:
                     for (int i = 0; i < callBackSlots.size(); i++){
