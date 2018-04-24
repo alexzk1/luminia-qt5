@@ -30,6 +30,7 @@ void Item_world::setup(){
 
 
 Item_world::Item_world(Item *p, const QString& name) : Item( p,name ){
+
     Item::world = this;
 
     //setIcon(0, QIcon(*xpm_world));

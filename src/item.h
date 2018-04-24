@@ -109,7 +109,7 @@ public slots:
     virtual QString getType()const{return QString("Item");}
 
 
-
+public:
     virtual void deleteLater() {QObject::deleteLater();}
 
 protected:

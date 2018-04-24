@@ -36,9 +36,6 @@ int main(int argc, char **argv)
     app.setWindowIcon(QIcon(":/images/lumina.png"));
 
     MainWindow mainWin;
-#ifdef Q_WS_X11
-    QObject::connect(&app,SIGNAL(spaceballEvent(int *)),&mainWin,SLOT(spaceballEvent(int *)));
-#endif
     mainWin.show();
     qDebug() << "xxxxxxx " << QFileInfo( QCoreApplication::arguments().at(0) ).absolutePath ();
     return app.exec();

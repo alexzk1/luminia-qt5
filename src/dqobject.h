@@ -7,7 +7,7 @@
 #include <QDebug>
 #include <stdint.h>
 #include <algorithm>
-
+#include <functional>
 #include <type_traits>
 #define CAST_INT(X) (*reinterpret_cast< int(*)>(args[X]))
 #define CAST_BOOL(X) (*reinterpret_cast< bool(*)>(args[X]))
@@ -18,6 +18,32 @@ T max(T a, T b)
 {
     return std::max<T>(a, b);
 }
+
+
+
+//constexpr MetaData qt_meta_data_DQObject = {
+//    7, 0,
+//    0, 0,
+//    1, 10,
+//    0, 0,
+//    0, 0,
+//    2,
+//};
+
+constexpr uint qt_meta_data_DQObject[] = {
+    // content:
+    1,       // revision
+    0,       // classname
+    0,    0, // classinfo
+    1,   10, // methods
+    0,    0, // properties
+    0,    0, // enums/sets
+
+    // slots: signature, parameters, type, tag, flags
+    15,   10,   9,   9, 0x0a,
+
+    0        // eod
+};
 
 
 class DQMetaObject : public QMetaObject
@@ -56,7 +82,7 @@ public:
     {
 
         auto s = dataSize(d.data);
-        uint * tmpData = new uint [s + 5];
+        uint* tmpData = new uint [s + 5];
 
         memcpy (tmpData + 5, d.data, s * sizeof(uint)); // copy all stuff behind methods
         memcpy (tmpData, d.data  , (d.data[5]+ 5 * d.data[4])* sizeof(uint)); //header inc methods
@@ -75,14 +101,14 @@ public:
         memcpy ( tmpStringData + old_len + sig_len + par_len, type , typ_len * sizeof(char)); // parameters
 
         //insert function
-        auto r = tmpData[4]++; //adjust other stuff too....
+        ++tmpData[4]; //adjust other stuff too....
 
         auto ofs = 5 * d.data[4] + d.data[5];
         tmpData[ofs + 0] = old_len; //signature
         tmpData[ofs + 1] = old_len + sig_len; //parameters
         tmpData[ofs + 2] = old_len + sig_len + par_len; // type
         tmpData[ofs + 3] = 9; // empty string
-        tmpData[ofs + 3] =  0x0a; // don't know.....
+        tmpData[ofs + 3] =  0x0a; // don't know.....0x0a = public slots
 
         //qDebug() << s << old_len << deb << "\n" << tmpStringData + tmpData[ofs -5] << tmpStringData + tmpData[ofs -4];
 
@@ -92,7 +118,8 @@ public:
         delete [] tmpData;
         delete [] tmpStringData;
 
-        return r; // return the function number
+        return d.data[4] - 1; // return the function number
+
     }
 
     uint numberOfMethods() const
@@ -164,20 +191,6 @@ private:
 };
 
 
-constexpr uint qt_meta_data_DQObject[] = {
-    // content:
-    1,       // revision
-    0,       // classname
-    0,    0, // classinfo
-    1,   10, // methods
-    0,    0, // properties
-    0,    0, // enums/sets
-
-    // slots: signature, parameters, type, tag, flags
-    15,   10,   9,   9, 0x0a,
-
-    0        // eod
-};
 
 constexpr char qt_meta_stringdata_DQObject[] = {
     "DQObject\0\0name\0createSlot(QString)\0"
@@ -186,15 +199,16 @@ constexpr char qt_meta_stringdata_DQObject[] = {
 
 
 
-typedef void (*Callback)( QObject* obj, int id , void** args);
-
-class CallBackSlot{
+//typedef void (*Callback)( QObject* obj, int id , void** args);
+using Callback = std::function<void(QObject*, int, void** args)>;
+class CallBackSlot
+{
 public:
-    CallBackSlot(Callback _callback, int _id, int _slot_id){
-        callback = _callback;
-        id = _id;
-        slot_id = _slot_id;
-    }
+    CallBackSlot() = delete;
+    CallBackSlot(const Callback& _callback, int _id, int _slot_id):
+        callback(_callback),
+        id(_id),
+        slot_id(_slot_id){}
 
     Callback callback;
     int id;
