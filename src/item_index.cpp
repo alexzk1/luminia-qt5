@@ -222,11 +222,11 @@ void Item_index::set(int i, int a, int b, int c, int d, int e, int f){
 
     switch (indices_per_primitive){
         case 6: index[ofs + 5]=f;
-        case 5: index[ofs + 4]=e;
-        case 4: index[ofs + 3]=d;
-        case 3: index[ofs + 2]=c;
-        case 2: index[ofs + 1]=b;
-        case 1: index[ofs + 0]=a;
+        [[clang::fallthrough]]; case 5: index[ofs + 4]=e;
+        [[clang::fallthrough]]; case 4: index[ofs + 3]=d;
+        [[clang::fallthrough]]; case 3: index[ofs + 2]=c;
+        [[clang::fallthrough]]; case 2: index[ofs + 1]=b;
+        [[clang::fallthrough]]; case 1: index[ofs + 0]=a;
         }
     needrefresh = 1;
 
@@ -244,11 +244,11 @@ void Item_index::add(int a, int b, int c, int d, int e, int f){
 
     switch (indices_per_primitive){
         case 6: index[ofs + 5]=f;
-        case 5: index[ofs + 4]=e;
-        case 4: index[ofs + 3]=d;
-        case 3: index[ofs + 2]=c;
-        case 2: index[ofs + 1]=b;
-        case 1: index[ofs + 0]=a;
+        [[clang::fallthrough]]; case 5: index[ofs + 4]=e;
+        [[clang::fallthrough]]; case 4: index[ofs + 3]=d;
+        [[clang::fallthrough]]; case 3: index[ofs + 2]=c;
+        [[clang::fallthrough]]; case 2: index[ofs + 1]=b;
+        [[clang::fallthrough]]; case 1: index[ofs + 0]=a;
         }
 
     }

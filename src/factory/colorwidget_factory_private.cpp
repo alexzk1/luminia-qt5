@@ -48,7 +48,7 @@ QColorLuminancePicker::QColorLuminancePicker(QWidget* parent)
     hue = 100; val = 100; sat = 100;
     pix = 0;
     //    setAttribute(WA_NoErase, true);
-setFixedWidth (24);
+    setFixedWidth (24);
 
 }
 
@@ -151,7 +151,7 @@ QColorPicker::QColorPicker(QWidget* parent) : QFrame(parent){
     setCol(150, 255);
     pix = NULL;
     resize (width(), height());
-      //setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed) );
+    //setSizePolicy(QSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed) );
     setMinimumSize(150,100);
     setAttribute(Qt::WA_NoSystemBackground);
 
@@ -163,11 +163,13 @@ QColorPicker::~QColorPicker()
 }
 
 
-void QColorPicker::resizeEvent ( QResizeEvent *e){
+void QColorPicker::resizeEvent ( QResizeEvent *)
+{
     QImage img(width(), height(), QImage::Format_RGB32);
     int x,y;
     for (y = 0; y < height(); y++)
-        for (x = 0; x < width(); x++) {
+        for (x = 0; x < width(); x++)
+        {
             QPoint p(x, y);
             QColor c;
             c.setHsv(huePt(p), satPt(p), 200);
@@ -176,10 +178,7 @@ void QColorPicker::resizeEvent ( QResizeEvent *e){
 
     if(pix)delete pix;
     pix = new QPixmap(QPixmap::fromImage(img));
-
-
-
-    }
+}
 
 
 QSize QColorPicker::sizeHint() const

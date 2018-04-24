@@ -20,7 +20,6 @@
 *********************************************************************************/
 #include "item_mesh.h"
 #include "incgl.h"
-#include <QtOpenGL>
 #include <math.h>
 
 

@@ -25,15 +25,13 @@
 #include "dialog_factory_private.h"
 
 #include "../incgl.h"
-#include <QtOpenGL>
-
-
 #include "../glcam.h" // hack, to share the context if possible
 
 
 
-class GLWidgetPrivate: public QGLWidget{
-Q_OBJECT
+class GLWidgetPrivate: public QGLWidget
+{
+    Q_OBJECT
 public:
     GLWidgetPrivate(QWidget* parent) : QGLWidget( parent,  GLCam::shareWidget ){
         qDebug() << "GLWidgetPrivate(QWidget* parent) ";
@@ -42,34 +40,32 @@ public:
         //setSizePolicy ( QSizePolicy::Expanding, QSizePolicy::Expanding);
         setSizePolicy ( QSizePolicy::MinimumExpanding  ,QSizePolicy::MinimumExpanding );
         setFocusPolicy(Qt::StrongFocus);
-        }
+    }
 
-    ~GLWidgetPrivate(){
-        qDebug() << "~GLWidgetPrivate() ";
-
-        }
-
-
+    virtual~GLWidgetPrivate() override = default;
 protected:
-    void initializeGL(){
+    void initializeGL() override
+    {
         glewInit();
         glClearColor(0,0,0,0); 		// Set OpenGL clear to black
         glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_ARB);
         glPixelStorei(GL_PACK_ALIGNMENT,1); //avoid trouble with non power of two textures
         glPixelStorei(GL_UNPACK_ALIGNMENT,1);
         emit initE();
-        }
+    }
 
-    void paintGL(){
+    void paintGL() override
+    {
         emit paintE();
-        }
+    }
 
-    void resizeGL( int width, int height ){
+    void resizeGL( int width, int height ) override
+    {
         makeCurrent();
-        float zoom = 1;
+        double zoom = 1.;
 
-        GLfloat w = zoom * (float) width / (float) height;
-        GLfloat h = zoom;
+        GLdouble w = zoom * width / height;
+        GLdouble h = zoom;
 
         glViewport( 0, 0, width, height );
         glMatrixMode(GL_PROJECTION);
@@ -79,51 +75,52 @@ protected:
         glMatrixMode(GL_MODELVIEW);
         glLoadIdentity();
 
-        emit resizeE(width,height);
-        }
+        emit resizeE(width, height);
+    }
 
 signals:
     void paintE();
     void initE();
     void resizeE(int,int);
-    };
+};
 
 namespace QS{
 
-class GLWidget : public Widget{
-    Q_OBJECT
-    inline  GLWidgetPrivate *d() const { return (GLWidgetPrivate*)widget; }
-    //QS_WIDGET(GLWidgetPrivate)
-public:
-    GLWidget(QObject* = NULL) : Widget(new GLWidgetPrivate(0)){
-        connect(d(), SIGNAL(paintE()), this, SLOT(_paintGL()));
-        connect(d(), SIGNAL(resizeE(int,int)), this, SLOT(_resizeGL(int,int)));
-
+    class GLWidget : public Widget
+    {
+        Q_OBJECT
+        inline  GLWidgetPrivate *d() const { return (GLWidgetPrivate*)widget; }
+        //QS_WIDGET(GLWidgetPrivate)
+    public:
+        GLWidget(QObject* = nullptr) : Widget(new GLWidgetPrivate(nullptr))
+        {
+            connect(d(), SIGNAL(paintE()), this, SLOT(_paintGL()));
+            connect(d(), SIGNAL(resizeE(int,int)), this, SLOT(_resizeGL(int,int)));
 
         }
 
 
-public slots:
-    void update(){
-        d()->update();
+    public slots:
+        void update(){
+            d()->update();
         }
 
-private slots:
-    void _paintGL(){
-        emit paintGL();
+    private slots:
+        void _paintGL(){
+            emit paintGL();
         }
 
-    void _resizeGL(int w, int h){
-        emit resizeGL(w, h);
+        void _resizeGL(int w, int h){
+            emit resizeGL(w, h);
         }
 
 
-signals:
+    signals:
         void paintGL();
-    void resizeGL(int, int);
+        void resizeGL(int, int);
     };
 
 
 
-    }
+}
 

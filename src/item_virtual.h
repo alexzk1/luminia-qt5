@@ -35,8 +35,8 @@ public:
     virtual ~Item_virtual() override;
 
 public slots:
-    void registerTexSpaceCallback(QObject* script, const QString& functioname ){}
-    void analyse(QObject* inTexture, QObject* outTexture){}
+    void registerTexSpaceCallback(QObject*, const QString&){}
+    void analyse(QObject*, QObject*){}
     virtual void contextmenu(const QPoint&) override;
 public:
     static void setup();

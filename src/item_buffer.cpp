@@ -463,9 +463,9 @@ void Item_buffer::set(int index, double x, double y, double z, double w){
 void Item_buffer::setInKeyFrame(int key, int index, double x, double y, double z, double w){
     switch (dim){
         case 4:  (*this)(3, index, key) = w;
-        case 3:  (*this)(2, index, key) = z;
-        case 2:  (*this)(1, index, key) = y;
-        default: (*this)(0, index, key) = x;
+        [[clang::fallthrough]]; case 3:  (*this)(2, index, key) = z;
+        [[clang::fallthrough]]; case 2:  (*this)(1, index, key) = y;
+        [[clang::fallthrough]]; default: (*this)(0, index, key) = x;
     }
 }
 

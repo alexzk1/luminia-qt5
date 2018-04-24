@@ -37,50 +37,50 @@ LumHandler::LumHandler(Item *root, const QString & _path):QXmlDefaultHandler (){
     item = root;
     luminaTag = false;
     path = _path;
-    }
+}
 
 LumHandler::~LumHandler(){
 
-    }
+}
 
 bool LumHandler::startElement(const QString & /* namespaceURI */,
-                               const QString & /* localName */,
-                               const QString &qName,
-                               const QXmlAttributes &attributes){
+                              const QString & /* localName */,
+                              const QString &qName,
+                              const QXmlAttributes &attributes){
 
     if (!luminaTag && qName != "lumina") {
         errorStr = QObject::tr("The file is not an Lumina file.");
         return false;
-        }
+    }
 
     if(qName == "lumina"){
         QString version = attributes.value("version");
         if (!version.isEmpty() && (version.toFloat() > 0.301)) {
             errorStr = QObject::tr("This file is written by a newer lumina version");
             return false;
-            }
+        }
 
         luminaTag = true;
-        }
+    }
     else if (qName == "node"){
         item = new DQObject<Item_node>(item ,attributes.value("name"));
-        }
+    }
     else if (qName == "text"){
         item = new DQObject<Item_edit>(item ,attributes.value("name"));
-        }
+    }
     else if (qName == "script"){
         item = new DQObject<Item_script>(item ,attributes.value("name"));
         if (attributes.value("run") == "true")
             runlater.append(static_cast<Item_script*>(item));
-            qDebug() << runlater;
-        }
+        qDebug() << runlater;
+    }
     else if (qName == "shader"){
         int shadertype = 0;
         if (attributes.value("type") == "vertex")shadertype = Item_shader::Vertexshader;
         else if (attributes.value("type") == "geometry")shadertype = Item_shader::Geometryshader;
         else if (attributes.value("type") == "fragment")shadertype = Item_shader::Fragmentshader;
         item = new DQObject<Item_shader>(item ,attributes.value("name"),shadertype);
-        }
+    }
     else if (qName == "texture"){
         Item_texture* t = new DQObject<Item_texture>(item ,attributes.value("name"));
         QString fn = attributes.value("filename");
@@ -90,10 +90,10 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
             t->load(path + "/" +fn);
 
 
-            }
+        }
 
         else{
-        int format = t->formatFromString(attributes.value("format"));
+            int format = t->formatFromString(attributes.value("format"));
             if (format != 0){
                 bool mipmap = attributes.value("mipmap")=="true";
                 qDebug () << mipmap;
@@ -101,17 +101,17 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
                 int w = attributes.value("width").toInt();
                 if (attributes.value("cubemap")=="true"){
                     t->ImageCube(w,format, mipmap);
-                    }
+                }
                 else {
                     int h = attributes.value("height").toInt();
                     int d = attributes.value("depth").toInt();
                     if (d < 2 || attributes.value("depth").isEmpty())t->Image2d(w,h,format, mipmap);
                     else t->Image3d(w,h,d,format, mipmap);
-                    }
                 }
             }
-        item = t;
         }
+        item = t;
+    }
     else if (qName == "buffer"){
         int dim = attributes.value("dim").toInt();
         int size =  attributes.value("size").toInt();
@@ -129,12 +129,12 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
         else {
             type = GL_FLOAT;
             qDebug() << "illegal format:" << format;
-            }
+        }
 
         Item_buffer *b = new DQObject<Item_buffer>(item ,attributes.value("name"),dim,size,keyframes,type);
 
         item = b;
-        }
+    }
     else if (qName == "uniform"){
         int dim = attributes.value("dim").toInt();
         int size =  attributes.value("size").toInt();
@@ -147,17 +147,17 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
         else {
             type = GL_FLOAT;
             qDebug() << "illegal format:" << format;
-            }
+        }
 
         Item_uniform *b = new DQObject<Item_uniform>(item ,attributes.value("name"),dim,size,keyframes,type);
 
         item = b;
-        }
+    }
     else if (qName == "mesh" || qName == "stream"){ //stream is deprecated and replaced by mesh
         Item_mesh *mesh = new DQObject<Item_mesh>(item ,attributes.value("name"),attributes.value("vertices").toInt());
 
         item = mesh;
-        }
+    }
     else if (qName == "component"){
         int type = 0;
         QString typen = attributes.value("type");
@@ -174,7 +174,7 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
         int keyframes = 1;
         if (attributes.index("keyframes")!= -1){
             keyframes = attributes.value("keyframes").toInt();
-            }
+        }
 
         QString format = attributes.value("format");
         int formatn;
@@ -190,19 +190,19 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
             type = GL_FLOAT;
             qDebug() << "illegal format:" << format;
             formatn = GL_FLOAT;
-            }
+        }
 
         item = new DQObject<Item_component>(static_cast<Item_mesh*>(item), attributes.value("name"), type, dim, keyframes, formatn);
-        }
+    }
 
     else if (qName == "index" ){
 
         item = static_cast<Item*>(static_cast<Item_mesh*>(item)->addIndex(attributes.value("name"),attributes.value("primitive").toInt()));
-        }
+    }
     else if (qName == "armature"){
         Item_armature *s = new Item_armature(item ,attributes.value("name"));
         item = s;
-        }
+    }
 
     else if (qName == "bone"){
         Item_bone *s  = new Item_bone(item ,attributes.value("name"),static_cast<Item_bone*>(item)->getArmature(),attributes.value("id").toInt());
@@ -210,81 +210,83 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
         s->setJoint(attributes.value("jointx").toFloat(),attributes.value("jointy").toFloat(),  attributes.value("jointz").toFloat());
         item = s;
 
-        }
+    }
 
     content.clear();
     return true;
-    }
+}
 
 bool LumHandler::endElement(const QString & /* namespaceURI */,
-                             const QString & /* localName */,
-                             const QString &qName){
+                            const QString & /* localName */,
+                            const QString &qName){
     if(qName == "node" || qName == "mesh" || qName == "stream" || qName == "bone" || qName == "armature" ){
         item = item->parent();
-        }
+    }
     else if(qName == "text" || qName == "shader" || qName == "script"){
         static_cast<Item_edit*>(item)->setText(content);
         item = item->parent();
-        }
+    }
     else if(qName == "texture"){
         QByteArray d = QByteArray::fromBase64(content.toUtf8());
         static_cast<Item_texture*>(item)->setData(d.data(), d.size());
         item = item->parent();
-        }
+    }
     else if(qName == "component"){
         static_cast<Item_component*>(item)->setData(content.trimmed());
         item = item->parent();
-        }
+    }
     else if(qName == "buffer"){
         static_cast<Item_buffer*>(item)->setData(content.trimmed());
         item = item->parent();
-        }
+    }
     else if(qName == "uniform"){
         static_cast<Item_uniform*>(item)->setData(content.trimmed());
         item = item->parent();
-        }
+    }
     else if(qName == "index"){
         static_cast<Item_index*>(item)->setData(content.trimmed());
         item = item->parent();
-        }
+    }
     else if(qName == "lumina"){
         for (int i = 0; i < runlater.size(); ++i)runlater.at(i)->run();
-        }
+    }
     item->world->setTime(0);
 
     return true;
-    }
+}
 
 bool LumHandler::characters(const QString &str){
     content += str;
     return true;
-    }
+}
 
 
 bool LumHandler::fatalError (const QXmlParseException & exception) {
     qDebug() << "Fatal error on line" << exception.lineNumber()
-                << ", column" << exception.columnNumber() << ":"
-                << exception.message();
+             << ", column" << exception.columnNumber() << ":"
+             << exception.message();
 
     return false;
-    }
+}
 
 QString LumHandler::errorString() const{
     return errorStr;
-    }
+}
 
 /********************************************************************************************/
 
 bool LumGenerator::write(QIODevice *device){
     QFile *f;
 
-    if(f = dynamic_cast<QFile*>(device)){
+    if((f = dynamic_cast<QFile*>(device)))
+    {
         relto = new QDir(QFileInfo(f->fileName()).absolutePath());
         qDebug() << relto;
-        }
-    else{
-        relto = NULL;
-        }
+    }
+    else
+    {
+        relto = nullptr;
+    }
 
 
     out.setDevice(device);
@@ -300,14 +302,14 @@ bool LumGenerator::write(QIODevice *device){
     if(relto)delete relto;
 
     return true;
-    }
+}
 
 
 
 
 QString LumGenerator::indent(int depth){
     return QString(4 * depth, ' ');
-    }
+}
 
 void LumGenerator::processItem(Item *item, int depth){
     qDebug() << item->objectName();
@@ -316,43 +318,43 @@ void LumGenerator::processItem(Item *item, int depth){
     if (type == "World"){
         for (int i = 0; i < item->childCount(); ++i)
             processItem(static_cast<Item*>(item->child(i)), depth + 0);
-        }
+    }
     else if (type == "Node"){
         out << indent(depth) << "<node name=\"" << item->objectName() << "\">\n";
         for (int i = 0; i < item->childCount(); ++i)
             processItem(static_cast<Item*>(item->child(i)), depth + 1);
 
         out << indent(depth) << "</node>\n";
-        }
+    }
     else if (type == "Text"){
         out << indent(depth) << "<text name=\"" << item->objectName() << "\">";
         out << escapedText(static_cast<Item_edit*>(item)->raw_text());
         out << "</text>\n";
-        }
+    }
     else if (type == "Script"){
         if (!dynamic_cast<Item_script*>(item)->isRunning()){
             out << indent(depth) << "<script name=\"" << item->objectName() << "\">";
-            }
+        }
         else{
             out << indent(depth) << "<script name=\"" << item->objectName() << "\" run=\"true\">";
 
-            }
+        }
 
         out << escapedText(static_cast<Item_edit*>(item)->raw_text());
         out << "</script>\n";
-        }
+    }
     else if (type == "Shader"){
         QString stype;
         switch(static_cast<Item_shader*>(item)->getShaderType()){
             case Item_shader::Vertexshader: stype="vertex" ; break;
             case Item_shader::Geometryshader: stype ="geometrie"; break;
             case Item_shader::Fragmentshader: stype ="fragment"; break;
-            }
+        }
 
         out << indent(depth) << "<shader name=\"" << item->objectName() << "\" type=\"" << stype << "\">";
         out << escapedText(static_cast<Item_edit*>(item)->raw_text());
         out << "</shader>\n";
-        }
+    }
     else if (type == "Texture"){
         Item_texture *T = static_cast<Item_texture*>(item);
         out << indent(depth) << "<texture name=\"" << item->objectName() << "\" ";
@@ -361,11 +363,11 @@ void LumGenerator::processItem(Item *item, int depth){
             QString filename;
             if(relto){
                 out << "filename=\"" << relto->relativeFilePath(T->getFilename()) << "\" >\n";
-                }
+            }
             else{
                 out << "filename=\"" << T->getFilename() << "\" >\n";
-                }
             }
+        }
 
         else{
 
@@ -392,11 +394,11 @@ void LumGenerator::processItem(Item *item, int depth){
             QByteArray b64 = tmp.toBase64();
             for(int pos = 0; pos < b64.size(); pos += 100){
                 out << indent(depth + 1) << b64.mid(pos, 100) << "\n";
-                }// */
-            }
+            }// */
+        }
 
         out << indent(depth) << "</texture>\n";
-        }
+    }
     else if (type == "Mesh"){ //Stream is deprecated and replaces by Mesh
         int num = static_cast<Item_mesh*>(item)->getNumOfVertices();
         out << indent(depth) << "<mesh name=\"" << item->objectName() << "\" vertices=\"" << num << "\">\n";
@@ -405,13 +407,13 @@ void LumGenerator::processItem(Item *item, int depth){
             processItem(static_cast<Item*>(item->child(i)), depth + 1);
 
         out << indent(depth) << "</mesh>\n";
-        }
+    }
     else if (type == "Index"){
         Item_index* in = static_cast<Item_index*>(item);
         out << indent(depth) << "<index name=\"" << item->objectName() << "\" primitive=\"" << in->getIPP() << "\">\n";
         out << in->getData();
         out << indent(depth) << "</index>\n";
-        }
+    }
     else if (type == "Component"){
         Item_component* co = static_cast<Item_component*>(item);
         QString comptype;
@@ -423,9 +425,9 @@ void LumGenerator::processItem(Item *item, int depth){
             case Item_component::UVCOORDS: comptype = "uvcoords"; break;
             case Item_component::BONEDEP: comptype = "bonedep"; break;
             case Item_component::QUATERNION: comptype = "quaternion"; break;
-            }
+        }
         out << indent(depth) << "<component name=\"" << item->objectName() << "\"",
-        out << " type=\"" << comptype << "\"";
+                out << " type=\"" << comptype << "\"";
         out << " dim=\"" << co->getDim() << "\"";
         out << " keyframes=\"" << co->getKeyFrames() << "\"";
 
@@ -440,11 +442,11 @@ void LumGenerator::processItem(Item *item, int depth){
             case GL_FLOAT:
             default:
                 out << " format=\"float\" >\n";
-            }
+        }
 
         out << co->getData();
         out << indent(depth) << "</component>\n";
-        }
+    }
     else if (type == "Buffer"){
         Item_buffer* buf= static_cast<Item_buffer*>(item);
         out << indent(depth) << "<buffer name=\"" << item->objectName() << "\" size=\"" << buf->getSize();
@@ -461,11 +463,11 @@ void LumGenerator::processItem(Item *item, int depth){
             case GL_FLOAT:
             default:
                 out << " format=\"float\" >\n";
-            }
+        }
 
         out << buf->getData();
         out << indent(depth) << "</buffer>\n";
-        }
+    }
     else if (type == "Uniform"){
         Item_uniform* buf= static_cast<Item_uniform*>(item);
         out << indent(depth) << "<uniform name=\"" << item->objectName() << "\" size=\"" << buf->getSize();
@@ -476,17 +478,17 @@ void LumGenerator::processItem(Item *item, int depth){
             case GL_FLOAT:
             default:
                 out << " format=\"float\" >\n";
-            }
+        }
 
         out << buf->getData();
         out << indent(depth) << "</uniform>\n";
-        }
+    }
     else if (type == "Armature"){
         out << indent(depth) << "<armature name=\"" << item->objectName() << "\">\n";
         for (int i = 0; i < item->childCount(); ++i)
             processItem(static_cast<Item*>(item->child(i)), depth + 1);
         out << indent(depth) << "</armature>\n";
-        }
+    }
     else if (type == "Bone"){
         float *joint = static_cast<Item_bone*>(item)->getJoint();
         int id = static_cast<Item_bone*>(item)->getId();
@@ -494,8 +496,8 @@ void LumGenerator::processItem(Item *item, int depth){
         for (int i = 0; i < item->childCount(); ++i)
             processItem(static_cast<Item*>(item->child(i)), depth + 1);
         out << indent(depth) << "</bone>\n";
-        }
     }
+}
 
 QString LumGenerator::escapedText(const QString &str){
     QString result = str;
@@ -503,4 +505,4 @@ QString LumGenerator::escapedText(const QString &str){
     result.replace("<", "&lt;");
     result.replace(">", "&gt;");
     return result;
-    }
+}
