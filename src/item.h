@@ -36,24 +36,23 @@
     menu->addAction (QIcon(QPixmap(ScriptExtender::actionlist.at(i).icon)), ScriptExtender::actionlist.at(i).text, this, ScriptExtender::actionlist.at(i).slot.toLatin1().constData());}}
 
 
-#define DQMENU(classname,menu) \
-    for (int i = 0; i < DQObject< classname >::actionlist.size(); ++i) { \
-    menu->addAction (QIcon(DQObject< classname >::actionlist.at(i).icon), DQObject< classname >::actionlist.at(i).text, this, DQObject< classname >::actionlist.at(i).member);}
+//#define DQMENU(classname,menu) \
+//    for (int i = 0; i < DQObject< classname >::actionlist.size(); ++i) { \
+//    menu->addAction (QIcon(DQObject< classname >::actionlist.at(i).icon), DQObject< classname >::actionlist.at(i).text, this, DQObject< classname >::actionlist.at(i).member);}
+
+
+#define DQMENU(classname,menu)
+#define SCRIPTSLOTS(classname, classtype)
 
 
 
 
-
-
-
-
-
-#define SCRIPTSLOTS(classname, classtype) \
-    for (int i = 0; i < ScriptExtender::slotlist.size(); ++i){ \
-    if(ScriptExtender::slotlist.at(i).filter.exactMatch( classtype )) {  \
-    DQObject< classname >::createCallBackSlot(ScriptExtender::slotlist.at(i).type.toLatin1().data(), ScriptExtender::slotlist.at(i).signature.toLatin1().data(), "", ScriptExtender::callback, ScriptExtender::slotlist.at(i).id); \
-    qDebug()<< "Create SCRIPTSLOTS" << ScriptExtender::slotlist.at(i).signature; \
-    }}
+//#define SCRIPTSLOTS(classname, classtype) \
+//    for (int i = 0; i < ScriptExtender::slotlist.size(); ++i){ \
+//    if(ScriptExtender::slotlist.at(i).filter.exactMatch( classtype )) {  \
+//    DQObject< classname >::createCallBackSlot(ScriptExtender::slotlist.at(i).type.toLatin1().data(), ScriptExtender::slotlist.at(i).signature.toLatin1().data(), "", ScriptExtender::callback, ScriptExtender::slotlist.at(i).id); \
+//    qDebug()<< "Create SCRIPTSLOTS" << ScriptExtender::slotlist.at(i).signature; \
+//    }}
 
 
 
@@ -66,11 +65,11 @@
 #include "script_extender.h"
 #include "profiler.h"
 
-#include "dqobject.h"
 #include <QTreeWidgetItem>
 #include <QPointer>
 #include <QDockWidget>
 #include <QMenu>
+#include <QDebug>
 
 class QMainWindow;
 class Item_world;
@@ -153,7 +152,9 @@ protected:
 signals:
     void update();
 public:
-    static void setup();
+    Q_INVOKABLE QObject* addCam(const QString& name = "Cam");
+    Q_INVOKABLE QObject* addNode(const QString& name = "Node");
+    Q_INVOKABLE QObject* addVirtual(const QString& name = "Virtual");
 };
 
 
@@ -191,23 +192,32 @@ class Item_mesh;
 The node object is the container for shader, scripts, textures, other nodes,
 stream or armatures.
 */
-class Item_node : public Item_matrix {
+class Item_node : public Item_matrix
+{
     Q_OBJECT
 public:
     Item_node( Item *parent, const QString& label1);
-    virtual bool dragAccept(Item*);
+    virtual bool dragAccept(Item*) override;
 public slots:
-    virtual QString getType()const{return QString("Node");}
-
-
-    QObject* addArmature(const QString& name = "Armature");
-
-    virtual void contextmenu(const QPoint&);
+    virtual QString getType()const override;
+    virtual void contextmenu(const QPoint&) override;
 
     void Call(const QString& function, const QVariantList& args = QVariantList());
-
     //Model importer section: Source in importer/
     void importModel(const QString& filename = "");
+public:
+    Q_INVOKABLE QObject *addBuffer(const QString& label1 = "Buffer", unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT, bool normalized_int = true);
+    Q_INVOKABLE QObject *addMesh(const QString& name = "Mesh", int numOfVertices = 0);
+    Q_INVOKABLE QObject *addText(const QString& name = "Text");
+    Q_INVOKABLE QObject *addImage(const QString& name = "Image");
+    Q_INVOKABLE QObject *addArmature(const QString& name = "Armature");
+    Q_INVOKABLE QObject *addNode(const QString& name = "Node");
+    Q_INVOKABLE QObject *addScript(const QString& name = "Script");
+    Q_INVOKABLE QObject *addVertexshader(const QString& name="Vertexshader");
+    Q_INVOKABLE QObject *addGeometryshader(const QString& name="Geometryshader");
+    Q_INVOKABLE QObject *addFragmentshader(const QString& name="Fragmentshader");
+    Q_INVOKABLE QObject *addTexture(const QString& name="Texture");
+    Q_INVOKABLE QObject *addUniform(const QString &name = "Uniform", unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT);
 protected:
     void importMD2(const QString& filename);
     void importMD3(const QString& filename);
@@ -216,10 +226,6 @@ protected:
     void importCR2(const QString& filename);
     void importX  (const QString& filename);
     void importCMF(const QString& filename);
-
-public:
-    static void setup();
-    static void create(QObject* obj, int id , void** args);
 private:
     bool menuinit;
 };
@@ -235,7 +241,7 @@ class Item_cam : public Item_matrix {
     Q_PROPERTY(int Far READ getFar WRITE Far)
 public:
     Item_cam( Item_world *parent, const QString& label1);
-    virtual ~Item_cam();
+    virtual ~Item_cam() override = default;
 public slots:
     virtual QString getType() const {return QString("Cam");}
     virtual void deleteLater();
@@ -249,10 +255,6 @@ protected:
     bool deletable;
 
     GLCam *cam;
-
-public:
-    static void setup();
-    static void create(QObject* obj, int id , void** args);
 };
 
 
@@ -269,7 +271,7 @@ class Item_edit : public Item
     Q_OBJECT
 public:
     Item_edit( Item *parent, const QString& label1);
-    virtual ~Item_edit();
+    virtual ~Item_edit() override;
 public slots:
 
     void saveas(const QString& filename = "");
@@ -281,17 +283,14 @@ public slots:
     QString text() const;
 
     void setText(const QString&);
-    virtual QString getType() const {return QString("Text");}
+    virtual QString getType() const override;
 
 protected:
     QPointer<SourceEdit> edit;
     QString fn;
 
 public slots:
-    virtual void contextmenu(const QPoint&);
-public:
-    static void setup();
-    static void create(QObject* obj, int id , void** args);
+    virtual void contextmenu(const QPoint&) override;
 private:
     bool menuinit;
 };
@@ -300,27 +299,24 @@ private:
 /*!
 The shader editors, including the completation handler
 */
-class Item_shader : public Item_edit{
+class Item_shader : public Item_edit
+{
     Q_OBJECT
     Q_ENUMS(shadertype)
 public:
     Item_shader( Item *parent, const QString& label1, int shadertype);
-    virtual ~Item_shader();
+    virtual ~Item_shader() override = default;
     enum shadertype{Vertexshader,Geometryshader,Fragmentshader};
     int getShaderType();
 public slots:
-    virtual QString getType()const {return QString("Shader");}
+    virtual QString getType()const override {return QString("Shader");}
 private slots:
     void completationHandler(const QString&);
     void helpHandler(const QString&);
 protected:
     int shadertype;
-
 public slots:
-    virtual void contextmenu(const QPoint&);
-public:
-    static void setup();
-    static void create(QObject* obj, int id , void** args);
+    virtual void contextmenu(const QPoint&) override;
 private:
     bool menuinit;
 
@@ -334,19 +330,19 @@ class glwrapper;
 The script editor, including the completation handler
 and scriptinterpreter
 */
-class Item_script : public Item_edit{
+class Item_script : public Item_edit
+{
     Q_OBJECT
 public:
     Item_script( Item *parent, const QString& label1);
-    virtual ~Item_script();
+    virtual ~Item_script() override;
 
 public slots:
     void run();
     void stop();
-    bool isRunning();
+    bool isRunning() const;
     void Call(const QString& function, const QVariantList& args = QVariantList());
-
-    virtual QString getType()const{return QString("Script");}
+    virtual QString getType()const override{return QString("Script");}
 private slots:
     void completationHandler(const QString&);
     void helpHandler(const QString&);
@@ -358,10 +354,7 @@ protected:
     QScriptEngine *ip;
 
 public slots:
-    virtual void contextmenu(const QPoint&);
-public:
-    static void setup();
-    static void create(QObject* obj, int id , void** args);
+    virtual void contextmenu(const QPoint&) override;
 private:
     bool menuinit;
 };
@@ -373,14 +366,15 @@ private:
 class for uniform arrays, including keyframe interpolating on CPU. This Class is required because the Buffer
 objects memory is located on the opengl servers side, The memory of this object is located on the client side.
 */
-class Item_uniform: public Item{
+class Item_uniform: public Item
+{
     Q_OBJECT
     friend class glwrapper;
     friend class glwrapper_shader;
 public:
     Item_uniform( Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT);
-    virtual ~Item_uniform();
-    virtual QString statusText()const;
+    virtual ~Item_uniform() override;
+    virtual QString statusText()const override;
 
     double& operator()(unsigned dim=0, unsigned index=0, unsigned keyframe=0);
 
@@ -407,7 +401,7 @@ public slots:
 
     int getFormat();
 
-    virtual QString getType() const{return QString("Uniform");}
+    virtual QString getType() const override;
 
 protected:
     void refresh();
@@ -429,10 +423,7 @@ private:
     int ref_pos; //position in double buffer
 
 public slots:
-    virtual void contextmenu(const QPoint&);
-public:
-    static void setup();
-    static void create(QObject* obj, int id , void** args);
+    virtual void contextmenu(const QPoint&) override;
 private:
     bool menuinit;
 };
@@ -443,12 +434,13 @@ class half;
 /*!
 class for bindable buffer and prototype for mesh component
 */
-class Item_buffer: public Item{
+class Item_buffer: public Item
+{
     Q_OBJECT
     friend class glwrapper;
     friend class glwrapper_shader;
 public:
-    Item_buffer( Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT, bool normalized_int = true);
+    Item_buffer(Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT, bool normalized_int = true);
     virtual ~Item_buffer();
     virtual QString statusText()const;
 
@@ -529,9 +521,6 @@ private:
 
 public slots:
     virtual void contextmenu(const QPoint&);
-public:
-    static void setup();
-    static void create(QObject* obj, int id , void** args);
 private:
     bool menuinit;
 };

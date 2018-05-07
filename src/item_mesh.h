@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007-2008  oc2k1
@@ -24,48 +24,53 @@
 
 #include "item.h"
 #include "item_index.h"
-#include "item_component.h" 
+#include "item_component.h"
 
 /*!
 mesh
 */
-class Item_mesh : public Item{
-Q_OBJECT
-Q_ENUMS(comptype)
+class Item_mesh : public Item
+{
+    Q_OBJECT
+    Q_ENUMS(comptype)
 
 public:
-	enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
-	Item_mesh( Item *parent , const QString& label1, int vertices = 0);
-	virtual QString statusText() const;
-
-	QObject* addComponent(int type ,const QString& label1, int dimension, int keyframes= 1, int format=GL_FLOAT); //deprecated
-	QObject* addIndex(const QString& label = "Index" , int verts_per_prim = 3);  //deprecated
-
-public slots: 
-
-	int getNumOfVertices();
-	
-	void setNumOfVertices(int num);
-
-	void Draw(int mode );
-	void DrawInstanced(int  num_of_instances, int mode);
+    enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
+    Item_mesh( Item *parent , const QString& label1, int vertices = 0);
+    virtual QString statusText() const;
 
 
-	void genNormal(Item_component* position = NULL);
-	void genTangent(Item_component* position = NULL,Item_component* normal = NULL,Item_component* texcoord = NULL);
-	void genTexSpaceQuaternion(Item_component* normal = NULL,Item_component* tangent = NULL);
-	
-	virtual QString getType() const {return QString("Mesh");}
+    Q_INVOKABLE QObject* addIndex(const QString& label = "Index" , int numOfVertices = 3);
+    Q_INVOKABLE QObject* addVertex();
+    Q_INVOKABLE QObject* addGeneric();
+    Q_INVOKABLE QObject* addVector();
+    Q_INVOKABLE QObject* addColor();
+    Q_INVOKABLE QObject* addUvCoords();
+    Q_INVOKABLE QObject* addBonedeep();
+    Q_INVOKABLE QObject* addQuaternion();
+    Q_INVOKABLE QObject* addComponent(int type ,const QString& label1, int dimension, int keyframes= 1, int format=GL_FLOAT);
+public slots:
+
+    int getNumOfVertices();
+
+    void setNumOfVertices(int num);
+
+    void Draw(int mode );
+    void DrawInstanced(int  num_of_instances, int mode);
+
+
+    void genNormal(Item_component* position = nullptr);
+    void genTangent(Item_component* position = nullptr,Item_component* normal = nullptr,Item_component* texcoord = nullptr);
+    void genTexSpaceQuaternion(Item_component* normal = nullptr,Item_component* tangent = nullptr);
+
+    virtual QString getType() const {return QString("Mesh");}
 protected:
-	int num_of_vertices;
+    int num_of_vertices;
 
-public slots: 
-	virtual void contextmenu(const QPoint&);
-public:
-	static void setup();
-	static void create(QObject* obj, int id , void** args);
-private: 
-	bool menuinit;
-	};
+public slots:
+    virtual void contextmenu(const QPoint&);
+private:
+    bool menuinit;
+};
 
 #endif

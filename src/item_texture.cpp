@@ -30,6 +30,7 @@
 #include <QDir>
 #include <QFileDialog>
 #include <QCoreApplication>
+#include <QDebug>
 
 #define  DDS_CAPS		0x00000001
 #define  DDS_HEIGHT		0x00000002
@@ -97,38 +98,8 @@ typedef struct
     unsigned int Reserved2[3];
 } DDS_Header_t;
 
-
-
-void Item_texture::create( QObject* obj, int id , void** args){
-    QObject* r;
-    switch (id){
-        case 0:
-            r = new DQObject<Item_texture>(dynamic_cast<Item*>(obj), "Texture");
-            break;
-        case 1:
-            r = new DQObject<Item_texture>(dynamic_cast<Item*>(obj), (*reinterpret_cast< const QString(*)>(args[1])));
-            break;
-        default:
-            qDebug() << "item_shader.cpp unhandled: create(" << obj << ", " << id << ", " << args << ")";
-            return;
-    }
-    if (args[0]) *reinterpret_cast< QObject**>(args[0]) = r;
-
-}
-
-void Item_texture::setup(){
-    qDebug() << "Item_texture::setup()";
-
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addTexture()", "", Item_texture::create, 0);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addTexture(QString)", "name", Item_texture::create, 1);
-    DQObject<Item_node>::actionlist << Action(":/images/xpm/texture.xpm", "Add Texture", SLOT(addTexture()));
-
-    SCRIPTSLOTS(Item_texture,"Texture");
-}
-
-
-
-Item_texture::Item_texture( Item *parent, const QString& name ) : Item( parent, name){
+Item_texture::Item_texture( Item *parent, const QString& name ) : Item( parent, name)
+{
     //if (fbo == 0)
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled);
 
@@ -152,7 +123,8 @@ Item_texture::Item_texture( Item *parent, const QString& name ) : Item( parent, 
     menuinit = false;
 }
 
-Item_texture::~Item_texture(){
+Item_texture::~Item_texture()
+{
     glDeleteTextures(1,(GLuint*) &texture);
     glDeleteFramebuffersEXT (1, (GLuint*)&fbo);
 }
@@ -1066,6 +1038,12 @@ void Item_texture::Print(int x, int y, QString text){
     glTexSubImage2D(type, 0, x, y, len, 1, GL_ALPHA, GL_UNSIGNED_BYTE, tp);
 
 }
+
+QString Item_texture::getType() const
+{
+    return QString("Texture");
+}
+
 /*!
 void getFormat()\n
 Returns the OpenGL Texture format enum.

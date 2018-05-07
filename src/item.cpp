@@ -29,6 +29,7 @@
 #include <QDir>
 #include <QFontInfo>
 #include <QFileInfoList>
+#include <QDebug>
 
 
 Item * Item::context = nullptr;
@@ -40,7 +41,7 @@ Profiler * Item::profiler = nullptr;
 QList<ScriptLauncher *> Item::launcher;
 
 
-Item::Item( Item *parent, const QString& name ):
+Item::Item(Item *parent, const QString& name ):
     QObject(parent),
     QTreeWidgetItem(parent, 0)
 {
@@ -102,7 +103,8 @@ void Item::setName(const QString& _name){
 
 void Item::setData ( int column, int role, const QVariant &value )
 {
-    if (role == Qt::EditRole && this != world){
+    if (role == Qt::EditRole && this != world)
+    {
         setName(value.toString());
         return;
     }
@@ -111,7 +113,8 @@ void Item::setData ( int column, int role, const QVariant &value )
 /*!
 returns the parent object
 */
-Item* Item::parent(){
+Item* Item::parent()
+{
     Item* i = (Item*) QObject::parent();
     return i;
 }
@@ -129,15 +132,18 @@ void Item::del(){
 /*!
 function to init static XPM icons
 */
-void Item::setup(){
+void Item::setup()
+{
     qDebug() << "Item::setup()";
 }
 
 /*!
 slot for opening the contextmenu
 */
-void Item::contextmenu(const QPoint& point){
-    if (menu){
+void Item::contextmenu(const QPoint& point)
+{
+    if (menu)
+    {
         context = this;
         menu->popup( point );
     }
@@ -146,7 +152,8 @@ void Item::contextmenu(const QPoint& point){
 /*!
 scan the plugin script directory for tool scripts
 */
-void Item::scanScripts(){
+void Item::scanScripts()
+{
     QStringList paths;
     paths << QString(QFileInfo( QCoreApplication::arguments().at(0) ).absolutePath ()) + "/plugins/";
     paths << QString(QDir::homePath ())+ "/.lumina/plugins/";
@@ -171,7 +178,8 @@ void Item::scanScripts(){
 
 }
 
-QObject* Item::findChild(const QString& name){
+QObject* Item::findChild(const QString& name)
+{
     return QObject::findChild<QObject *>(name);
 }
 
@@ -180,26 +188,25 @@ QObject* Item::findChild(const QString& name){
 returns a list of child objects
 
 */
-QObjectList Item::findChildrenByType ( const QString & typen) const{
+QObjectList Item::findChildrenByType ( const QString & typen) const
+{
 
     QObjectList l = findChildren<QObject*>();
 
-    for (int i = l.size() -1; i >= 0; i--){
-        if(Item* it = dynamic_cast<Item*>( l[i] ) ) {
+    for (int i = l.size() -1; i >= 0; i--)
+    {
+        if(Item* it = dynamic_cast<Item*>( l[i] ) )
+        {
             if(it->getType()!= typen) l.removeAt(i);
         }
-
         else l.removeAt(i);
 
     }
     return l;
 }
 
-
-
-
-bool Item::dragAccept(Item*){
+bool Item::dragAccept(Item*)
+{
     return false;
 }
 
-QString Item_world::getType() const{return QString("World");}

@@ -77,4 +77,6 @@ void Item_node::importModel(const QString& filename){
         importCR2(fn);
     }
 
-};
+}
+
+

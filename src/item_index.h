@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007-2008  oc2k1
@@ -26,44 +26,41 @@
 
 
 /*!
-index 
+index
 */
-class Item_index: public Item{
-Q_OBJECT
-friend class Item_mesh;
+class Item_index: public Item
+{
+    Q_OBJECT
+    friend class Item_mesh;
 public:
-	Item_index( Item *parent, const QString& label1, int indices_per_primitive=3 , int num =0);
-	virtual ~Item_index();
+    Item_index( Item *parent, const QString& label1, int indices_per_primitive=3 , int num =0);
+    virtual ~Item_index() override;
 
-	void setData(QString);
-	QString getData();
-	int getIPP();
-	virtual QString statusText()const;
-public slots: 
+    void setData(QString);
+    QString getData();
+    int getIPP();
+    virtual QString statusText()const override;
+public slots:
 
-	void Draw(int mode = -1);
-	void DrawInstanced(int instances, int mode = -1);
-	void set(int index, int a, int b = 0, int c = 0, int d = 0, int e = 0, int f = 0);
-	void add(int a, int b = 0, int c = 0, int d = 0, int e = 0, int f = 0);
-	void del(int index, int num);
-	
-	virtual QString getType()const{return QString("Index");}
+    void Draw(int mode = -1);
+    void DrawInstanced(int instances, int mode = -1);
+    void set(int index, int a, int b = 0, int c = 0, int d = 0, int e = 0, int f = 0);
+    void add(int a, int b = 0, int c = 0, int d = 0, int e = 0, int f = 0);
+    void del(int index, int num);
+    virtual QString getType()const override;
 
 protected:
-	int* index;
-	int num_of_primitives;
-	
-	unsigned int VBO;
-	int needrefresh;
-	int indices_per_primitive;
+    int* index;
+    int num_of_primitives;
 
-	void resize();
-public slots: 
-	virtual void contextmenu(const QPoint&);
-public:
-	static void setup();
-	static void create(QObject* obj, int id , void** args);
-private: 
-	bool menuinit;
-	};
+    unsigned int VBO;
+    int needrefresh;
+    int indices_per_primitive;
+
+    void resize();
+public slots:
+    virtual void contextmenu(const QPoint&) override;
+private:
+    bool menuinit;
+};
 #endif

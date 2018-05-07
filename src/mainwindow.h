@@ -23,6 +23,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "saveable_widget.h"
 
 class QAction;
 class QListWidget;
@@ -33,7 +34,7 @@ class Console;
 class ScriptLauncher;
 class TimeWidget;
 
-class MainWindow : public QMainWindow
+class MainWindow : public QMainWindow, public utility::SaveableWidget<MainWindow>
 {
     Q_OBJECT
 public:
@@ -92,6 +93,9 @@ private:
 
     TimeWidget *time;
     Console *console;
+protected:
+    virtual void recurseWrite(QSettings& settings, QObject* object) override;
+    virtual void recurseRead(QSettings& settings, QObject* object) override;
 };
 
 #endif

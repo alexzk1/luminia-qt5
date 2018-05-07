@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** This code based on Trolltechs QSA input dialog factory.
@@ -31,22 +31,23 @@
 
 class Factory : public QSObjectFactory{
 public:
-	Factory();
-	QObject *create(const QString &className, const QVariantList &arguments, QObject *context);
-	static const QMetaObject *metaObjectFrom(QString classname);
-	};
+    Factory();
+    QObject *create(const QString &className, const QVariantList &arguments, QObject *context);
+    static const QMetaObject *metaObjectFrom(QString classname);
+};
 #endif
 
 #ifdef QTSCRIPT
 #include <QtCore>
 
 
-class QMetaObject;
+struct QMetaObject;
 class QScriptEngine;
-namespace Factory {
-	void Factory(QScriptEngine &eng);
-	const QMetaObject *metaObjectFrom(QString classname);
-	};
+namespace Factory
+{
+    void Factory(QScriptEngine &eng);
+    const QMetaObject *metaObjectFrom(QString classname);
+};
 #endif
 
 #endif

@@ -21,6 +21,7 @@
 
 #include "glwrapper.h"
 #include <QMessageBox>
+#include <QDebug>
 
 glwrapper_framebuffer::glwrapper_framebuffer( QObject * parent): QObject( parent ){
     viewport[0]= -1;

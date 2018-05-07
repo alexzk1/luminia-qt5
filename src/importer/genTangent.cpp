@@ -23,7 +23,7 @@
 
 #include <math.h>
 #include <QMessageBox>
-
+#include <QDebug>
 /*!
 genTangent(Item_component* vertex, Item_component* normal, Item_component* texcoord); \n
 

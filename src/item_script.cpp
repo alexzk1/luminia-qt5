@@ -27,64 +27,30 @@
 
 #include "factory/factory.h"
 
+Item_script::Item_script( Item *parent, const QString& name) : Item_edit( parent, name)
+{
+    setIcon(0, QIcon(":/images/xpm/script.xpm"));
+    ogl = new glwrapper(this, "gl");
 
+    connect(edit, SIGNAL(requestCompletationList(QString)), this, SLOT(completationHandler(QString)));
+    connect(edit, SIGNAL(requestHelpString(QString)), this, SLOT(helpHandler(QString)));
 
-void Item_script::create( QObject* obj, int id , void** args){
-    QObject* r;
-    switch (id){
-        case 1:
-            r = new DQObject<Item_script>(dynamic_cast<Item*>(obj), (*reinterpret_cast< const QString(*)>(args[1])));
-            break;
-        case 0:
-            r = new DQObject<Item_script>(dynamic_cast<Item*>(obj), "Script");
-            break;
-        default:
-            qDebug() << "item_script.cpp unhandled: create(" << obj << ", " << id << ", " << args << ")";
-            return;
-        }
-    if (args[0]) *reinterpret_cast< QObject**>(args[0]) = r;
-    }
-
-void Item_script::setup(){
-
-    qDebug() << "Item_script::setup()";
-
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addScript()", "", Item_script::create, 0);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addScript(QString)", "name", Item_script::create, 1);
-
-    DQObject<Item_node>::actionlist << Action(":/images/xpm/script.xpm", "Add Script", SLOT(addScript()));
-
-    SCRIPTSLOTS(Item_script,"Script");
-    }
-
-
-
-
-Item_script::Item_script( Item *parent, const QString& name) : Item_edit( parent, name){
-
-    setIcon( 0,QIcon(":/images/xpm/script.xpm"));
-
-    ogl = new glwrapper(this,"gl");
-
-    connect((QObject*)edit,SIGNAL(requestCompletationList(QString)), this, SLOT(completationHandler(QString)));
-    connect((QObject*)edit,SIGNAL(requestHelpString(QString)), this, SLOT(helpHandler(QString)));
-
-    ip = NULL;
+    ip = nullptr;
     running = false;
 
     menuinit = false;
-    }
+}
 
 
 /*!
 slot for opening the contextmenu
 */
-void Item_script::contextmenu(const QPoint& point){
-
+void Item_script::contextmenu(const QPoint& point)
+{
     context = this;
 
-    if(!menuinit){
-
+    if(!menuinit)
+    {
         menu->addSeparator();
         menu->addAction ( QIcon(":/images/xpm/run.xpm"),QString( "Run Script") , this, SLOT( run()));
         menu->addAction ( QIcon(":/images/xpm/stop.xpm"),QString( "Stop Script") , this, SLOT( stop()));
@@ -100,18 +66,19 @@ void Item_script::contextmenu(const QPoint& point){
         menu->addSeparator();
         menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
         menuinit = true;
-
-        }
-
+    }
     menu->popup( point );
-    }
+}
 
 
 
-Item_script::~Item_script(){
-    delete ip;
-    delete ogl;
-    }
+Item_script::~Item_script()
+{
+    if(ip)
+        delete ip;
+    if (ogl)
+        delete ogl;
+}
 
 Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
 /*!
@@ -119,8 +86,8 @@ Start a script. QT-4.3 part is not full compatible to QSA
 */
 void Item_script::run()
 {
-
-    if(ip)delete ip;
+    if(ip)
+        delete ip;
     ip = new QScriptEngine();
 
     ogl->cleartrasher();
@@ -136,23 +103,26 @@ void Item_script::run()
     ip->globalObject().setProperty("gl" , ogl_sv );
 
     QObjectList QObjectList = parent()->findChildren<QObject *>();
-    for ( int i = 0; i < QObjectList.count();i++){
-        if (QObjectList[i]->parent() == (QObject*)parent()){
+    for ( int i = 0; i < QObjectList.count();i++)
+    {
+        if (QObjectList[i]->parent() == parent())
+        {
             ip->globalObject().setProperty(QObjectList[i]->objectName() ,ip->newQObject(QObjectList[i]));
-            }
         }
+    }
 
     QScriptValue r = ip->evaluate(edit->getText());
 
-    if (ip->hasUncaughtException()) {
+    if (ip->hasUncaughtException())
+    {
         int line = ip->uncaughtExceptionLineNumber();
-        QMessageBox::critical ( 0, QString("Script error"), QString("Error processing Script at Line %1 ").arg(line));
+        QMessageBox::critical ( nullptr, QString("Script error"), QString("Error processing Script at Line %1 ").arg(line));
 
-        }
+    }
 
     //mark an active script with render() function
     //if(ip->globalObject().property("render").isValid()){
-        setIcon( 0,QIcon(":/images/xpm/script_run.xpm"));
+    setIcon( 0,QIcon(":/images/xpm/script_run.xpm"));
     //	}
 
     running=true;
@@ -160,62 +130,68 @@ void Item_script::run()
 
     Item_world *w = static_cast<Item_world*>(world);
     w->setTime(w->getTime()); //ugly hack for updating the QOpengl widget
-    }
+}
 
 /*!
 call a scriptfunction from a script.
 */
 
-void Item_script::Call(const QString& function, const QVariantList& args){
-    if (!running)return;
-    if (ip == NULL) return;
-    QScriptValueList qsarglist = QScriptValueList();
-    for ( int i = 0; i < args.size(); i++){
-        QObject* obj = args.at(i).value<QObject*>();
-        if(obj){
-            qsarglist <<  ip->newQObject (obj);
+void Item_script::Call(const QString& function, const QVariantList& args)
+{
+    if (!isRunning() && ip)
+    {
+        QScriptValueList qsarglist = QScriptValueList();
+        for ( int i = 0; i < args.size(); i++){
+            QObject* obj = args.at(i).value<QObject*>();
+            if(obj){
+                qsarglist <<  ip->newQObject (obj);
             }
-        else switch(args.at(i).type()){
-            case QVariant::Double:
-            case QVariant::Bool:
-            case QVariant::Int:
-            case QVariant::UInt:
-            case QVariant::ULongLong:
-                qsarglist <<  QScriptValue (ip,args.at(i).toDouble());
-                break;
+            else switch(args.at(i).type())
+            {
+                case QVariant::Double:
+                case QVariant::Bool:
+                case QVariant::Int:
+                case QVariant::UInt:
+                case QVariant::ULongLong:
+                    qsarglist <<  QScriptValue (ip,args.at(i).toDouble());
+                    break;
 
-            default:
-                qsarglist <<  QScriptValue (ip,args.at(i).toString());
+                default:
+                    qsarglist <<  QScriptValue (ip,args.at(i).toString());
             }
-        //qDebug() << "Item_script::Call" << args.at(i).type();
+            //qDebug() << "Item_script::Call" << args.at(i).type();
         }
 
-    QScriptValue f = ip->globalObject().property(function).call(ip->globalObject(),qsarglist);
+        QScriptValue f = ip->globalObject().property(function).call(ip->globalObject(),qsarglist);
 
-    if (! f.isUndefined()){
-        if (f.toString().contains("Error:")){
-            qDebug() << f.toString();
-            stop();
-            QMessageBox::critical ( 0, QString("Script error"),f.toString());
+        if (! f.isUndefined())
+        {
+            if (f.toString().contains("Error:"))
+            {
+                qDebug() << f.toString();
+                stop();
+                QMessageBox::critical (nullptr, QString("Script error"),f.toString());
             }
         }
     }
+}
 
 /*!
 stopt the excution. "render()" will not be called anymore
 */
-void Item_script::stop(){
-
+void Item_script::stop()
+{
     running=false;
     setIcon( 0,QIcon(":/images/xpm/script_run.xpm"));
-    }
+}
 /*!
 returns true if the script is running. A "render()" function is needed or the script will
 stop at the end.
 */
-bool Item_script::isRunning(){
+bool Item_script::isRunning() const
+{
     return running;
-    }
+}
 /*!
 complettation handler, that searchs the object by the last line and generates complettations
 (childobjects, functions and enums) from the objects metadata.
@@ -234,29 +210,34 @@ void Item_script::completationHandler(const QString& line){
 
 
         QStringList parts = last.split(".");
-        if (parts[0] == "World"){
+        if (parts[0] == "World")
+        {
             obj = Item::world;
-            }
-        else if (parts[0] == "gl"){
+        }
+        else if (parts[0] == "gl")
+        {
             obj = ogl;
-            }
+        }
         else{
             //Factory prototypes
             QRegExp searchProto(parts[0]+"\\s*=\\s*new\\s*(\\w+)[\\(|;]");
             searchProto.indexIn(text());
             meta = Factory::metaObjectFrom(searchProto.cap(1));
-            if (meta != nullptr){
+            if (meta != nullptr)
+            {
                 goto META_OBJ_KNOWN;
-                }
+            }
 
             //Object from treeview
             QObjectList QObjectList = parent()->findChildren<QObject *>();
-            for ( int i = 0; i < QObjectList.count();i++){
-                if (QObjectList[i]->parent() == (QObject*)parent()){
+            for ( int i = 0; i < QObjectList.count();i++)
+            {
+                if (QObjectList[i]->parent() == (QObject*)parent())
+                {
                     if (parts[0] ==QObjectList[i]->objectName())obj = QObjectList[i];
-                    }
                 }
             }
+        }
         if (obj == nullptr)
             return;
         else{
@@ -269,9 +250,9 @@ void Item_script::completationHandler(const QString& line){
                     if (QObjectList[i]->parent() == obj && QObjectList[i]->objectName() == parts[depth]){
                         obj = QObjectList[i];
                         found = true;
-                        }
                     }
                 }
+            }
             qDebug() << obj << found;
             if (!found)return;
 
@@ -280,61 +261,69 @@ void Item_script::completationHandler(const QString& line){
             for ( int i = 0; i < QObjectList.count();i++){
                 if (QObjectList[i]->parent() == obj){
                     complettations << QObjectList[i]->objectName();
-                    }
                 }
+            }
         }
         meta = obj->metaObject();
 
 META_OBJ_KNOWN:
         QStringList Slots;
-        for ( int i = 0; i < meta->methodCount(); i++){
+        for ( int i = 0; i < meta->methodCount(); ++i)
+        {
             QString slot = QString(meta->method(i).methodSignature()).replace(QRegExp("\\(.*"),"");
             if (slot.isEmpty())continue;
             if (slot == "deleteLater")continue;
             if (slot.startsWith("_"))continue;
             Slots << slot;
-            }
+        }
         Slots.sort();
-        for (int i = Slots.count()-1; i > 1; i--){
+        for (int i = Slots.count()-1; i > 1; --i)
+        {
             if (Slots[i]==Slots[i-1])Slots.removeAt(i);
-            }
+        }
 
         complettations << Slots;
 
 
         QStringList Enums;
-        for ( int i = 0; i < meta->enumeratorCount(); i++){
-            for (int k = 0; k < meta->enumerator(i).keyCount();k++){
+        for ( int i = 0; i < meta->enumeratorCount(); ++i)
+        {
+            for (int k = 0; k < meta->enumerator(i).keyCount();--k)
+            {
                 Enums << QString(meta->enumerator(i).key(k));
-                }
             }
+        }
         Enums.sort();
         complettations << Enums;
 
         edit->setCompleatationList(complettations,0);
         return;
-        }
+    }
 
     complettations << "World" << "Math";
 
     QObjectList QObjectList = parent()->findChildren<QObject *>();
-    for ( int i = 0; i < QObjectList.count();i++){
-        if (QObjectList[i]->parent() == (QObject*)parent()){
+    for (int i = 0; i < QObjectList.count();++i)
+    {
+        if (QObjectList[i]->parent() == parent())
+        {
             complettations << QObjectList[i]->objectName();
-            }
         }
+    }
 
     edit->setCompleatationList(complettations.filter(QRegExp(QString("^") + last)),last.length());
-    }
+}
 
 /*!
 handler that reads the doxygen XML documentation an pass the help to the editors complettation box
 */
-void Item_script::helpHandler(const QString& string){
-    if (meta == NULL){
+void Item_script::helpHandler(const QString& string)
+{
+    if (meta == nullptr)
+    {
         edit->setHelpString("");
         return;
-        }
+    }
 
     static QString cacheFilename("");
     static QString lines("");
@@ -352,7 +341,7 @@ void Item_script::helpHandler(const QString& string){
 
         lines = in.readAll();
         cacheFilename = Filename;
-        }
+    }
 
     QRegExp parser1(QString("<memberdef.*<name>") + string + "</name>.*</memberdef>");
     parser1.setMinimal(true);
@@ -367,4 +356,4 @@ void Item_script::helpHandler(const QString& string){
     QRegExp remove("<.*>");
     remove.setMinimal(true);
     edit->setHelpString(parser2.cap(1).replace(remove,""));
-    }
+}

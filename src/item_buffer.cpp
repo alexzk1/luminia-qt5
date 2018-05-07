@@ -28,6 +28,7 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
+#include <QDebug>
 
 #define GL_CHECK_ERROR()                         \
     do                                              \
@@ -40,62 +41,11 @@
     } while(0)
 
 
-
-
-void Item_buffer::create( QObject* obj, int id , void** args){
-    QObject* r;
-    switch (id){
-        case 0:
-            r = new DQObject<Item_buffer>(dynamic_cast<Item*>(obj), QString("Buffer"));
-            break;
-        case 1:
-            r = new DQObject<Item_buffer>(dynamic_cast<Item*>(obj), CAST_QSTRING(1));
-            break;
-        case 2:
-            r = new DQObject<Item_buffer>(dynamic_cast<Item*>(obj), CAST_QSTRING(1), CAST_INT(2));
-            break;
-        case 3:
-            r = new DQObject<Item_buffer>(dynamic_cast<Item*>(obj), CAST_QSTRING(1), CAST_INT(2), CAST_INT(3));
-            break;
-        case 4:
-            r = new DQObject<Item_buffer>(dynamic_cast<Item*>(obj), CAST_QSTRING(1), CAST_INT(2), CAST_INT(3), CAST_INT(4));
-            break;
-        case 5:
-            r = new DQObject<Item_buffer>(dynamic_cast<Item*>(obj), CAST_QSTRING(1), CAST_INT(2), CAST_INT(3), CAST_INT(4), CAST_INT(5));
-            break;
-        case 6:
-            r = new DQObject<Item_buffer>(dynamic_cast<Item*>(obj), CAST_QSTRING(1), CAST_INT(2), CAST_INT(3), CAST_INT(4), CAST_INT(5), CAST_BOOL(6));
-            break;
-        default:
-            qDebug() << "item_buffer.cpp unhandled: create(" << obj << ", " << id << ", " << args << ")";
-            return;
-    }
-    if (args[0]) *reinterpret_cast< QObject**>(args[0]) = r;
-}
-
-void Item_buffer::setup(){
-
-    qDebug() << "Item_buffer::setup()";
-
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addBuffer()", "", Item_buffer::create, 0);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addBuffer(QString)", "name", Item_buffer::create, 1);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addBuffer(QString,int)", "name,dim", Item_buffer::create, 2);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addBuffer(QString,int,int)", "name,dim,size", Item_buffer::create, 3);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addBuffer(QString,int,int,int)", "name,dim,size,keyframes", Item_buffer::create, 4);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addBuffer(QString,int,int,int,int)", "name,dim,size,keyframes,format", Item_buffer::create, 5);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addBuffer(QString,int,int,int,int,bool)", "name,dim,size,keyframes,format,normalized", Item_buffer::create, 6);
-
-
-    DQObject<Item_node>::actionlist << Action(":/images/xpm/buffer.xpm", "Add Buffer", SLOT(addBuffer()));
-    SCRIPTSLOTS(Item_buffer,"Buffer");
-
-}
-
 QList<int> Item_buffer::boundedAttributeLocations = QList<int>();
 QList<Item_buffer*> Item_buffer::boundedTransformFeedback = QList<Item_buffer*>();
 
 
-Item_buffer::Item_buffer( Item *parent, const QString& name, unsigned _dim, unsigned _size, unsigned _keyframes, int _format, bool _normalized_int) : Item( parent, name){
+Item_buffer::Item_buffer(Item *parent, const QString& name, unsigned _dim, unsigned _size, unsigned _keyframes, int _format, bool _normalized_int) : Item( parent, name){
 
     qDebug() << "_normalized_int" << _normalized_int;
 

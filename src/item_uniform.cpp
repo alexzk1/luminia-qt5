@@ -1,4 +1,4 @@
- /********************************************************************************
+/********************************************************************************
 ** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
@@ -28,54 +28,7 @@
 #include <QHBoxLayout>
 #include <QPushButton>
 #include <QDialog>
-
-void Item_uniform::create( QObject* obj, int id , void** args){
-    QObject* r;
-    switch (id){
-        case 0:
-            r = new DQObject<Item_uniform>(dynamic_cast<Item*>(obj), QString("Uniform"));
-            break;
-        case 1:
-            r = new DQObject<Item_uniform>(dynamic_cast<Item*>(obj), CAST_QSTRING(1));
-            break;
-        case 2:
-            r = new DQObject<Item_uniform>(dynamic_cast<Item*>(obj), CAST_QSTRING(1), CAST_INT(2));
-            break;
-        case 3:
-            r = new DQObject<Item_uniform>(dynamic_cast<Item*>(obj), CAST_QSTRING(1), CAST_INT(2), CAST_INT(3));
-            break;
-        case 4:
-            r = new DQObject<Item_uniform>(dynamic_cast<Item*>(obj), CAST_QSTRING(1), CAST_INT(2), CAST_INT(3), CAST_INT(4));
-            break;
-        case 5:
-            r = new DQObject<Item_uniform>(dynamic_cast<Item*>(obj), CAST_QSTRING(1), CAST_INT(2), CAST_INT(3), CAST_INT(4), CAST_INT(5));
-            break;
-        default:
-            qDebug() << "item_mesh.cpp unhandled: create(" << obj << ", " << id << ", " << args << ")";
-            return;
-        }
-    if (args[0]) *reinterpret_cast< QObject**>(args[0]) = r;
-    }
-
-void Item_uniform::setup(){
-
-    qDebug() << "Item_node::setup()";
-
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addUniform()", "", Item_uniform::create, 0);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addUniform(QString)", "name", Item_uniform::create, 1);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addUniform(QString,int)", "name,dim", Item_uniform::create, 2);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addUniform(QString,int,int)", "name,dim,size", Item_uniform::create, 3);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addUniform(QString,int,int,int)", "name,dim,size,keyframes", Item_uniform::create, 4);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addUniform(QString,int,int,int,int)", "name,dim,size,keyframes,format", Item_uniform::create, 5);
-
-
-    DQObject<Item_node>::actionlist << Action(":/images/xpm/uniform.xpm", "Add Uniform", SLOT(addUniform()));
-
-    SCRIPTSLOTS(Item_uniform,"Uniform");
-    }
-
-
-
+#include <QDebug>
 
 Item_uniform::Item_uniform( Item *parent, const QString& name, unsigned _dim, unsigned _size,  unsigned _keyframes, int _format) : Item( parent, name){
 
@@ -88,11 +41,12 @@ Item_uniform::Item_uniform( Item *parent, const QString& name, unsigned _dim, un
 
     ref_pos = -1;
     menuinit = false;
-    }
+}
 
-Item_uniform::~Item_uniform(){
+Item_uniform::~Item_uniform()
+{
     delete [] buf.f;
-    }
+}
 
 
 /*!
@@ -112,10 +66,10 @@ void Item_uniform::contextmenu(const QPoint& point){
         menu->addSeparator();
         menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
         menuinit = true;
-        }
+    }
 
     menu->popup( point );
-    }
+}
 
 
 
@@ -132,7 +86,7 @@ void Item_uniform::setDim(int _dim, int _size, int _keyframes, int _format){
     if (_format != GL_FLOAT &&  _format != GL_INT){
         qDebug() << " Item_uniform::setDim(): Only GL_FLOAT and GL_INT are alowed for uniforms";
         return;
-        }
+    }
 
     int max_elements = tmp_dim * tmp_keyframes * tmp_size;
     qDebug() << " Item_uniform::setDim" << tmp_dim << tmp_size << tmp_keyframes << max_elements;
@@ -141,15 +95,15 @@ void Item_uniform::setDim(int _dim, int _size, int _keyframes, int _format){
 
 #define COPY_DATA(dest) 										\
     if (buf.f){											\
-        for (unsigned k = 0; k < (tmp_keyframes < keyframes ? tmp_keyframes : keyframes);k++){	\
-            for (unsigned j = 0 ; j < (tmp_size < size ? tmp_size : size); j++){		\
-                for (unsigned i = 0; i < (tmp_dim < dim ? tmp_dim : dim); i++){		\
-                    double x = operator()(i,j,k);					\
-                    dest [i + tmp_dim * j + tmp_dim * tmp_size * k] = x ;		\
-                    }								\
-                }									\
-            }										\
-        }
+    for (unsigned k = 0; k < (tmp_keyframes < keyframes ? tmp_keyframes : keyframes);k++){	\
+    for (unsigned j = 0 ; j < (tmp_size < size ? tmp_size : size); j++){		\
+    for (unsigned i = 0; i < (tmp_dim < dim ? tmp_dim : dim); i++){		\
+    double x = operator()(i,j,k);					\
+    dest [i + tmp_dim * j + tmp_dim * tmp_size * k] = x ;		\
+}								\
+}									\
+}										\
+}
 
     switch (_format){
 
@@ -157,18 +111,18 @@ void Item_uniform::setDim(int _dim, int _size, int _keyframes, int _format){
             tmp_buf.i = new int[elements];
             memset(tmp_buf.i,0,elements * 4);
             COPY_DATA(tmp_buf.i)
-            format = GL_INT;
+                    format = GL_INT;
             break;
 
         case GL_FLOAT:
             tmp_buf.f = new float[elements];
             memset(tmp_buf.f,0,elements * 4);
             COPY_DATA(tmp_buf.f)
-            format =  GL_FLOAT;
+                    format =  GL_FLOAT;
             break;
         default:
             qDebug() << "Item_uniform::setDim panic";
-        }
+    }
 
     size = tmp_size;
     dim = tmp_dim;
@@ -180,7 +134,7 @@ void Item_uniform::setDim(int _dim, int _size, int _keyframes, int _format){
 
     ref_pos = -1;
     need_refresh = true;
-    }
+}
 
 /*!
 returns some statur informations about the object
@@ -189,15 +143,15 @@ QString Item_uniform::statusText() const{
     QString k("");
     if (keyframes > 1){
         k = QString ("%3 Keyframes with").arg(keyframes);
-        }
+    }
 
     switch (format){
         case GL_INT:
             return QString("Uniform %1 %2 Int%4").arg(k).arg(size).arg(dim);
         default:
             return QString("Uniform %1 %2 Float%3").arg(k).arg(size).arg(dim);
-        }
     }
+}
 
 /*!
 Operator to acces the contend witha up to 3 dimensional index.
@@ -209,7 +163,7 @@ double& Item_uniform::operator()( unsigned _dim, unsigned _index, unsigned _keyf
     if (element > dim * size * keyframes){
         qDebug() << objectName() << " Item_uniform::operator(): Index out of range";
         return ref_buf;
-        }
+    }
 
     switch (format){
         case GL_INT:
@@ -220,12 +174,12 @@ double& Item_uniform::operator()( unsigned _dim, unsigned _index, unsigned _keyf
         default:
             if(ref_pos>=0)buf.f[ref_pos] = ref_buf;
             ref_buf = buf.f[element];
-        }
+    }
 
     ref_pos = element;
     need_refresh = true;
     return ref_buf;
-    }
+}
 
 /*!
 internal function.
@@ -242,10 +196,10 @@ void Item_uniform::refresh(){
                 break;
             default:
                 qDebug() << "Item_uniform::refresh() Panic";
-            }
         }
-    need_refresh = false;
     }
+    need_refresh = false;
+}
 
 
 
@@ -255,7 +209,7 @@ Set the element index.
 */
 void Item_uniform::set(int index, double x, double y, double z, double w){
     setInKeyFrame(0, index, x, y, z, w);
-    }
+}
 
 /*!
 void setInKeyFrame(number key, number index, number x[, number y=0[, number z=0[, number w=0]]])\n
@@ -263,11 +217,11 @@ void setInKeyFrame(number key, number index, number x[, number y=0[, number z=0[
 void Item_uniform::setInKeyFrame(int key, int index, double x, double y, double z, double w){
     switch (dim){
         case 4:  (*this)(3, index, key) = w;
-        [[clang::fallthrough]]; case 3:  (*this)(2, index, key) = z;
-        [[clang::fallthrough]]; case 2:  (*this)(1, index, key) = y;
-        [[clang::fallthrough]]; default: (*this)(0, index, key) = x;
-        }
+            [[clang::fallthrough]]; case 3:  (*this)(2, index, key) = z;
+            [[clang::fallthrough]]; case 2:  (*this)(1, index, key) = y;
+            [[clang::fallthrough]]; default: (*this)(0, index, key) = x;
     }
+}
 
 /*!
 void set(int index, Array od numbers)\n
@@ -276,17 +230,17 @@ Set the element at index.
 
 void Item_uniform::set(int index, const QList<double>& l){
     setInKeyFrame(0, index, l);
-    }
+}
 
 void Item_uniform::setInKeyFrame(int key, int index, const QList<double>& l){
     if ( (unsigned)index > size) return;
     if ( l.size() != (int)dim ){
         qDebug() << "Item_uniform::set() list size don't match  dim";
-        }
+    }
     for (unsigned i = 0 ; i < dim; i++){
         (*this)(i,index,key) = l.at(i);
-        }
     }
+}
 
 /*!
 internal function
@@ -298,7 +252,7 @@ void Item_uniform::setData(const QString& content){
     if (n > (unsigned)list.count()){
         qDebug() <<  "Item_uniform::setData(): not enough data";
         return;
-        };
+    };
 
     double tmp = normalized_scalefactor;
     normalized_scalefactor = 1.0; //don't normalize data in files, to save space for integer formats
@@ -308,11 +262,11 @@ void Item_uniform::setData(const QString& content){
             for (unsigned i = 0; i < dim; i++){
                 (*this)(i,j,k) = list.at(n).toFloat();
                 n++;
-                }
             }
         }
-    normalized_scalefactor = tmp;
     }
+    normalized_scalefactor = tmp;
+}
 
 /*!
 internal function
@@ -331,14 +285,14 @@ QString Item_uniform::getData(){
                 double x = (*this)(i,j,k);
                 num.setNum(x);
                 data.append(num).append(" ");
-                }
-            data.append("\n");
             }
+            data.append("\n");
         }
+    }
     normalized_scalefactor = tmp;
 
     return data;
-    }
+}
 
 /*!
 internal function \n
@@ -346,7 +300,7 @@ returns the dimension i.E. 1,2,3,4,9,16
 */
 int Item_uniform::getDim(){
     return dim;
-    }
+}
 
 /*!
 internal function \n
@@ -354,7 +308,7 @@ returns the size (number of vertices)
 */
 int Item_uniform::getSize(){
     return size;
-    }
+}
 
 /*!
 internal function \n
@@ -362,7 +316,7 @@ returns the number of keyframes
 */
 int Item_uniform::getKeyFrames(){
     return keyframes;
-    }
+}
 
 /*!
 internal function \n
@@ -370,7 +324,12 @@ returns the Opengl format. Only GL_FLOAT, GL_INT
 */
 int Item_uniform::getFormat(){
     return format;
-    }
+}
+
+QString Item_uniform::getType() const
+{
+    return "Uniform";
+}
 
 
 
@@ -394,22 +353,22 @@ void Item_uniform::Uniform(QObject* _shader, QString var){
                 case 3:  glUniform3fvARB(loc, size, buf.f);			return;
                 case 2:  glUniform2fvARB(loc, size, buf.f);			return;
                 case 1:  glUniform1fvARB(loc, size, buf.f);			return;
-                }
             }
+        }
         else if (format == GL_INT){
             switch (dim){
                 case 4:  glUniform4ivARB(loc, size, (GLint*) buf.i);			return;
                 case 3:  glUniform3ivARB(loc, size, (GLint*) buf.i);			return;
                 case 2:  glUniform2ivARB(loc, size, (GLint*) buf.i);			return;
                 case 1:  glUniform1ivARB(loc, size, (GLint*) buf.i);			return;
-                }
             }
+        }
         else{
             qDebug() << "Item_uniform::UniformBind(): Only glfloat and glint uniform variables are supported";
-            }
-        qDebug() << "Item_uniform::UniformBind(): This dimension is not supported as uniform variables";
         }
+        qDebug() << "Item_uniform::UniformBind(): This dimension is not supported as uniform variables";
     }
+}
 
 /*!
 
@@ -420,7 +379,7 @@ void Item_uniform::UniformInterpolator( QObject* _shader, const QString& var, fl
     float mix  = pos - (float)keyframe1;
 
     UniformInterpolator(_shader, var ,mix, keyframe1, keyframe2);
-    }
+}
 
 
 
@@ -438,8 +397,8 @@ void Item_uniform::UniformInterpolator( QObject* _shader, const QString& var, fl
             for (unsigned i = 0; i < size; i++){
                 for (unsigned d = 0 ; d < dim; d++){
                     fbuf[i * dim + d] = (*this)(d,i,keyframe1)*(1.0-mix) + (*this)(d,i,keyframe2)*mix;
-                    }
                 }
+            }
 
             switch (dim){
                 case 16: glUniformMatrix4fv(loc,  size, GL_FALSE, fbuf);	return;
@@ -448,17 +407,17 @@ void Item_uniform::UniformInterpolator( QObject* _shader, const QString& var, fl
                 case 3:  glUniform3fvARB(loc, size, fbuf);			return;
                 case 2:  glUniform2fvARB(loc, size, fbuf);			return;
                 case 1:  glUniform1fvARB(loc, size, fbuf);			return;
-                }
+            }
 
             delete[] fbuf;
-            }
+        }
 
         else{
             qDebug() << "Item_uniform::UniformBind(): Only glfloat and glint uniform variables are supported";
-            }
-        qDebug() << "Item_uniform::UniformBind(): This dimension is not supported as uniform variables";
         }
+        qDebug() << "Item_uniform::UniformBind(): This dimension is not supported as uniform variables";
     }
+}
 
 
 
@@ -469,77 +428,77 @@ Opens the properties dialog
 */
 void Item_uniform::PropertiesDialog(){
 
-        QDialog d;
-        QVBoxLayout vboxlayout;
-        d.setLayout(&vboxlayout);
+    QDialog d;
+    QVBoxLayout vboxlayout;
+    d.setLayout(&vboxlayout);
 
-        QWidget gridwidget;
-        vboxlayout.addWidget(&gridwidget);
-        QGridLayout grid( &gridwidget);
+    QWidget gridwidget;
+    vboxlayout.addWidget(&gridwidget);
+    QGridLayout grid( &gridwidget);
 
-        int row = 0;
+    int row = 0;
 
-        QLabel l_dim("Dim:",0);
-        grid.addWidget(&l_dim,row,0);
-        QSpinBox s_dim(0);
-        grid.addWidget(&s_dim,row,1);
-        s_dim.setValue(getDim());
-        s_dim.setRange(1,4);
+    QLabel l_dim("Dim:",0);
+    grid.addWidget(&l_dim,row,0);
+    QSpinBox s_dim(0);
+    grid.addWidget(&s_dim,row,1);
+    s_dim.setValue(getDim());
+    s_dim.setRange(1,4);
+    row++;
+
+    QLabel l_size("Size:",0);
+    QSpinBox s_size(0);
+    s_size.setRange(1,1<<24);
+    s_size.setValue(getSize());
+    if(getType()!= "Component"){
+        grid.addWidget(&l_size,row,0);
+        grid.addWidget(&s_size,row,1);
         row++;
+    }
 
-        QLabel l_size("Size:",0);
-        QSpinBox s_size(0);
-        s_size.setRange(1,1<<24);
-        s_size.setValue(getSize());
-        if(getType()!= "Component"){
-            grid.addWidget(&l_size,row,0);
-            grid.addWidget(&s_size,row,1);
-            row++;
-            }
-
-        QLabel l_key("Keyframes:",0);
-        grid.addWidget(&l_key,row,0);
-        QSpinBox s_key(0);
-        grid.addWidget(&s_key,row,1);
-        s_key.setRange(1,10000);
-        s_key.setValue(getKeyFrames());
-        row++;
+    QLabel l_key("Keyframes:",0);
+    grid.addWidget(&l_key,row,0);
+    QSpinBox s_key(0);
+    grid.addWidget(&s_key,row,1);
+    s_key.setRange(1,10000);
+    s_key.setValue(getKeyFrames());
+    row++;
 
 
-        QLabel l_format("Format:");
-        grid.addWidget(&l_format,row,0);
-        QComboBox c_format(0);
-        grid.addWidget(&c_format,row,1);
-        c_format.addItems(QStringList() << "Float" << "Int");
-        switch (format){
-            case GL_FLOAT:		c_format.setCurrentIndex(0);	break;
-            case GL_INT:		c_format.setCurrentIndex(1);	break;
-            default: 		c_format.setCurrentIndex(0);	break;
-            }
-        row++;
+    QLabel l_format("Format:");
+    grid.addWidget(&l_format,row,0);
+    QComboBox c_format(0);
+    grid.addWidget(&c_format,row,1);
+    c_format.addItems(QStringList() << "Float" << "Int");
+    switch (format){
+        case GL_FLOAT:		c_format.setCurrentIndex(0);	break;
+        case GL_INT:		c_format.setCurrentIndex(1);	break;
+        default: 		c_format.setCurrentIndex(0);	break;
+    }
+    row++;
 
-        QWidget buttonwidget;
-        vboxlayout.addWidget(&buttonwidget);
-        QHBoxLayout buttons;
-        buttonwidget.setLayout(&buttons);
+    QWidget buttonwidget;
+    vboxlayout.addWidget(&buttonwidget);
+    QHBoxLayout buttons;
+    buttonwidget.setLayout(&buttons);
 
-        QPushButton ok("OK",0);
-        connect (&ok, SIGNAL(clicked()),&d,SLOT (accept()));
-        buttons.addWidget(&ok);
+    QPushButton ok("OK",0);
+    connect (&ok, SIGNAL(clicked()),&d,SLOT (accept()));
+    buttons.addWidget(&ok);
 
-        QPushButton cancel("Cancel",0);
-        connect (&cancel, SIGNAL(clicked()),&d,SLOT (reject()));
-        buttons.addWidget(&cancel);
+    QPushButton cancel("Cancel",0);
+    connect (&cancel, SIGNAL(clicked()),&d,SLOT (reject()));
+    buttons.addWidget(&cancel);
 
-        if (d.exec()==QDialog::Accepted){
-            int f;
-            switch (c_format.currentIndex()){
-                case 1:
-                    f = GL_INT;
-                    break;
-                default:
-                    f = GL_FLOAT;
-                }
-            setDim(s_dim.value(),s_size.value(), s_key.value(), f);
-            }
+    if (d.exec()==QDialog::Accepted){
+        int f;
+        switch (c_format.currentIndex()){
+            case 1:
+                f = GL_INT;
+                break;
+            default:
+                f = GL_FLOAT;
         }
+        setDim(s_dim.value(),s_size.value(), s_key.value(), f);
+    }
+}

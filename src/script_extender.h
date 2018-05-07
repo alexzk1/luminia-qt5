@@ -19,11 +19,8 @@
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************************/
 
-
-#include "dqobject.h"
-
-
 #include <QRegExp>
+#include <QObject>
 
 #ifndef _SCRIPT_EXTENDER_H
 #define _SCRIPT_EXTENDER_H

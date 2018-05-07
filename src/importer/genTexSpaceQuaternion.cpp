@@ -28,6 +28,7 @@
 #include <QGridLayout>
 #include <QComboBox>
 #include <QPushButton>
+#include <QDebug>
 
 
 #define n (*I_normal)

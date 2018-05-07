@@ -22,6 +22,7 @@
 #include "item.h"
 #include "incgl.h"
 #include <math.h>
+#include <QDebug>
 
 Item_bone::Item_bone( Item *parent, const QString& name, Item_armature* _armature, int _id) : Item( parent, name){
     armature = _armature;

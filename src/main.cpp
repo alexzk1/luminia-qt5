@@ -22,17 +22,22 @@
 
 #include <QApplication>
 #include "mainwindow.h"
-#include "setup.h"
 #include <QFileInfo>
+#include <QDebug>
 
 int main(int argc, char **argv)
 {
-
     qDebug() << "main()";
-
     QApplication app(argc, argv);
+
+    app.setApplicationName("Luminia Modern");
+    //app.setApplicationVersion("0.1");
+    app.setApplicationDisplayName("Luminia Modern");
+    app.setOrganizationDomain("pasteover.net");
+    app.setOrganizationName("pasteover.net");
+
+
     Q_INIT_RESOURCE(lumina);
-    setup();
     app.setWindowIcon(QIcon(":/images/lumina.png"));
 
     MainWindow mainWin;

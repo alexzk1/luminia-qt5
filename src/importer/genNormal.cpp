@@ -23,6 +23,7 @@
 
 #include <math.h>
 #include <QMessageBox>
+#include <QDebug>
 
 /*!
 genNormal(Item_component* vertex); \n

@@ -21,6 +21,7 @@
 #include "glcam.h"
 #include <QWheelEvent>
 #include <QKeyEvent>
+#include <QDebug>
 
 QGLWidget* GLCam::shareWidget = nullptr;
 

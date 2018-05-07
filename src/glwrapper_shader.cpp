@@ -21,7 +21,7 @@
 
 #include "glwrapper.h"
 #include <QMessageBox>
-
+#include <QDebug>
 /*!
 constructor for vertex shader only shader object (useful for transformfeedback)
 */

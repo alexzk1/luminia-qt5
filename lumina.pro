@@ -16,7 +16,7 @@ exists($$[QT_INSTALL_HEADERS]/QtScript){
         }
 
 
-debug:QMAKE_CXXFLAGS += -march=native
+debug:QMAKE_CXXFLAGS += -march=native -g -O0
 QMAKE_CXXFLAGS +=  -std=c++14 -Wall -frtti -fexceptions -Werror=return-type
 
 #original code heavy uses overloaded virtuals
@@ -60,11 +60,10 @@ HEADERS	=	src/mainwindow.h \
                 src/factory/factory.h \
                 src/importer/parsercodec.h \
                 src/half.h \
-                src/dqobject.h \
                 src/script_extender.h \
                 src/script_extender_engine.h \
-                src/setup.h \
-    src/incgl.h
+    src/incgl.h \
+    src/saveable_widget.h
 
 SOURCES =	src/main.cpp \
                 src/mainwindow.cpp \

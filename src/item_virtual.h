@@ -38,9 +38,6 @@ public slots:
     void registerTexSpaceCallback(QObject*, const QString&){}
     void analyse(QObject*, QObject*){}
     virtual void contextmenu(const QPoint&) override;
-public:
-    static void setup();
-    static void create(QObject* obj, int id , void** args);
 private:
     bool menuinit;
     static bool exist;

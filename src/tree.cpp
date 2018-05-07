@@ -43,7 +43,7 @@ TreeView::TreeView ( QWidget * parent) : QTreeWidget (parent)
     Item::scanScripts();
 
     Item *null = nullptr;
-    Item_world *w = new DQObject<Item_world>(null, "World");
+    Item_world *w = new Item_world(null, "World");
     ScriptLauncher::world = w;
     insertTopLevelItem(0,w );
     w->setExpanded(true);

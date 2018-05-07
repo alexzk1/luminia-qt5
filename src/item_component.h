@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007-2008  oc2k1
@@ -28,36 +28,33 @@ class Item_mesh;
 
 
 /*!
-component 
+component
 */
 
-class Item_component : public Item_buffer{
-Q_OBJECT
-Q_ENUMS(comptype)
+class Item_component : public Item_buffer
+{
+    Q_OBJECT
+    Q_ENUMS(comptype)
 public:
-        enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
-	Item_component( Item_mesh *parent, const QString& label1, int comptype, int dimension, int keyframes = 1, int format = GL_FLOAT, bool normalized_int = true);
-	virtual ~Item_component();
-	//virtual QString statusText() const; 
-	int getCompType(){return comptype;}
+    enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
+    Item_component(Item_mesh *parent, const QString& label1, int comptype, int dimension, int keyframes = 1, int format = GL_FLOAT, bool normalized_int = true);
+    virtual ~Item_component() override = default;
+    //virtual QString statusText() const;
+    int getCompType(){return comptype;}
 public slots:
-	virtual void setDim( int dimension = 1, int dummy = 0, int keyframes = 1, int format= GL_FLOAT, bool normalized_int = true); //the parent size will be used
-	void Bind();
-	void BindKeyFrame(int key);
-	void Unbind();
-	virtual QString getType()const{return QString("Component");}
+    virtual void setDim( int dimension = 1, int dummy = 0, int keyframes = 1, int format= GL_FLOAT, bool normalized_int = true) override; //the parent size will be used
+    void Bind();
+    void BindKeyFrame(int key);
+    void Unbind();
+    virtual QString getType()const override;
 protected:
-	int comptype;
-	Item_mesh *parent;
-
-public slots: 
-	virtual void contextmenu(const QPoint&);
-public:
-	static void setup();
-	static void create(QObject* obj, int id , void** args);
-private: 
-	bool menuinit;
-	};
+    int comptype;
+    Item_mesh *parent;
+public slots:
+    virtual void contextmenu(const QPoint&) override;
+private:
+    bool menuinit;
+};
 
 
 #endif

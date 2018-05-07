@@ -31,7 +31,7 @@
 #include "item_texture.h"
 #include <QFileInfo>
 #include <QDir>
-
+#include <QDebug>
 
 LumHandler::LumHandler(Item *root, const QString & _path):QXmlDefaultHandler (){
     item = root;
@@ -63,13 +63,13 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
         luminaTag = true;
     }
     else if (qName == "node"){
-        item = new DQObject<Item_node>(item ,attributes.value("name"));
+        item = new Item_node(item ,attributes.value("name"));
     }
     else if (qName == "text"){
-        item = new DQObject<Item_edit>(item ,attributes.value("name"));
+        item = new Item_edit(item ,attributes.value("name"));
     }
     else if (qName == "script"){
-        item = new DQObject<Item_script>(item ,attributes.value("name"));
+        item = new Item_script(item ,attributes.value("name"));
         if (attributes.value("run") == "true")
             runlater.append(static_cast<Item_script*>(item));
         qDebug() << runlater;
@@ -79,10 +79,10 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
         if (attributes.value("type") == "vertex")shadertype = Item_shader::Vertexshader;
         else if (attributes.value("type") == "geometry")shadertype = Item_shader::Geometryshader;
         else if (attributes.value("type") == "fragment")shadertype = Item_shader::Fragmentshader;
-        item = new DQObject<Item_shader>(item ,attributes.value("name"),shadertype);
+        item = new Item_shader(item ,attributes.value("name"),shadertype);
     }
     else if (qName == "texture"){
-        Item_texture* t = new DQObject<Item_texture>(item ,attributes.value("name"));
+        Item_texture* t = new Item_texture(item ,attributes.value("name"));
         QString fn = attributes.value("filename");
 
         if (!fn.isEmpty()){
@@ -131,7 +131,7 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
             qDebug() << "illegal format:" << format;
         }
 
-        Item_buffer *b = new DQObject<Item_buffer>(item ,attributes.value("name"),dim,size,keyframes,type);
+        Item_buffer *b = new Item_buffer(item ,attributes.value("name"),dim,size,keyframes,type);
 
         item = b;
     }
@@ -149,12 +149,12 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
             qDebug() << "illegal format:" << format;
         }
 
-        Item_uniform *b = new DQObject<Item_uniform>(item ,attributes.value("name"),dim,size,keyframes,type);
+        Item_uniform *b = new Item_uniform(item ,attributes.value("name"),dim,size,keyframes,type);
 
         item = b;
     }
     else if (qName == "mesh" || qName == "stream"){ //stream is deprecated and replaced by mesh
-        Item_mesh *mesh = new DQObject<Item_mesh>(item ,attributes.value("name"),attributes.value("vertices").toInt());
+        Item_mesh *mesh = new Item_mesh(item ,attributes.value("name"),attributes.value("vertices").toInt());
 
         item = mesh;
     }
@@ -192,7 +192,7 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
             formatn = GL_FLOAT;
         }
 
-        item = new DQObject<Item_component>(static_cast<Item_mesh*>(item), attributes.value("name"), type, dim, keyframes, formatn);
+        item = new Item_component(static_cast<Item_mesh*>(item), attributes.value("name"), type, dim, keyframes, formatn);
     }
 
     else if (qName == "index" ){

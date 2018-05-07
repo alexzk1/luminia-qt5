@@ -20,61 +20,35 @@
 *********************************************************************************/
 
 #include "item.h"
+#include "item_mesh.h"
+#include "item_image.h"
+#include "item_texture.h"
+
 //********************************************************************
 
-
-
-void Item_node::create( QObject* obj, int id , void** args){
-    QObject* r;
-    switch (id){
-        case 1:
-            r = new DQObject<Item_node>(dynamic_cast<Item*>(obj), (*reinterpret_cast< const QString(*)>(args[1])));
-            break;
-        case 0:
-            r = new DQObject<Item_node>(dynamic_cast<Item*>(obj), "Node");
-            break;
-        default:
-            qDebug() << "item_node.cpp unhandled: create(" << obj << ", " << id << ", " << args << ")";
-            return;
-    }
-    if (args[0]) *reinterpret_cast< QObject**>(args[0]) = r;
+QString Item_node::getType()const
+{
+    return QString("Node");
 }
 
-void Item_node::setup(){
-
-    qDebug() << "Item_node::setup()";
-
-    DQObject<Item_world>::createCallBackSlot( "QObject*", "addNode()", "", Item_node::create, 0);
-    DQObject<Item_world>::createCallBackSlot( "QObject*", "addNode(QString)", "name", Item_node::create, 1);
-    DQObject<Item_world>::actionlist << Action(":/images/xpm/node.xpm", "Add Node", SLOT(addNode()));
-
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addNode()", "", Item_node::create, 0); //reuse code
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addNode(QString)", "name", Item_node::create, 1);
-    DQObject<Item_node>::actionlist << Action(":/images/xpm/node.xpm", "Add Node", SLOT(addNode()));
-
-    SCRIPTSLOTS(Item_node,"Node");
-
-
-
-}
-
-
-Item_node::Item_node( Item *parent, const QString& name) : Item_matrix( parent, name){
+Item_node::Item_node( Item *parent, const QString& name) : Item_matrix( parent, name)
+{
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
     //Icon = xpm_node;
     setIcon(0, QIcon(":/images/xpm/node.xpm"));
     menuinit = false;
 }
 
-
 /*!
 slot for opening the contextmenu
 */
-void Item_node::contextmenu(const QPoint& point){
+void Item_node::contextmenu(const QPoint& point)
+{
 
     context = this;
 
-    if(!menuinit){
+    if(!menuinit)
+    {
         DQMENU(Item_node, menu);
 
         menu->addAction( QIcon(":/images/xpm/armature.xpm"), QString("Add Armature") , this, SLOT( addArmature()));
@@ -93,14 +67,11 @@ void Item_node::contextmenu(const QPoint& point){
     menu->popup( point );
 }
 
-
-
-
-
 /*!
 accept the most drag events
 */
-bool Item_node::dragAccept(Item* i){
+bool Item_node::dragAccept(Item* i)
+{
     if (i->getType()=="Node")return true;
     if (i->getType()=="Mesh")return true;
     if (i->getType()=="Text")return true;
@@ -114,13 +85,69 @@ bool Item_node::dragAccept(Item* i){
     return false;
 }
 
+QObject *Item_node::addBuffer(const QString &label1, unsigned dim, unsigned size, unsigned keyframes, int type, bool normalized_int)
+{
+    return new Item_buffer(this, label1, dim, size,keyframes, type, normalized_int);
+}
+
+QObject *Item_node::addMesh(const QString &name, int numOfVertices)
+{
+    return new Item_mesh(this, name, numOfVertices);
+}
+
+QObject *Item_node::addText(const QString &name)
+{
+    return new Item_edit(this, name);
+}
+
+QObject *Item_node::addImage(const QString &name)
+{
+    return new Item_image(this, name);
+}
 
 /*!
 void addArmature([String name])\n
 */
-QObject* Item_node::addArmature(const QString& name){
-    return new Item_armature(this,name);
+QObject* Item_node::addArmature(const QString& name)
+{
+    return new Item_armature(this, name);
 }
+
+QObject *Item_node::addNode(const QString &name)
+{
+    return new Item_node(this, name);
+}
+
+QObject *Item_node::addScript(const QString &name)
+{
+    return new Item_script(this, name);
+}
+
+QObject *Item_node::addVertexshader(const QString &name)
+{
+    return new Item_shader(this, name, Item_shader::Vertexshader);
+}
+
+QObject *Item_node::addGeometryshader(const QString &name)
+{
+    return new Item_shader(this, name, Item_shader::Geometryshader);
+}
+
+QObject *Item_node::addFragmentshader(const QString &name)
+{
+    return new Item_shader(this, name, Item_shader::Fragmentshader);
+}
+
+QObject *Item_node::addTexture(const QString &name)
+{
+    return new Item_texture(this, name);
+}
+
+QObject *Item_node::addUniform(const QString &name, unsigned dim, unsigned size, unsigned keyframes, int type)
+{
+    return new Item_uniform(this, name, dim, size, keyframes, type);
+}
+
 
 
 /*!
@@ -135,8 +162,8 @@ void Item_node::Call(const QString& function, const QVariantList& args){
     rec++;
 
     QTreeWidgetItemIterator it(this);
-    while (*it) {
-
+    while (*it)
+    {
         if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it)){
             glPushMatrix();
             //simple code to apply the nodes matices, a stack based could be better

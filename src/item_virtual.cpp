@@ -23,37 +23,6 @@
 
 
 bool Item_virtual::exist = false;
-
-void Item_virtual::create( QObject* obj, int id , void** args)
-{
-    if(exist) return;
-
-    QObject* r;
-    switch (id){
-        case 0:
-            r = new DQObject<Item_virtual>(dynamic_cast<Item*>(obj), QString("Virtual"));
-            break;
-        case 1:
-            r = new DQObject<Item_virtual>(dynamic_cast<Item*>(obj), CAST_QSTRING(1));
-            break;
-
-        default:
-            qDebug() << "item_image.cpp unhandled: create(" << obj << ", " << id << ", " << args << ")";
-            return;
-    }
-    if (args[0]) *reinterpret_cast< QObject**>(args[0]) = r;
-}
-
-void Item_virtual::setup()
-{
-    qDebug() << "Item_image::setup()";
-    DQObject<Item_world>::createCallBackSlot( "QObject*", "addVirtual()", "", Item_virtual::create, 0);
-    DQObject<Item_world>::createCallBackSlot( "QObject*", "addVirtual(QString)", "name", Item_virtual::create, 1);
-
-    DQObject<Item_world>::actionlist << Action(":/images/xpm/virtual.xpm", "Add Virtual", SLOT(addVirtual()));
-    SCRIPTSLOTS(Item_virtual,"Virtual");
-}
-
 Item_virtual::Item_virtual( Item *parent, const QString& name): Item( parent, name)
 {
     menuinit = false;
@@ -63,7 +32,6 @@ Item_virtual::Item_virtual( Item *parent, const QString& name): Item( parent, na
 Item_virtual::~Item_virtual()
 {
     exist = false;
-
 }
 
 /*!

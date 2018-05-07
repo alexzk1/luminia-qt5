@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007 - 2008 oc2k1
@@ -27,30 +27,24 @@
 #include "item.h"
 
 
-class Item_image: public Item{
-Q_OBJECT
+class Item_image: public Item
+{
+    Q_OBJECT
 public:
-	Item_image(Item *parent, const QString& label1);
-
+    Item_image(Item *parent, const QString& label1);
 
 public slots:
-	
-	void load(const QString& filename = "");
+    void load(const QString& filename = "");
 
+public slots:
+    virtual void contextmenu(const QPoint&) override;
 
-public slots: 
-	virtual void contextmenu(const QPoint&);
 public:
-	static void setup();
-	static void create(QObject* obj, int id , void** args);
+    Q_INVOKABLE void subImage(Item_texture *tex, int xTexOfs,int yTexOfs, int width, int height, int xImgOfs = 0, int yImgofs = 0);
 
-protected:
-	void subImage(Item_texture *tex, int xTexOfs,int yTexOfs, int width, int height, int xImgOfs = 0, int yImgofs = 0);
-
-
-private: 
-	bool menuinit;
-	};
+private:
+    bool menuinit;
+};
 
 #endif
 

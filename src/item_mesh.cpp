@@ -22,47 +22,13 @@
 #include "incgl.h"
 #include <math.h>
 
-
-
-void Item_mesh::create( QObject* obj, int id , void** args){
-    QObject* r;
-    switch (id){
-        case 0:
-            r = new DQObject<Item_mesh>(dynamic_cast<Item*>(obj), "Mesh");
-            break;
-        case 1:
-            r = new DQObject<Item_mesh>(dynamic_cast<Item*>(obj), (*reinterpret_cast< const QString(*)>(args[1])));
-            break;
-        case 2:
-            r = new DQObject<Item_mesh>(dynamic_cast<Item*>(obj), (*reinterpret_cast< const QString(*)>(args[1])), (*reinterpret_cast< int(*)>(args[2])));
-            break;
-        default:
-            qDebug() << "item_mesh.cpp unhandled: create(" << obj << ", " << id << ", " << args << ")";
-            return;
-        }
-    if (args[0]) *reinterpret_cast< QObject**>(args[0]) = r;
-    }
-
-void Item_mesh::setup(){
-
-    qDebug() << "Item_mesh::setup()";
-
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addMesh()", "", Item_mesh::create, 0); //reuse code
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addMesh(QString)", "name", Item_mesh::create, 1);
-    DQObject<Item_node>::createCallBackSlot( "QObject*", "addMesh(QString,int)", "name,numOfVertices", Item_mesh::create, 2);
-    DQObject<Item_node>::actionlist << Action(":/images/xpm/stream.xpm", "Add Mesh", SLOT(addMesh()));
-
-    SCRIPTSLOTS(Item_mesh,"Mesh");
-    }
-
-
 Item_mesh::Item_mesh( Item *parent, const QString& label1, int vertices) : Item( parent,label1 ){
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled);
     setIcon( 0, QIcon(":/images/xpm/stream.xpm") );
 
     num_of_vertices = vertices;
     menuinit = false;
-    }
+}
 
 
 /*!
@@ -79,9 +45,9 @@ void Item_mesh::contextmenu(const QPoint& point){
 
 
         menu->addSeparator();
-    menu->addAction( QIcon(":/images/xpm/normal.xpm"), QString("generate Normal"), this, SLOT( genNormal()) );
-    menu->addAction( QIcon(":/images/xpm/normal.xpm"), QString("generate Tangent"), this, SLOT( genTangent()) );
-    menu->addAction( QIcon(":/images/xpm/quaternion.xpm"), QString("generate Texspace Quaternion"), this, SLOT( genTexSpaceQuaternion()));
+        menu->addAction( QIcon(":/images/xpm/normal.xpm"), QString("generate Normal"), this, SLOT( genNormal()) );
+        menu->addAction( QIcon(":/images/xpm/normal.xpm"), QString("generate Tangent"), this, SLOT( genTangent()) );
+        menu->addAction( QIcon(":/images/xpm/quaternion.xpm"), QString("generate Texspace Quaternion"), this, SLOT( genTexSpaceQuaternion()));
 
         menu->addSeparator();
         SCRIPT2MENU(menu);
@@ -90,29 +56,67 @@ void Item_mesh::contextmenu(const QPoint& point){
 
 
         menuinit = true;
-        }
+    }
 
     menu->popup( point );
-    }
+}
 
 
 
 QString Item_mesh::statusText() const{
     return QString("Mesh  %1 Vertices").arg(num_of_vertices);
-    }
+}
 
 /*!
 Object addIndex(String name, Number vertices_per_primitive)\n
 */
-QObject* Item_mesh::addIndex(const QString& label1 , int verts_per_prim){
-    return new DQObject<Item_index>(this, label1, verts_per_prim, 0);
-    }
+QObject* Item_mesh::addIndex(const QString& label1 , int verts_per_prim)
+{
+    return new Item_index(this, label1, verts_per_prim, 0);
+}
+
+QObject *Item_mesh::addVertex()
+{
+    return addComponent(VERTEX, "Vertex",  3);
+}
+
+QObject *Item_mesh::addGeneric()
+{
+    return addComponent(GENERIC, "Generic", 3);
+}
+
+QObject *Item_mesh::addVector()
+{
+    return addComponent(VECTOR, "Vector",  3);
+}
+
+QObject *Item_mesh::addColor()
+{
+    return addComponent(COLOR, "Color",  3);
+}
+
+QObject *Item_mesh::addUvCoords()
+{
+    return addComponent(UVCOORDS, "UvCoords", 2);
+}
+
+QObject *Item_mesh::addBonedeep()
+{
+    return addComponent(BONEDEP, "Bonedep",  3);
+}
+
+QObject *Item_mesh::addQuaternion()
+{
+    return addComponent(QUATERNION, "Quaternion", 4);
+}
+
 /*!
 Object addComponent(Enum Type, String name="Component", Number dimension=4)\n
 */
-QObject* Item_mesh::addComponent(int type ,const QString& label1, int dimension, int keyframes, int format){
-    return new DQObject<Item_component>(this, label1, type, dimension, keyframes, format);
-    }
+QObject* Item_mesh::addComponent(int type ,const QString& label1, int dimension, int keyframes, int format)
+{
+    return new Item_component(this, label1, type, dimension, keyframes, format);
+}
 
 /*!
 void Draw(Enum mode)\n
@@ -126,11 +130,11 @@ void Item_mesh::Draw(int mode){
         glDisable(GL_POINT_SPRITE_ARB);
         profiler->stop();
         return;
-        }
+    }
 
     glDrawArrays(mode, 0 , num_of_vertices);
     profiler->stop();
-    }
+}
 
 /*!
 void DrawInstanced(number instances, Enum mode)\n
@@ -144,11 +148,11 @@ void Item_mesh::DrawInstanced( int  num_of_i, int mode){
         glDisable(GL_POINT_SPRITE_ARB);
         profiler->stop();
         return;
-        }
+    }
 
     glDrawArraysInstancedEXT(mode, 0 , num_of_vertices, num_of_i);
     profiler->stop();
-    }
+}
 
 
 
@@ -166,10 +170,10 @@ void Item_mesh::setNumOfVertices(int num){
     while (*it) {
         if (Item_component* ic = dynamic_cast<Item_component*>(*it)){
             ic->setDim( ic->getDim(), ic->getSize(), ic->getKeyFrames(), ic->getFormat(), ic->isNormalizedInt());
-            }
-        ++it;
         }
+        ++it;
     }
+}
 
 /*!
 number getNumOfVertices()\n
@@ -177,4 +181,4 @@ get the number of vertices
 */
 int Item_mesh::getNumOfVertices(){
     return num_of_vertices;
-    }
+}

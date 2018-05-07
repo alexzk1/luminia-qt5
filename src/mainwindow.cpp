@@ -34,7 +34,7 @@
 
 MainWindow::MainWindow()
 {
-    setWindowTitle(tr("Lumina-Qt5-0.5.0"));
+    setWindowTitle(tr("Lumina Modern"));
     treeview = new TreeView (this);
     setCentralWidget(treeview);
 
@@ -51,10 +51,13 @@ MainWindow::MainWindow()
     time = new TimeWidget(this);
     timeToolBar->addWidget(time);
     connect(time, SIGNAL(timeChanged(double)), treeview->world, SLOT(setTime(double)));
+
+    readSettings(this);
 }
 
 MainWindow::~MainWindow()
 {
+    writeSettings(this);
     delete time;
     delete timeToolBar;
     delete console;
@@ -71,6 +74,16 @@ void MainWindow::createScriptToolBar( QList<ScriptLauncher*>  launcher)
             scriptToolBar->addAction (launcher.at(i)->a);
         }
     }
+}
+
+void MainWindow::recurseWrite(QSettings &settings, QObject *object)
+{
+    utility::SaveableWidget<MainWindow>::recurseWrite(settings, object);
+}
+
+void MainWindow::recurseRead(QSettings &settings, QObject *object)
+{
+    utility::SaveableWidget<MainWindow>::recurseRead(settings, object);
 }
 
 
@@ -168,7 +181,7 @@ void MainWindow::clear(){
 }
 
 void MainWindow::about(){
-    QMessageBox::about(this, tr("About Lumina"),tr("Lumina is a flexible plattform independent development envrionment for GLSL shaders. It uses ECMA-script for tools and emulating opengl engines. This code is distibuted under GNU/GPL license and are made by oc2k1. <br> Contact: <a href='mailto:oc2k1@users.sourceforge.net'>oc2k1@users.sourceforge.net</a><br>Homepage with Tutorials:<a href='http://lumina.sourceforge.net'>http://lumina.sourceforge.net</a>"));
+    QMessageBox::about(this, tr("About Lumina Modern"),tr("Lumina is a flexible plattform independent development envrionment for GLSL shaders. It uses ECMA-script for tools and emulating opengl engines. This code is distibuted under GNU/GPL license and are made by oc2k1. <br> Contact: <a href='mailto:oc2k1@users.sourceforge.net'>oc2k1@users.sourceforge.net</a><br>Homepage with Tutorials:<a href='http://lumina.sourceforge.net'>http://lumina.sourceforge.net</a>"));
 }
 
 

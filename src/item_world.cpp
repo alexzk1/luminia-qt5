@@ -20,13 +20,7 @@
 *********************************************************************************/
 
 #include "item.h"
-
-void Item_world::setup(){
-    qDebug() << "Item_world::setup()";
-    SCRIPTSLOTS(Item_world,"World");
-}
-
-
+#include "item_virtual.h"
 
 
 Item_world::Item_world(Item *p, const QString& name) : Item( p,name ){
@@ -41,7 +35,7 @@ Item_world::Item_world(Item *p, const QString& name) : Item( p,name ){
     //SCRIPT2MENU
     setIcon(0, QIcon(":/images/xpm/world.xpm"));
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsDropEnabled);
-    new DQObject<Item_cam>(this, "Cam");
+    new Item_cam(this, "Cam");
 }
 
 /*!
@@ -63,10 +57,25 @@ void Item_world::contextmenu(const QPoint& point)
     menu->popup( point );
 }
 
+QObject *Item_world::addCam(const QString &name)
+{
+    return new Item_cam(this, name);
+}
 
+QObject *Item_world::addNode(const QString &name)
+{
+    return new Item_world(this, name);
+}
 
+QObject *Item_world::addVirtual(const QString &name)
+{
+    return new Item_virtual(this, name);
+}
 
-
+QString Item_world::getType() const
+{
+    return QString("World");
+}
 /*!
 accept only Node items for dragging
 */
