@@ -29,7 +29,7 @@
 #include <QFileDialog>
 #include <QCoreApplication>
 #include <QDebug>
-
+#include "file_loader.h"
 
 constexpr auto static lastTexture = GL_TEXTURE31;
 
@@ -75,36 +75,34 @@ constexpr auto static lastTexture = GL_TEXTURE31;
 
 #include <math.h>
 
-typedef struct
+struct __attribute__ (( packed )) DDS_Header_t
 {
-    unsigned int Magic;
-    unsigned int Size;
-    unsigned int Flags;
-    unsigned int Height;
-    unsigned int Width;
-    unsigned int PitchOrLinearSize;
-    unsigned int Depth;
-    unsigned int MipMapCount;
-    unsigned int Reserved1[11];
-    unsigned int pfSize;
-    unsigned int pfFlags;
-    unsigned int pfFourCC;
-    unsigned int pfRGBBitCount;
-    unsigned int pfRBitMask;
-    unsigned int pfGBitMask;
-    unsigned int pfBBitMask;
-    unsigned int pfABitMask;
-    unsigned int Caps1;
-    unsigned int Caps2;
-    unsigned int Reserved2[3];
-} DDS_Header_t;
+    uint32_t Flags;
+    uint32_t Height;
+    uint32_t Width;
+    uint32_t PitchOrLinearSize;
+    uint32_t Depth;
+    uint32_t MipMapCount;
+    uint32_t Reserved1[11];
+    uint32_t pfSize;
+    uint32_t pfFlags;
+    uint32_t pfFourCC;
+    uint32_t pfRGBBitCount;
+    uint32_t pfRBitMask;
+    uint32_t pfGBitMask;
+    uint32_t pfBBitMask;
+    uint32_t pfABitMask;
+    uint32_t Caps1;
+    uint32_t Caps2;
+    uint32_t Reserved2[3];
+};
 
 Item_texture::Item_texture( Item *parent, const QString& name ) : Item( parent, name)
 {
     //if (fbo == 0)
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled);
 
-    glGenFramebuffersEXT (1,(GLuint*) &fbo);
+    glGenFramebuffersEXT (1,  &fbo);
     //fileNormal = new QPixmap( pix_file );
     setIcon( 0, QIcon(":/images/xpm/texture.xpm") );
 
@@ -126,8 +124,8 @@ Item_texture::Item_texture( Item *parent, const QString& name ) : Item( parent, 
 
 Item_texture::~Item_texture()
 {
-    glDeleteTextures(1,(GLuint*) &texture);
-    glDeleteFramebuffersEXT (1, (GLuint*)&fbo);
+    glDeleteTextures(1, &texture);
+    glDeleteFramebuffersEXT (1, &fbo);
 }
 
 
@@ -138,8 +136,8 @@ void Item_texture::contextmenu(const QPoint& point){
 
     context = this;
 
-    if(!menuinit){
-
+    if(!menuinit)
+    {
         menu->addSeparator();
         menu->addAction ( QIcon(":/images/xpm/load.xpm"), QString("Load file"), this, SLOT(load()) );
         DQMENU(Item_edit, menu);
@@ -150,15 +148,8 @@ void Item_texture::contextmenu(const QPoint& point){
         menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
         menuinit = true;
     }
-
     menu->popup( point );
 }
-
-
-
-
-
-
 
 
 /*!
@@ -184,14 +175,16 @@ QString Item_texture::statusText() const{
 /*!
 returns true if it's a depth component
 */
-bool Item_texture::isDepth(){
+bool Item_texture::isDepth()
+{
     return (texturetype[formatindex].format==GL_DEPTH_COMPONENT);
 }
 
 /*!
 returns the Opengl texture handle
 */
-GLuint Item_texture::getTextureID(){
+GLuint Item_texture::getTextureID()
+{
     return texture;
 }
 
@@ -237,6 +230,8 @@ void Item_texture::load(){
 /*!
 reload function will reload the texture from the file
 */
+
+
 
 #include <QGLWidget>
 void Item_texture::reload()
@@ -286,8 +281,10 @@ void Item_texture::reload()
         glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         type = GL_TEXTURE_2D;
 
-        for(int i = 0; texturetype[i].intformat != 0; i++){
-            if (QString("RGBA8") == texturetype[i].name){
+        for(int i = 0; texturetype[i].intformat != 0; i++)
+        {
+            if (QString("RGBA8") == texturetype[i].name)
+            {
                 formatindex = i;
                 break;
             }
@@ -303,17 +300,38 @@ void Item_texture::reload()
     //process the dds file header
     if (ends(fn, dds))
     {
-        qWarning( "Load dds" );
         QFile file(fn);
-        if ( file.open( QIODevice::ReadOnly ) ) {
-            DDS_Header_t DDS_Header;
-            file.read ((char *) &DDS_Header, sizeof(DDS_Header_t));
+        if ( file.open( QIODevice::ReadOnly ) )
+        {
+            using namespace utility;
+            const auto dds_magic = le2cpu(readIntegralFromFile<uint32_t>(file));
+            const auto dds_size  = le2cpu(readIntegralFromFile<uint32_t>(file));
+            const auto trueSize  = std::min(static_cast<size_t>(dds_size) - sizeof (dds_size), sizeof(DDS_Header_t));
+            qDebug() << "Loading DDS, magic: " << dds_magic <<", size: " << dds_size <<", effectiveSize = " << trueSize;
+            DDS_Header_t DDS_Header;memset(&DDS_Header, 0, sizeof (DDS_Header));
+            readFromFile(file, DDS_Header, trueSize);
 
+            const qint64 delta = static_cast<qint64>(dds_size) - static_cast<qint64>(trueSize) - static_cast<qint64>(sizeof (dds_size));
+            if (delta > 0)
+            {
+                qDebug() << "Have extra bytes in DDS file in header, skipping it: " << delta;
+                file.skip(delta);
+            }
             int format = 0;
+            DDS_Header.pfFlags = le2cpu(DDS_Header.pfFlags);
+            DDS_Header.pfFourCC= le2cpu(DDS_Header.pfFourCC);
+            DDS_Header.pfRGBBitCount = le2cpu(DDS_Header.pfRGBBitCount);
+            DDS_Header.Caps2 = le2cpu(DDS_Header.Caps2);
+            DDS_Header.Width = le2cpu(DDS_Header.Width);
+            DDS_Header.Height = le2cpu(DDS_Header.Height);
+            DDS_Header.Depth = le2cpu(DDS_Header.Depth);
+            DDS_Header.MipMapCount = le2cpu(DDS_Header.MipMapCount);
 
-            if(DDS_Header.pfFlags & DDS_FOURCC){
+            if(DDS_Header.pfFlags & DDS_FOURCC)
+            {
 
-                switch(DDS_Header.pfFourCC){
+                switch(DDS_Header.pfFourCC)
+                {
                     case DDS_DXT1:
                         format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
                         break;
@@ -369,8 +387,8 @@ void Item_texture::reload()
                 type = GL_TEXTURE_2D;
             }
 
-            qint64 datalen =  file.size() - 128;
-            qDebug() << datalen;
+            qint64 datalen =  file.size() - (delta + static_cast<qint64>((sizeof (dds_magic) + sizeof (dds_size) + trueSize)));
+            qDebug() << "DDS data len: " <<datalen;
 
             char *buffer = new char[datalen];
 

@@ -243,48 +243,50 @@ bool LumHandler::endElement(const QString & /* namespaceURI */,
                             const QString & /* localName */,
                             const QString &qName)
 {
-
-    if(qName == "node" || qName == "mesh" || qName == "stream" || qName == "bone" || qName == "armature" )
-    {
-        item = item->parent();
-    }
-    else if(qName == "text" || qName == "shader" || qName == "script")
-    {
-        static_cast<Item_edit*>(item)->setText(content);
-        item = item->parent();
-    }
-    else if(qName == "texture")
-    {
-        QByteArray d = QByteArray::fromBase64(content.toUtf8());
-        if (!d.isEmpty())
-            static_cast<Item_texture*>(item)->setData(d.data(), d.size());
-
-        item = item->parent();
-    }
-    else if(qName == "component")
-    {
-        static_cast<Item_component*>(item)->setData(content.trimmed());
-        item = item->parent();
-    }
-    else if(qName == "buffer")
-    {
-        static_cast<Item_buffer*>(item)->setData(content.trimmed());
-        item = item->parent();
-    }
-    else if(qName == "uniform")
-    {
-        static_cast<Item_uniform*>(item)->setData(content.trimmed());
-        item = item->parent();
-    }
-    else if(qName == "index")
-    {
-        static_cast<Item_index*>(item)->setData(content.trimmed());
-        item = item->parent();
-    }
-    else if(qName == "lumina")
+    if(qName == "lumina")
     {
         for (int i = 0; i < runlater.size(); ++i)
             runlater.at(i)->run();
+    }
+    else
+    {
+        if(content.isEmpty() || qName == "node" || qName == "mesh" || qName == "stream" || qName == "bone" || qName == "armature" )
+        {
+            item = item->parent();
+        }
+        else if(qName == "text" || qName == "shader" || qName == "script")
+        {
+            static_cast<Item_edit*>(item)->setText(content);
+            item = item->parent();
+        }
+        else if(qName == "texture")
+        {
+            QByteArray d = QByteArray::fromBase64(content.toUtf8());
+            if (!d.isEmpty())
+                static_cast<Item_texture*>(item)->setData(d.data(), d.size());
+
+            item = item->parent();
+        }
+        else if(qName == "component")
+        {
+            static_cast<Item_component*>(item)->setData(content.trimmed());
+            item = item->parent();
+        }
+        else if(qName == "buffer")
+        {
+            static_cast<Item_buffer*>(item)->setData(content.trimmed());
+            item = item->parent();
+        }
+        else if(qName == "uniform")
+        {
+            static_cast<Item_uniform*>(item)->setData(content.trimmed());
+            item = item->parent();
+        }
+        else if(qName == "index")
+        {
+            static_cast<Item_index*>(item)->setData(content.trimmed());
+            item = item->parent();
+        }
     }
     item->world->setTime(0);
 

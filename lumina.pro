@@ -64,7 +64,8 @@ HEADERS	=	src/mainwindow.h \
                 src/script_extender_engine.h \
     src/incgl.h \
     src/saveable_widget.h \
-    src/loaderpaths.h
+    src/loaderpaths.h \
+    src/file_loader.h
 
 SOURCES =	src/main.cpp \
                 src/mainwindow.cpp \
