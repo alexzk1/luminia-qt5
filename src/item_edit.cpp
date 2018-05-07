@@ -27,7 +27,9 @@
 #include <QDebug>
 #include "loaderpaths.h"
 
-Item_edit::Item_edit( Item *parent, const QString& name) : Item( parent, name ){
+Item_edit::Item_edit( Item *parent, const QString& name) :
+    Item( parent, name )
+{
     //fileNormal = new QPixmap( pix_file );
 
     edit =  new SourceEdit(nullptr);
@@ -74,7 +76,7 @@ void Item_edit::contextmenu(const QPoint& point){
         menu->addAction ( QIcon(":/images/xpm/reload.xpm"), "Reload file", this, SLOT(reload()) );
         menu->addSeparator();
 
-        SCRIPT2MENU(menu);
+        SCRIPT2MENU();
         menu->addSeparator();
         menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
         menuinit = true;

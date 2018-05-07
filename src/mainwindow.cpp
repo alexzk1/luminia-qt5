@@ -36,7 +36,7 @@
 MainWindow::MainWindow()
 {
     setDockNestingEnabled(true);
-
+    Item::ws = this;
     treeview = new TreeView (this);
     setCentralWidget(treeview);
 
@@ -114,7 +114,7 @@ void MainWindow::open(const QString & fn)
 
 
     //treeWidget->clear();
-    LumHandler handler((Item*)treeview->world, lastPath);
+    LumHandler handler(treeview->world, lastPath);
     QXmlSimpleReader reader;
     reader.setContentHandler(&handler);
     //	reader.setErrorHandler(&handler);
@@ -171,22 +171,14 @@ void MainWindow::save(){
 }
 
 void MainWindow::clear(){
-    int res = QMessageBox::question ( NULL, "Clear World", "Clear the world may cause data los... ", QMessageBox::Ok ,QMessageBox::Cancel );
+    int res = QMessageBox::question ( nullptr, "Clear World", "Clear the world may cause data loss... ", QMessageBox::Ok ,QMessageBox::Cancel );
 
-    if(res == QMessageBox::Ok){
+    if(res == QMessageBox::Ok)
+    {
         fileName = "";
         showFileName("");
-
-        QList<Item*> allItems = treeview->world->findChildren<Item*>();
-
-        for(int i = 0; i < allItems.size(); i++){
-            allItems.at(i)->deleteLater();
-        }
-
+        treeview->world->destroyAll();
     }
-
-
-
 }
 
 void MainWindow::about(){
@@ -200,7 +192,7 @@ void MainWindow::about(){
 
 
 void MainWindow::hide_all_editors(){
-    QTreeWidgetItemIterator it((Item*)treeview->world);
+    QTreeWidgetItemIterator it(treeview->world);
     while (*it) {
         if (Item_edit* edititem = dynamic_cast<Item_edit*>(*it)){
             edititem->dock->hide();
@@ -210,7 +202,7 @@ void MainWindow::hide_all_editors(){
 }
 
 void MainWindow::run_all_scripts(){
-    QTreeWidgetItemIterator it((Item*)treeview->world);
+    QTreeWidgetItemIterator it(treeview->world);
     while (*it) {
         if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it)){
             scriptitem->run();
@@ -220,7 +212,7 @@ void MainWindow::run_all_scripts(){
 }
 
 void MainWindow::stop_all_scripts(){
-    QTreeWidgetItemIterator it((Item*)treeview->world);
+    QTreeWidgetItemIterator it(treeview->world);
     while (*it) {
         if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it)){
             scriptitem->stop();
@@ -229,7 +221,8 @@ void MainWindow::stop_all_scripts(){
     }
 }
 
-void MainWindow::createActions(){
+void MainWindow::createActions()
+{
     clearAct = new QAction(QIcon(":/images/new.png"), tr("&New"), this);
     clearAct->setShortcut(tr("Ctrl+N"));
     clearAct->setStatusTip(tr("Start a new project"));

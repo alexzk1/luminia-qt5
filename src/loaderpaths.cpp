@@ -5,6 +5,9 @@
 #include <QDir>
 #include <QDebug>
 #include <algorithm>
+#include <set>
+const QString LoaderPaths::PLUGINS = "plugins";
+const QString LoaderPaths::SCRIPTS = "scripts";
 
 QString LoaderPaths::findObject(const QString &fullFileName, const QStringList &relTo)
 {
@@ -17,7 +20,7 @@ QString LoaderPaths::findObject(const QString &fullFileName, const QStringList &
             result = fullFileName;
         else
         {
-            auto dlist = buildDirsList();
+            auto dlist = buildDirsList(QString(), relTo);
             const auto name = (tmp.isRelative())?fullFileName:tmp.fileName();
             for (const auto& p : dlist)
             {
@@ -50,4 +53,31 @@ QStringList LoaderPaths::buildDirsList(const QString &forWhat, QStringList relTo
         });
     }
     return relTo;
+}
+
+QStringList LoaderPaths::listFilesInSubfolder(const QString &subfolder, const QString &extension)
+{
+    QStringList result;
+    std::set<QString> no_same_name;
+    auto folders = buildDirsList(QDir::separator() + subfolder + QDir::separator());
+    for(const auto& p : folders)
+    {
+        QDir dir(p);
+        dir.setFilter( QDir::Files);
+        dir.setSorting( QDir::Size | QDir::Reversed );
+        QFileInfoList list = dir.entryInfoList();
+
+        for (int i = 0, sz = list.size(); i < sz; ++i)
+        {
+            const QFileInfo fileInfo = list.at(i);
+            const QString name = fileInfo.fileName();
+
+            if (fileInfo.suffix() == extension && !no_same_name.count(name))
+            {
+                result.push_back(fileInfo.absoluteFilePath());
+                no_same_name.insert(name);
+            }
+        }
+    }
+    return result;
 }

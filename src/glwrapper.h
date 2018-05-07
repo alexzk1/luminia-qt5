@@ -27,22 +27,20 @@
 #include <math.h>
 #include "item.h"
 
-#include "item_texture.h"
-
 #define GL_CHECK_ERROR()                         \
-          do                                              \
-          {                                               \
-              GLenum error = glGetError();                \
-              if (error != GL_NO_ERROR)                   \
-                  fprintf(stderr, "E: %s(%d): %s 0x%X\n", \
-                          __FILE__, __LINE__,             \
-                          __PRETTY_FUNCTION__, error);    \
-          } while(0)
+    do                                              \
+{                                               \
+    GLenum error = glGetError();                \
+    if (error != GL_NO_ERROR)                   \
+    fprintf(stderr, "E: %s(%d): %s 0x%X\n", \
+    __FILE__, __LINE__,             \
+    __PRETTY_FUNCTION__, error);    \
+    } while(0)
 
 
 class glwrapper_shader: public QObject
 {
-Q_OBJECT
+    Q_OBJECT
 public:
     glwrapper_shader( QObject * parent,  QString inVertex);
     glwrapper_shader( QObject * parent,  QString inVertex, QString inFragment);
@@ -84,12 +82,12 @@ protected:
     GLhandleARB shader;
     void printInfoLog(GLhandleARB obj);
     GLhandleARB  v,g,f;
-    };
+};
 
 
 
 class glwrapper_framebuffer: public QObject {
-Q_OBJECT
+    Q_OBJECT
 public:
     glwrapper_framebuffer( QObject * parent);
     ~glwrapper_framebuffer();
@@ -106,17 +104,19 @@ private:
     bool *activelayer;
     int viewport[4];
     int w,h;
-    };
+};
 
-class glwrapper: public QObject{
-Q_OBJECT
-Q_ENUMS(glconst)
+class glwrapper: public QObject
+{
+    Q_OBJECT
+    Q_ENUMS(glconst)
 
-friend class glwrapper_shader;
+    friend class glwrapper_shader;
 
 public:
     glwrapper( QObject * parent, QString name = "gl");
-    ~glwrapper(){trasher.clear();}
+    ~glwrapper() override
+    {trasher.clear();}
 
     enum glconst {
         POINTS			= GL_POINTS,
@@ -160,7 +160,7 @@ public:
         NEAREST_MIPMAP_LINEAR = GL_NEAREST_MIPMAP_LINEAR,
         LINEAR_MIPMAP_LINEAR = GL_LINEAR_MIPMAP_LINEAR,
 
-                // float Texturformnats
+        // float Texturformnats
         RGBA32F			= GL_RGBA32F_ARB,
         RGB32F			= GL_RGB32F_ARB,
         ALPHA32F		= GL_ALPHA32F_ARB,
@@ -304,7 +304,7 @@ public:
         NEVER	= GL_NEVER,
 
         RASTERIZER_DISCARD = GL_RASTERIZER_DISCARD_NV
-        };
+    };
 
     void cleartrasher();
 public slots:
@@ -368,5 +368,5 @@ protected:
 
 private:
     QList<QObject*> trasher;
-    };
+};
 #endif

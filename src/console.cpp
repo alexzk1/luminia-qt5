@@ -179,7 +179,7 @@ void ConsoleLine::helpHandler(const QString& _string){
 
 //***********************Console*********************************
 
-Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
+
 
 Console::Console(QObject *_world) :
     QObject()

@@ -23,83 +23,41 @@
 #ifndef SCRIPT_EXTENDER_ENGINE
 #define SCRIPT_EXTENDER_ENGINE
 
-
-#include "factory/factory.h"
-#include "glwrapper.h"
-
-#include "script_extender.h"
-#include "item.h"
-
 #include <QtScript>
-#include <QMessageBox>
+#include <QFile>
+#include <QPointer>
 
-Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
+#include "no_copy.h"
 
+class Item;
+class glwrapper;
 
-
-class SEngine: public QObject{
-Q_OBJECT
+class SEngine: public QObject, public utility::NoCopyAssignMove
+{
+    Q_OBJECT
 public:
+    SEngine(QObject *o);
+    SEngine(QObject *o, const QString& fileName);
+    virtual ~SEngine() override;
+    bool equals(const SEngine *c) const;
 
-    SEngine(QObject *o, const QString& fn){
-        obj = o;
-        filename = fn;
-        connect(obj,SIGNAL(destroyed()), this, SLOT(deleteLater()));
+    QScriptValue run();
+    QScriptValue run(const QString& src);
+    QScriptValue run(QFile &file);
 
-        QFile file(filename);
-        if (!file.open(QIODevice::ReadOnly | QIODevice::Text )) {
-            qDebug() << "Error launching script";
-            return ;
-            }
-        QString script(file.readAll());
-
-
-
-        QScriptValue obj_sv = eng.newQObject(obj);
-        eng.globalObject().setProperty("obj" , obj_sv );
-
-
-        ogl = new glwrapper(this,"gl");
-        QScriptValue ogl_sv = eng.newQObject(ogl);
-        ogl_sv.setPrototype(eng.scriptValueFromQMetaObject<glwrapper>());
-        eng.globalObject().setProperty("gl" , ogl_sv );
-
-        eng.globalObject().setProperty("World" ,eng.newQObject(Item::world));
-
-
-        Factory::Factory(eng);
-
-        QScriptValue r = eng.evaluate(script);
-        if (eng.hasUncaughtException()) {
-            int line = eng.uncaughtExceptionLineNumber();
-            QMessageBox::critical ( 0, QString("Script error"), QString("Error processing Script %1 at Line %2 ").arg(filename).arg(line));
-            }
-
-
-
-        }
-
-    ~SEngine(){
-        ScriptExtender::engineList.removeAll (this);
-        qDebug() << "SEngine destroyed";
-        delete ogl;
-        }
-
-    bool is(QObject *o, const QString& fn){
-        return (o==obj && fn == filename);
-
-        }
-
+    void useDefaultError();
+    QScriptEngine& getEngine();
+signals:
+    void scriptError(const QString& err) const;
+private slots:
+    void defaultError(const QString& err) const;
+private:
     QScriptEngine eng;
-
-    QObject *obj; // assigned object
+    QPointer<Item> obj; // assigned object
     QString filename; //script filename
-
     glwrapper *ogl;
 
-    };
-
-
-
-
+    void testErrors() const;
+    void setupEngine(QObject *o);
+};
 #endif

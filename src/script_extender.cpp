@@ -23,10 +23,10 @@
 #include "script_extender_engine.h"
 #include "loaderpaths.h"
 
-QList<SAction> ScriptExtender::actionlist = QList<SAction>();
-QList<SSlot> ScriptExtender::slotlist = QList<SSlot>();
+QList<SAction> ScriptExtender::actionlist;
+QList<SSlot> ScriptExtender::slotlist;
 
-QList<SEngine*> ScriptExtender::engineList = QList<SEngine*>();
+QList<QPointer<SEngine>> ScriptExtender::engineList;
 
 
 void ScriptExtender::scanFile(const QString& filename)
@@ -55,12 +55,13 @@ void ScriptExtender::scanFile(const QString& filename)
     {
         QStringList split = rx.cap(1).split(" ");
 
-        switch (split.size()){
+        switch (split.size())
+        {
             case 1:
-                slotlist << SSlot("",split.at(0), slotlist.size(), QRegExp(filter),filename );
+                slotlist << SSlot("", split.at(0), slotlist.size(), QRegExp(filter),filename );
                 break;
             case 2:
-                slotlist << SSlot(split.at(0), split.at(1),slotlist.size(), QRegExp(filter),filename );
+                slotlist << SSlot(split.at(0), split.at(1), slotlist.size(), QRegExp(filter),filename );
                 break;
             default:
                 qDebug() << "<FUNCTION>....</FUNCTION> with illegal content";
@@ -95,11 +96,6 @@ void ScriptExtender::scanFile(const QString& filename)
 
 
 }
-
-
-
-
-
 
 const char** ScriptExtender::xpm(const QString& in){
 
@@ -136,109 +132,24 @@ const char** ScriptExtender::xpm(const QString& in){
     return xpmptrs;
 }
 
+void ScriptExtender::addActions(QMenu *menu, const QString &type)
+{
+    for (const auto& as : ScriptExtender::actionlist)
+    {
+        if(as.filter.exactMatch(type))
+        {
+             QAction *a = menu->addAction(QIcon(QPixmap(as.icon)), "*" + as.text);
+
+             //, ScriptExtender::actionlist.at(i).text, this, ScriptExtender::actionlist.at(i).slot.toLatin1().constData());
+        }
+    }
+}
 
 void ScriptExtender::setup()
 {
-    QStringList paths = LoaderPaths::buildDirsList(QDir::separator() + QString("scripts"));
-    for(QString p : paths)
-    {
-        QDir dir(p);
-        dir.setFilter( QDir::Files | QDir::NoSymLinks );
-        dir.setSorting( QDir::Size | QDir::Reversed );
-
-        QFileInfoList list = dir.entryInfoList();
-
-        for (int i = 0; i < list.size(); ++i)
-        {
-            QFileInfo fileInfo = list.at(i);
-            if (fileInfo.suffix()=="js")
-            {
-                scanFile(p.append(fileInfo.fileName()));
-            }
-        }
-    }
+    QStringList paths = LoaderPaths::listFilesInSubfolder(LoaderPaths::SCRIPTS);
+    for(const auto& p : paths)
+        scanFile(p);
 }
 
-
-
-
-void ScriptExtender::callback(QObject* obj, int id , void** args){
-
-    //use id to determine the right script and function
-    SEngine *e = nullptr;
-
-    int i;
-    for (i = 0; i < engineList.size(); i++){
-        if (engineList.at(i)->is(obj, slotlist.at(id).filename)){
-            e = engineList.at(i);
-            qDebug() << "engine found";
-            break;
-        }
-    }
-
-    if(!e){
-        //new engine
-        e = new SEngine(obj, slotlist.at(id).filename);
-        engineList << e;
-    }
-
-
-    //qDebug() << e << obj << id << args;
-
-    //
-    QRegExp tx( "(.+)\\((.*)\\)");
-    tx.indexIn(slotlist.at(id).signature,0);
-    qDebug() <<   tx.cap( 1 )<< " arg sig" <<  tx.cap( 2 );
-
-    //ip->newQObject (obj)
-    QScriptValueList qsarglist = QScriptValueList();// << QScriptValue (e->eng, obj); // first argument always obj)
-
-    QStringList al = tx.cap( 2 ).split(",");
-    for ( int i = 0; i < al.size(); i++){
-
-        if(al.at(i) == "int"){
-            qsarglist << QScriptValue (&e->eng, *reinterpret_cast< int(*)>(args[i+1]));
-            qDebug() << "add int to args" << *reinterpret_cast< int(*)>(args[i+1]);
-        }
-        else if (al.at(i) == "double"){
-            qsarglist << QScriptValue (&e->eng, *reinterpret_cast< double(*)>(args[i+1]));
-        }
-        else if (al.at(i) == "float"){
-            qsarglist << QScriptValue (&e->eng, *reinterpret_cast< float(*)>(args[i+1]));
-        }
-        else if (al.at(i) == "QString"){
-            qsarglist << QScriptValue (&e->eng,*reinterpret_cast< const QString(*)>(args[i+1]));
-        }
-        else if (al.at(i) == "QObject*"){
-            qsarglist << e->eng.newQObject (*reinterpret_cast< QObject*(*)>(args[i+1])) ;//QScriptValue (&e->eng,*reinterpret_cast< QObject*(*)>(args[i+1]));
-        }
-    }
-
-    //qDebug() << qsarglist;
-
-    QScriptValue f = e->eng.globalObject().property(tx.cap( 1 )).call(e->eng.globalObject(),qsarglist);
-
-    if (e->eng.hasUncaughtException()) {
-        int line = e->eng.uncaughtExceptionLineNumber();
-        QMessageBox::critical ( 0, QString("Script error"), QString("Error processing Script at Line %1 ").arg(line));
-    }
-
-    if (!args[0])return; //skip return value
-
-    if(slotlist.at(id).type == "int"){
-        *reinterpret_cast< int*>(args[0]) = f.toInteger();
-    }
-    else if(slotlist.at(id).type == "float"){
-        *reinterpret_cast< float*>(args[0]) = f.toNumber();
-    }
-    else if(slotlist.at(id).type == "double"){
-        *reinterpret_cast< double*>(args[0]) = f.toNumber();
-    }
-    else if(slotlist.at(id).type == "QString"){
-        *reinterpret_cast< QString*>(args[0]) = f.toString();
-    }
-    else if(slotlist.at(id).type == "QObject*"){
-        *reinterpret_cast< QObject**>(args[0]) = f.toQObject();
-    }
-}
 

@@ -56,7 +56,7 @@ void Item_node::contextmenu(const QPoint& point)
         menu->addSeparator();
         menu->addAction( QIcon( ":/images/xpm/importer.xpm"), QString("Import Model"), this, SLOT(importModel()) );
         menu->addSeparator();
-        SCRIPT2MENU(menu);
+        SCRIPT2MENU();
         menu->addSeparator();
         menu->addAction( QIcon( ":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
 
@@ -87,22 +87,22 @@ bool Item_node::dragAccept(Item* i)
 
 QObject *Item_node::addBuffer(const QString &label1, unsigned dim, unsigned size, unsigned keyframes, int type, bool normalized_int)
 {
-    return new Item_buffer(this, label1, dim, size,keyframes, type, normalized_int);
+    return makeNewItem<Item_buffer>(label1, dim, size,keyframes, type, normalized_int);
 }
 
 QObject *Item_node::addMesh(const QString &name, int numOfVertices)
 {
-    return new Item_mesh(this, name, numOfVertices);
+    return makeNewItem<Item_mesh>(name, numOfVertices);
 }
 
 QObject *Item_node::addText(const QString &name)
 {
-    return new Item_edit(this, name);
+    return makeNewItem<Item_edit>(name);
 }
 
 QObject *Item_node::addImage(const QString &name)
 {
-    return new Item_image(this, name);
+    return makeNewItem<Item_image>(name);
 }
 
 /*!
@@ -110,42 +110,42 @@ void addArmature([String name])\n
 */
 QObject* Item_node::addArmature(const QString& name)
 {
-    return new Item_armature(this, name);
+    return makeNewItem<Item_armature>(name);
 }
 
 QObject *Item_node::addNode(const QString &name)
 {
-    return new Item_node(this, name);
+    return makeNewItem<Item_node>(name);
 }
 
 QObject *Item_node::addScript(const QString &name)
 {
-    return new Item_script(this, name);
+    return makeNewItem<Item_script>(name);
 }
 
 QObject *Item_node::addVertexshader(const QString &name)
 {
-    return new Item_shader(this, name, Item_shader::Vertexshader);
+    return makeNewItem<Item_shader>(name, Item_shader::Vertexshader);
 }
 
 QObject *Item_node::addGeometryshader(const QString &name)
 {
-    return new Item_shader(this, name, Item_shader::Geometryshader);
+    return makeNewItem<Item_shader>(name, Item_shader::Geometryshader);
 }
 
 QObject *Item_node::addFragmentshader(const QString &name)
 {
-    return new Item_shader(this, name, Item_shader::Fragmentshader);
+    return makeNewItem<Item_shader>(name, Item_shader::Fragmentshader);
 }
 
 QObject *Item_node::addTexture(const QString &name)
 {
-    return new Item_texture(this, name);
+    return makeNewItem<Item_texture>(name);
 }
 
 QObject *Item_node::addUniform(const QString &name, unsigned dim, unsigned size, unsigned keyframes, int type)
 {
-    return new Item_uniform(this, name, dim, size, keyframes, type);
+    return makeNewItem<Item_uniform>(name, dim, size, keyframes, type);
 }
 
 

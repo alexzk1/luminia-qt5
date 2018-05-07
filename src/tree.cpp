@@ -38,15 +38,12 @@ TreeView::TreeView ( QWidget * parent) : QTreeWidget (parent)
     setDropIndicatorShown(true);
     setDragDropMode(QAbstractItemView::InternalMove);
     //setDragDropMode(QAbstractItemView::DragDrop);
-    Item::ws = (QMainWindow*)parent;
     setColumnCount(1);
-    Item::scanScripts();
 
-    Item_world *w = new Item_world(nullptr, "World");
-    ScriptLauncher::world = w;
-    insertTopLevelItem(0, w);
-    w->setExpanded(true);
-    world = w;
+    world = new Item_world();
+    insertTopLevelItem(0, world);
+    world->setExpanded(true);
+
 
     header()->hide();
 
@@ -68,6 +65,8 @@ void TreeView::mousePressEvent ( QMouseEvent * event )
 {
 
     // hack ... in future drag source should  fetched from QMimeData
+    //hint: writting to u from the future, 7 years later - u didnt make it!
+
     dragSource = static_cast<Item*>(itemFromIndex(indexAt (event->pos ())));
     QTreeView::mousePressEvent(event);
 }

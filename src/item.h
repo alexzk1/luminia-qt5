@@ -28,38 +28,10 @@
 
 #endif
 
-
-#define SCRIPT2MENU(menu) for (int i = 0; i < launcher.size(); ++i) {if (launcher.at(i)->filter->exactMatch(getType()))menu->addAction ( launcher.at(i)->a);}\
-    \
-    for (int i = 0; i < ScriptExtender::actionlist.size(); ++i){ \
-    if(ScriptExtender::actionlist.at(i).filter.exactMatch(getType())) { \
-    menu->addAction (QIcon(QPixmap(ScriptExtender::actionlist.at(i).icon)), ScriptExtender::actionlist.at(i).text, this, ScriptExtender::actionlist.at(i).slot.toLatin1().constData());}}
-
-
-//#define DQMENU(classname,menu) \
-//    for (int i = 0; i < DQObject< classname >::actionlist.size(); ++i) { \
-//    menu->addAction (QIcon(DQObject< classname >::actionlist.at(i).icon), DQObject< classname >::actionlist.at(i).text, this, DQObject< classname >::actionlist.at(i).member);}
-
-
 #define DQMENU(classname,menu)
 #define SCRIPTSLOTS(classname, classtype)
 
-
-
-
-//#define SCRIPTSLOTS(classname, classtype) \
-//    for (int i = 0; i < ScriptExtender::slotlist.size(); ++i){ \
-//    if(ScriptExtender::slotlist.at(i).filter.exactMatch( classtype )) {  \
-//    DQObject< classname >::createCallBackSlot(ScriptExtender::slotlist.at(i).type.toLatin1().data(), ScriptExtender::slotlist.at(i).signature.toLatin1().data(), "", ScriptExtender::callback, ScriptExtender::slotlist.at(i).id); \
-//    qDebug()<< "Create SCRIPTSLOTS" << ScriptExtender::slotlist.at(i).signature; \
-//    }}
-
-
-
-//
-
-
-
+#include <QtScript>
 
 #include "script_launcher.h"
 #include "script_extender.h"
@@ -70,13 +42,15 @@
 #include <QDockWidget>
 #include <QMenu>
 #include <QDebug>
+#include <QPointer>
 
-class QMainWindow;
+class MainWindow;
 class Item_world;
+class ScriptLauncher;
 /*!
 The Item class impletments the basic scriptable TreeWidgetItem
 */
-class Item : public QObject, public QTreeWidgetItem
+class Item : public QObject, public QTreeWidgetItem, public QScriptable
 {
     Q_OBJECT
 public:
@@ -87,34 +61,60 @@ public:
     virtual void setData ( int column, int role,  const QVariant &value ) override;
     void setName (const QString& name);
     QString getName() const;
-    Item *parent();
+    Item *parent() const;
     void appendToWs(QWidget *);
 
     static void scanScripts();
 
     QPointer<QDockWidget> dock;
 
-    static QMainWindow *ws;
+    static QPointer<MainWindow> ws;
     static Item_world *world;
     static Item *context;
     static Profiler *profiler;
     static QList<ScriptLauncher *> launcher;
 
 public slots:
-    QObject* findChild(const QString& name);
-    QObjectList findChildrenByType ( const QString &) const;
+    Item *findChild(const QString& name) const;
+    QList<Item*> findChildrenByType ( const QString &) const;
 
     QObject* getParent(){return parent();}
     virtual void contextmenu(const QPoint&);
-    virtual QString getType()const{return QString("Item");}
+    virtual QString getType()const;
 
-
+    void destroyAll();//destroys all childs
 public:
-    virtual void deleteLater() {QObject::deleteLater();}
+    virtual void deleteLater();
+    QString getFullScriptName() const;
+    void bindToEngine(QScriptEngine *eng);
 
 protected:
     QMenu *menu;
+    void SCRIPT2MENU();
+    QScriptValue getEngineParentObject(QScriptEngine &eng) const;
+    static QScriptValue getEngineObject(QScriptEngine &eng, const Item *object);
+    virtual void binding(QScriptEngine* ep);
 
+
+    template<class T, class ...Args>
+    T* makeNewItemNoThis(Args... args)
+    {
+        T* ptr = new T(args...);
+        QScriptEngine *eng = engine();
+        if (eng)
+        {
+            ptr->bindToEngine(eng);
+            ptr->binding(eng);
+        }
+        return ptr;
+    }
+
+    template<class T, class ...Args>
+    T* makeNewItem(Args... args)
+    {
+        return makeNewItemNoThis<T>(this, args...);
+    }
+private:
 };
 
 /*!
@@ -126,7 +126,7 @@ class Item_world : public Item
 {
     Q_OBJECT
 public:
-    Item_world(Item *parent, const QString& label1);
+    Item_world();
     void setCamSize(int w, int h);
     virtual bool dragAccept(Item*)override;
 public slots:
@@ -141,13 +141,10 @@ public slots:
     QObject* getSelected();
     QObject* getContext(){return context;}
     virtual QString getType()const override;
-
-    virtual void deleteLater()override{}
     virtual void contextmenu(const QPoint&)override;
 protected:
     double timev;
     int CamWidth,CamHeight;
-
 signals:
     void update();
 public:
@@ -239,11 +236,11 @@ class Item_cam : public Item_matrix {
     Q_PROPERTY(int Near READ getNear WRITE Near)
     Q_PROPERTY(int Far READ getFar WRITE Far)
 public:
-    Item_cam( Item_world *parent, const QString& label1);
+    Item_cam(Item_world *parent, const QString& label1);
     virtual ~Item_cam() override = default;
 public slots:
-    virtual QString getType() const {return QString("Cam");}
-    virtual void deleteLater();
+    virtual QString getType() const override;
+    virtual void deleteLater() override;
 
 protected:
     double getNear();
@@ -342,6 +339,7 @@ public slots:
     bool isRunning() const;
     void Call(const QString& function, const QVariantList& args = QVariantList());
     virtual QString getType()const override{return QString("Script");}
+    virtual void contextmenu(const QPoint&) override;
 private slots:
     void completationHandler(const QString&);
     void helpHandler(const QString&);
@@ -349,11 +347,7 @@ protected:
     bool running,busy;
     glwrapper *ogl;
     const QMetaObject *meta;
-
     QScriptEngine *ip;
-
-public slots:
-    virtual void contextmenu(const QPoint&) override;
 private:
     bool menuinit;
 };

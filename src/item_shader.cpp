@@ -23,8 +23,7 @@
 
 Item_shader::Item_shader( Item *parent, const QString& name, int _shadertype) : Item_edit( parent, name)
 {
-    SCRIPT2MENU(menu)
-            shadertype = _shadertype;
+    shadertype = _shadertype;
     if (shadertype==Vertexshader){
         setIcon(0, QIcon(":/images/xpm/vertexshader.xpm"));
 
@@ -55,7 +54,7 @@ void Item_shader::contextmenu(const QPoint& point){
         menu->addAction ( QIcon(":/images/xpm/reload.xpm"), "Reload file", this, SLOT(reload()) );
         menu->addSeparator();
 
-        SCRIPT2MENU(menu);
+        SCRIPT2MENU();
         menu->addSeparator();
         menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
         menuinit = true;

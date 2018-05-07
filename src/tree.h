@@ -26,6 +26,7 @@
 
 #include <QTreeWidget>
 #include "item.h"
+#include <QPointer>
 
 class Item;
 class Item_world;
@@ -37,7 +38,7 @@ public:
     TreeView ( QWidget * parent = nullptr );
     virtual ~TreeView ()override = default;
 
-    Item_world* world;
+    QPointer<Item_world> world;
 
 protected:
     virtual void contextMenuEvent ( QContextMenuEvent * event )override;

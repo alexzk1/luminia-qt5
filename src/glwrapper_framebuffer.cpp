@@ -22,6 +22,7 @@
 #include "glwrapper.h"
 #include <QMessageBox>
 #include <QDebug>
+#include "item_texture.h"
 
 glwrapper_framebuffer::glwrapper_framebuffer( QObject * parent): QObject( parent ){
     viewport[0]= -1;
@@ -34,13 +35,14 @@ glwrapper_framebuffer::glwrapper_framebuffer( QObject * parent): QObject( parent
 
     for (unsigned int ac= 0; ac < maxbuffers; ac++){
         activelayer[ac] = false;
-        }
     }
+}
 
-glwrapper_framebuffer::~glwrapper_framebuffer(){
+glwrapper_framebuffer::~glwrapper_framebuffer()
+{
     glDeleteFramebuffersEXT (1, &fbo);
     delete[] activelayer;
-    }
+}
 
 
 
@@ -58,14 +60,14 @@ void glwrapper_framebuffer::Bind(){
             buffers[found] = GL_COLOR_ATTACHMENT0_EXT + found;
             //qDebug() << "bind" << found;
             found++;
-            }
         }
+    }
     if (found != 0){
         glDrawBuffers(found, buffers);
-        }
+    }
     else{
         glDrawBuffer (GL_FALSE);
-        }
+    }
 
     //save viewport and replace it;
     if (viewport[0]== -1){
@@ -73,16 +75,16 @@ void glwrapper_framebuffer::Bind(){
         glGetIntegerv(GL_VIEWPORT,(GLint*)viewport);
         glViewport(0,0,w,h);
         //qDebug() << w << h;
-        }
-    GL_CHECK_ERROR();
     }
+    GL_CHECK_ERROR();
+}
 
 
 void glwrapper_framebuffer::Unbind(){
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
     glViewport (viewport[0],viewport[1],viewport[2],viewport[3]);
     viewport[0]= -1;
-    }
+}
 /*!
 attach a texture to a framebuffer
 
@@ -92,7 +94,7 @@ void glwrapper_framebuffer::Append(QObject* _tex, int layer, int slice){
     if (maxbuffers < unsigned(layer)){
         //Warn
         return;
-        }
+    }
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fbo);
 
     Item_texture* tex = dynamic_cast<Item_texture*>(_tex);
@@ -115,7 +117,7 @@ void glwrapper_framebuffer::Append(QObject* _tex, int layer, int slice){
             if (slice==-1){ //not tested code....
                 glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT, attachment, tex->getTextureID(), 0);
                 qDebug() << "glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT, attachment = "<<attachment << ", tex->getTextureID(), 0);";
-                }
+            }
             else glFramebufferTextureLayerEXT(GL_FRAMEBUFFER_EXT, attachment, tex->getTextureID(), 0, slice);
             break;
         case GL_TEXTURE_2D:
@@ -125,7 +127,7 @@ void glwrapper_framebuffer::Append(QObject* _tex, int layer, int slice){
             break;
         default: qDebug() << "Panic: Unknown texture type" << type;
 
-        }
+    }
 
     if (!tex->isDepth()){
         // marks the layer as active
@@ -133,8 +135,8 @@ void glwrapper_framebuffer::Append(QObject* _tex, int layer, int slice){
         if (layer ==0){
             w = int(tex->Width());
             h = int(tex->Height());
-            }
         }
+    }
 
     GLenum status = glCheckFramebufferStatusEXT (GL_FRAMEBUFFER_EXT);
     switch (status){
@@ -146,7 +148,7 @@ void glwrapper_framebuffer::Append(QObject* _tex, int layer, int slice){
         default:
             QMessageBox::warning ( 0,QString("FBO error") , QString("FBO error") );
             printf( "FBO error %i\n ",status );
-            }
+    }
 
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
-    }
+}

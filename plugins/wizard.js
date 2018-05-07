@@ -32,7 +32,7 @@ static char *wizzard[]={
 </XPM>
 */
 
-
+World.destroyAll();
 World.addNode("Wizard");
 World.Wizard.addScript();
 World.Wizard.addVertexshader();

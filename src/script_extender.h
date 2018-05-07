@@ -21,6 +21,7 @@
 
 #include <QRegExp>
 #include <QObject>
+#include <QMenu>
 
 #ifndef _SCRIPT_EXTENDER_H
 #define _SCRIPT_EXTENDER_H
@@ -54,7 +55,8 @@ class SSlot
 {
     friend class SEngine;
 public:
-    SSlot(const QString& _type, const QString& _signature, int _id, QRegExp _filter, const QString& _filename){
+    SSlot(const QString& _type, const QString& _signature, int _id, QRegExp _filter, const QString& _filename)
+    {
         type = _type;
         signature = _signature;
         id = _id;
@@ -74,16 +76,14 @@ public:
 class ScriptExtender
 {
 public:
-
+    static void addActions(QMenu* menu, const QString& type);
+    static void setup();
     static void scanFile(const QString& filename);
     static const char** xpm(const QString& in); //move to SAction later
-    static void callback(QObject* obj, int id , void** args);
-    static void setup();
     static QList<SAction> actionlist;
-    static QList<SSlot> slotlist;
+    static QList<SSlot>   slotlist;
     //private:
-    static QList<SEngine*> engineList;
-
+    static QList<QPointer<SEngine>> engineList;
 };
 
 #endif

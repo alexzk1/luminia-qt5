@@ -31,18 +31,19 @@
 #include "item.h"
 #include "glwrapper.h"
 #include <QMessageBox>
+#include "mainwindow.h"
 
-Item* ScriptLauncher::world = nullptr;
-
-ScriptLauncher::ScriptLauncher(  QString fn, QObject * parent): QObject( parent){
-
+ScriptLauncher::ScriptLauncher(QString fn, QObject * parent):
+    QObject( parent)
+{
     QPixmap *pix;
     QString name;
     ip = nullptr;
     fileName = fn;
     //Load XPM
     QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text )) qDebug() << "Error launching script";
+    if (!file.open(QIODevice::ReadOnly | QIODevice::Text ))
+        qDebug() << "Error launching script";
 
     QRegExp rx( "<XPM>.+\"(.+)\".+</XPM>" );
     QString in = file.readAll();
@@ -58,9 +59,9 @@ ScriptLauncher::ScriptLauncher(  QString fn, QObject * parent): QObject( parent)
         if (xpmbytes[i]=='\n'){
             xpmfinal[i]=0;
             lines++;
-            }
-        else xpmfinal[i]=xpmbytes[i];
         }
+        else xpmfinal[i]=xpmbytes[i];
+    }
 
     const char ** xpmptrs = new const char*[lines+1];
     xpmptrs[0] = xpmfinal;
@@ -69,8 +70,8 @@ ScriptLauncher::ScriptLauncher(  QString fn, QObject * parent): QObject( parent)
         if (xpmfinal[i]=='\0'){
             xpmptrs[j]=xpmfinal + i + 1;
             j++;
-            }
         }
+    }
 
     pix = new QPixmap(xpmptrs);
     delete[] xpmfinal;
@@ -81,105 +82,81 @@ ScriptLauncher::ScriptLauncher(  QString fn, QObject * parent): QObject( parent)
     if (fx.indexIn(in,0))filter = new QRegExp(fx.cap( 1 ));
     else filter = new QRegExp("(.+)");
 
-    qDebug(qPrintable(fx.cap( 1 )));
-
-
     QRegExp nx( "<NAME>(.+)</NAME>" );
-    if (nx.indexIn(in,0))name = nx.cap( 1 );
-    else name = fn;
+    if (nx.indexIn(in,0))
+        name = nx.cap( 1 );
+    else
+        name = fn;
 
     QString tooltip;
     QRegExp tx( "<DESCRIPTION>(.+)</DESCRIPTION>" );
     if (tx.indexIn(in,0))tooltip = tx.cap( 1 );
 
 
-    a = new QAction(   QIcon(*pix),name , parent);
+    a = new QAction(QIcon(*pix), name , parent);
     a->setStatusTip ( tooltip );
 
     toggle = false;
     QRegExp px( ".*<TOGGLE/>.*" );
-    if (px.exactMatch(in)){
+    if (px.exactMatch(in))
+    {
         toggle=true;
         qDebug() << "toggle";
         a->setCheckable ( true );
         QObject::connect( a, SIGNAL(triggered(bool)), this, SLOT(toggled(bool)));
-        }
-    else{
-        QObject::connect( a, SIGNAL(activated()), this, SLOT(launch()));
-        }
+    }
+    else
+    {
+        QObject::connect( a, SIGNAL(triggered()), this, SLOT(launch()));
+    }
     delete pix;
 
     ogl = new glwrapper(this,"gl");
-    }
+}
 
-ScriptLauncher::~ScriptLauncher(){
+ScriptLauncher::~ScriptLauncher()
+{
+    deleteEngine();
     delete a;
     delete filter;
     delete ogl;
-    //delete ip; // is a child with autodelete
-    }
+}
 
- #include <QGLContext>
-Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
+#include <QGLContext>
 
-void ScriptLauncher::launch(){
-
+void ScriptLauncher::launch()
+{
     qDebug() << "Current context" << QGLContext::currentContext ();
+    deleteEngine();
+    ip = new SEngine(this, fileName);
+    ip->useDefaultError();
 
-    QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text )) {
-        qDebug() << "Error launching script";
-        return ;
-        }
-    QString script(file.readAll());
-
-
-    //Code for compile against QT4.3 with qtscript
-    if ( ip != NULL){
-        delete ip;
-        }
-
-    ip = new QScriptEngine(this);
-    QScriptValue globalObject = ip->globalObject();
-
-    Factory::Factory(*ip); //  qtscript factory for dialogs file ....
-
-    ip->globalObject().setProperty("World" ,ip->newQObject(world));
-
-    ogl->cleartrasher();
-    QScriptValue ogl_sv = ip->newQObject(ogl);
-    ogl_sv.setPrototype(ip->scriptValueFromQMetaObject<glwrapper>());
-    ip->globalObject().setProperty("gl" , ogl_sv );
-
+    QScriptValue globalObject = ip->getEngine().globalObject();
 
     if (toggle)
-        ip->globalObject().setProperty("Launcher" ,ip->newQObject(this));
-    //ip->evaluate(script);
-    QScriptValue r = ip->evaluate(script);
-    if (ip->hasUncaughtException()) {
-        int line = ip->uncaughtExceptionLineNumber();
-        QMessageBox::critical ( 0, QString("Script error"), QString("Error processing Script at Line %1 ").arg(line));
-        }
+        globalObject.setProperty("Launcher" ,ip->getEngine().newQObject(this));
 
-    if (!toggle){
-        delete ip;
-        ip = NULL;
-        }
-    }
+    ip->run();
+    deleteEngine();
+}
 
-void ScriptLauncher::terminate(){
-    delete ip;
-    ip = NULL;
-    //ip->deleteLater();
+void ScriptLauncher::deleteEngine()
+{
+    if (ip)
+        ip->deleteLater();
+    ip = nullptr;
+}
+
+void ScriptLauncher::terminate()
+{
+    deleteEngine();
     a->setChecked (false);
-    }
+}
 
-void ScriptLauncher::toggled(bool run){
-    if (run){
+void ScriptLauncher::toggled(bool run)
+{
+    if (run)
         launch();
-        }
-    else{
-        delete ip;
-        ip = NULL;
-        }
-    }
+    else
+        deleteEngine();
+}

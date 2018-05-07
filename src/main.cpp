@@ -25,6 +25,10 @@
 #include <QFileInfo>
 #include <QDebug>
 #include "script_extender.h"
+#include "item.h"
+#include "glwrapper.h"
+
+Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
 
 int main(int argc, char **argv)
 {
@@ -42,6 +46,7 @@ int main(int argc, char **argv)
     app.setWindowIcon(QIcon(":/images/lumina.png"));
 
     ScriptExtender::setup();
+    Item::scanScripts();
 
     MainWindow mainWin;
     mainWin.show();

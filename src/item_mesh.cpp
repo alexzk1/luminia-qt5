@@ -50,7 +50,7 @@ void Item_mesh::contextmenu(const QPoint& point){
         menu->addAction( QIcon(":/images/xpm/quaternion.xpm"), QString("generate Texspace Quaternion"), this, SLOT( genTexSpaceQuaternion()));
 
         menu->addSeparator();
-        SCRIPT2MENU(menu);
+        SCRIPT2MENU();
         menu->addSeparator();
         menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
 
@@ -72,7 +72,7 @@ Object addIndex(String name, Number vertices_per_primitive)\n
 */
 QObject* Item_mesh::addIndex(const QString& label1 , int verts_per_prim)
 {
-    return new Item_index(this, label1, verts_per_prim, 0);
+    return makeNewItem<Item_index>(label1, verts_per_prim, 0);
 }
 
 QObject *Item_mesh::addVertex()
@@ -115,7 +115,7 @@ Object addComponent(Enum Type, String name="Component", Number dimension=4)\n
 */
 QObject* Item_mesh::addComponent(int type ,const QString& label1, int dimension, int keyframes, int format)
 {
-    return new Item_component(this, label1, type, dimension, keyframes, format);
+    return makeNewItemNoThis<Item_component>(this, label1, type, dimension, keyframes, format);
 }
 
 /*!

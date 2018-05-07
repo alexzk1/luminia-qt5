@@ -54,7 +54,7 @@ void Item_component::contextmenu(const QPoint& point){
         DQMENU(Item_edit, menu);
         menu->addSeparator();
 
-        SCRIPT2MENU(menu);
+        SCRIPT2MENU();
         menu->addSeparator();
         menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
         menuinit = true;

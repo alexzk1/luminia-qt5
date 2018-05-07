@@ -27,7 +27,8 @@
 
 #include "factory/factory.h"
 
-Item_script::Item_script( Item *parent, const QString& name) : Item_edit( parent, name)
+Item_script::Item_script( Item *parent, const QString& name) :
+    Item_edit( parent, name)
 {
     setIcon(0, QIcon(":/images/xpm/script.xpm"));
     ogl = new glwrapper(this, "gl");
@@ -62,7 +63,7 @@ void Item_script::contextmenu(const QPoint& point)
         menu->addAction ( QIcon(":/images/xpm/reload.xpm"), "Reload file", this, SLOT(reload()) );
         menu->addSeparator();
 
-        SCRIPT2MENU(menu);
+        SCRIPT2MENU();
         menu->addSeparator();
         menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
         menuinit = true;
@@ -80,7 +81,6 @@ Item_script::~Item_script()
         delete ogl;
 }
 
-Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
 /*!
 Start a script. QT-4.3 part is not full compatible to QSA
 */
@@ -141,9 +141,11 @@ void Item_script::Call(const QString& function, const QVariantList& args)
     if (!isRunning() && ip)
     {
         QScriptValueList qsarglist = QScriptValueList();
-        for ( int i = 0; i < args.size(); i++){
+        for (int i = 0, sz = args.size(); i < sz; ++i)
+        {
             QObject* obj = args.at(i).value<QObject*>();
-            if(obj){
+            if(obj)
+            {
                 qsarglist <<  ip->newQObject (obj);
             }
             else switch(args.at(i).type())
@@ -153,13 +155,13 @@ void Item_script::Call(const QString& function, const QVariantList& args)
                 case QVariant::Int:
                 case QVariant::UInt:
                 case QVariant::ULongLong:
-                    qsarglist <<  QScriptValue (ip,args.at(i).toDouble());
+                    qsarglist <<  QScriptValue (ip, args.at(i).toDouble());
                     break;
 
                 default:
-                    qsarglist <<  QScriptValue (ip,args.at(i).toString());
+                    qsarglist <<  QScriptValue (ip, args.at(i).toString());
             }
-            //qDebug() << "Item_script::Call" << args.at(i).type();
+            qDebug() << "Item_script::Call" << args.at(i).type();
         }
 
         QScriptValue f = ip->globalObject().property(function).call(ip->globalObject(),qsarglist);

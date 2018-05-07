@@ -20,9 +20,10 @@
 *********************************************************************************/
 #include "item.h"
 
+#include "palgorithm.h"
 
 #include <QPointer>
-#include<QMainWindow>
+#include "mainwindow.h"
 #include <QDockWidget>
 #include <QCoreApplication>
 #include <QFile>
@@ -31,10 +32,11 @@
 #include <QFileInfoList>
 #include <QDebug>
 
+#include "loaderpaths.h"
 
 Item * Item::context = nullptr;
 Item_world * Item::world = nullptr;
-QMainWindow * Item::ws = nullptr;
+QPointer<MainWindow> Item::ws = nullptr;
 Profiler * Item::profiler = nullptr;
 
 
@@ -52,7 +54,7 @@ Item::Item(Item *parent, const QString& name ):
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDropEnabled);
     setName ( name );
     menu = new QMenu();
-    qDebug() << "created:" <<  this << childCount ()  ;
+    qDebug() << "Created Item, engine:" << engine();
 }
 
 Item::~Item()
@@ -67,7 +69,8 @@ Item::~Item()
 /*!
 function to add a QWidget or similar to the Workspace area
 */
-void Item::appendToWs(QWidget *w){
+void Item::appendToWs(QWidget *w)
+{
     dock = new QDockWidget(objectName(), ws);
     dock->setAllowedAreas(Qt::RightDockWidgetArea);
     dock->setWidget(w);
@@ -77,26 +80,26 @@ void Item::appendToWs(QWidget *w){
 
 
 /*!
-Function for setting the objects name. Automatic renaming double names is currently defect.
+Function for setting the objects name.
 */
-void Item::setName(const QString& _name){
-    QString name = _name;
-    setObjectName ("___renaming");
-    Item *res = (Item*)parent()->findChild(name);
-    if (res ){
-        if(!name.contains(QRegExp("\\d"))) name.append("_0");
+void Item::setName(const QString& _name)
+{
+    static std::map<QString, size_t> renameCounter;
+    const auto key = getType();
+    if (!renameCounter.count(key))
+        renameCounter[key] = 0;
 
-        QStringList parts = name.split("_");
-        bool ok;
-        qDebug() << parts;
-        name = parts[0].append("_%1").arg(parts[1].toUInt(&ok, 10) + 1);
-        qDebug() << name;
-        setName(name);
-        return;
+    QString name = _name;
+    Item* p;
+    while ((p = parent()->findChild(name)) && p != this)
+    {
+        name = QString("%1_%2").arg(_name).arg(renameCounter[key]++);
     }
-    setObjectName (name);
-    setText(0,name);
-    if (dock)dock->setWindowTitle (name);
+
+    setObjectName(name);
+    setText(0, name);
+    if (dock)
+        dock->setWindowTitle (name);
 }
 
 QString Item::getName() const
@@ -117,10 +120,9 @@ void Item::setData ( int column, int role, const QVariant &value )
 /*!
 returns the parent object
 */
-Item* Item::parent()
+Item* Item::parent() const
 {
-    Item* i = (Item*) QObject::parent();
-    return i;
+    return qobject_cast<Item*>(QObject::parent());
 }
 
 
@@ -145,38 +147,123 @@ void Item::contextmenu(const QPoint& point)
     }
 }
 
+QString Item::getType() const
+{
+    return QString("Item");
+}
+
+void Item::destroyAll()
+{
+    QList<Item*> allItems = findChildren<Item*>();
+    std::for_each(allItems.begin(), allItems.end(), [](auto& p)
+    {
+        if (p)
+        {
+            p->deleteLater();
+        }
+    });
+}
+
+void Item::deleteLater()
+{
+    QList<Item*> allItems = findChildren<Item*>(QString(), Qt::FindDirectChildrenOnly);
+    if (parent())
+    {
+        std::for_each(allItems.begin(), allItems.end(), [this](auto& p)
+        {
+            if (p)
+            {
+                setParent(nullptr);
+                p->deleteLater();
+            }
+        });
+        auto eng = engine();
+        if (eng)
+        {
+            const static QScriptValue invalid;
+            getEngineObject(*eng, nullptr).setProperty(getFullScriptName(), invalid);
+        }
+    }
+    QObject::deleteLater();
+}
+
+QString Item::getFullScriptName() const
+{
+    if (!parent())
+        return getName();
+
+    return parent()->getFullScriptName() + "." + getName();
+}
+
+void Item::bindToEngine(QScriptEngine *eng)
+{
+    if (eng)
+    {
+        std::function<void(QScriptValue val, Item* itm)> recursive;
+        recursive = [&eng, &recursive](QScriptValue val, Item* itm)
+        {
+            auto nobj = eng->newQObject(itm);
+            val.setProperty(itm->getName(), nobj);
+            QList<Item*> directs = itm->findChildren<Item*>(QString(), Qt::FindDirectChildrenOnly);
+            for (const auto& p : directs)
+            {
+                if (p)
+                    recursive(nobj, p);
+            }
+        };
+
+        QScriptValue val = getEngineObject(*eng, this);
+        if (!val.isValid() || val.isUndefined() || val.isNull())
+            recursive(getEngineParentObject(*eng), this);
+    }
+}
+
+void Item::binding(QScriptEngine *ep)
+{
+
+}
+
+void Item::SCRIPT2MENU()
+{
+    if (menu)
+    {
+        for (int i = 0; i < launcher.size(); ++i)
+        {
+            if (launcher.at(i)->filter->exactMatch(getType()))
+                menu->addAction ( launcher.at(i)->a);
+        }
+        ScriptExtender::addActions(menu, getType());
+    }
+}
+
+QScriptValue Item::getEngineParentObject(QScriptEngine &eng) const
+{
+    return getEngineObject(eng, parent());
+}
+
+QScriptValue Item::getEngineObject(QScriptEngine &eng, const Item* obj)
+{
+    if (obj)
+    {
+        QString name = obj->getFullScriptName();
+        return eng.globalObject().property(name);
+    }
+    return eng.globalObject();
+}
+
 /*!
 scan the plugin script directory for tool scripts
 */
 void Item::scanScripts()
 {
-    QStringList paths;
-    paths << QString(QFileInfo( QCoreApplication::arguments().at(0) ).absolutePath ()) + "/plugins/";
-    paths << QString(QDir::homePath ())+ "/.lumina/plugins/";
-
-    for(int p = 0; p < paths.size(); p++){
-
-
-        QDir dir(paths.at(p));
-
-        dir.setFilter( QDir::Files | QDir::NoSymLinks );
-        dir.setSorting( QDir::Size | QDir::Reversed );
-
-        QFileInfoList list = dir.entryInfoList();
-        for (int i = 0; i < list.size(); ++i) {
-            QFileInfo fileInfo = list.at(i);
-            if (fileInfo.suffix()=="js")
-                launcher.append(new ScriptLauncher(QString(paths.at(p)).append(fileInfo.fileName()),Item::ws));
-        }
-
-    }
-
-
+    QStringList paths = LoaderPaths::listFilesInSubfolder(LoaderPaths::PLUGINS, "js");
+    for(const QString& p : paths)
+        launcher.append(new ScriptLauncher(p, Item::ws));
 }
 
-QObject* Item::findChild(const QString& name)
+Item* Item::findChild(const QString& name) const
 {
-    return QObject::findChild<QObject *>(name);
+    return QObject::findChild<Item *>(name);
 }
 
 
@@ -184,11 +271,9 @@ QObject* Item::findChild(const QString& name)
 returns a list of child objects
 
 */
-QObjectList Item::findChildrenByType ( const QString & typen) const
+QList<Item *> Item::findChildrenByType( const QString & typen) const
 {
-
-    QObjectList l = findChildren<QObject*>();
-
+    auto l = findChildren<Item*>();
     for (int i = l.size() -1; i >= 0; i--)
     {
         if(Item* it = dynamic_cast<Item*>( l[i] ) )
@@ -196,7 +281,6 @@ QObjectList Item::findChildrenByType ( const QString & typen) const
             if(it->getType()!= typen) l.removeAt(i);
         }
         else l.removeAt(i);
-
     }
     return l;
 }
@@ -205,4 +289,3 @@ bool Item::dragAccept(Item*)
 {
     return false;
 }
-

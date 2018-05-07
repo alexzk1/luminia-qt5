@@ -24,7 +24,8 @@
 #include <QDebug>
 
 //********************************************************************
-Item_cam::Item_cam( Item_world *parent, const QString& name) : Item_matrix( parent, name){
+Item_cam::Item_cam(Item_world *parent, const QString& name) : Item_matrix( parent, name)
+{
     setIcon( 0,  QIcon(":/images/xpm/cam.xpm"));
 
     deletable = true;
@@ -37,12 +38,17 @@ Item_cam::Item_cam( Item_world *parent, const QString& name) : Item_matrix( pare
     qDebug() << GLCam::shareWidget << cam;
 
     appendToWs(cam);
-    SCRIPT2MENU(menu)
-            connect(world, SIGNAL(update()),(QObject*)cam, SLOT(update()) );
+    SCRIPT2MENU();
+    connect(world, SIGNAL(update()),(QObject*)cam, SLOT(update()) );
     Translate(0.0,0.0,10.0);
 
 
     qDebug() << GLCam::shareWidget << cam;
+}
+
+QString Item_cam::getType() const
+{
+    return QString("Cam");
 }
 
 /*!

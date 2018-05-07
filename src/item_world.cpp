@@ -23,7 +23,9 @@
 #include "item_virtual.h"
 
 
-Item_world::Item_world(Item *p, const QString& name) : Item( p,name ){
+Item_world::Item_world():
+    Item(nullptr, "World")
+{
 
     Item::world = this;
 
@@ -50,7 +52,7 @@ void Item_world::contextmenu(const QPoint& point)
     if(!init){
         //	menu->addAction ( QIcon(*xpm_node),QString("Add Node"),this, SLOT( addNode()));
         DQMENU(Item_world, menu);
-        SCRIPT2MENU(menu);
+        SCRIPT2MENU();
         init = true;
     }
 
@@ -59,17 +61,17 @@ void Item_world::contextmenu(const QPoint& point)
 
 QObject *Item_world::addCam(const QString &name)
 {
-    return new Item_cam(this, name);
+    return makeNewItemNoThis<Item_cam>(this, name);
 }
 
 QObject *Item_world::addNode(const QString &name)
 {
-    return new Item_world(this, name);
+    return makeNewItem<Item_node>(name);
 }
 
 QObject *Item_world::addVirtual(const QString &name)
 {
-    return new Item_virtual(this, name);
+    return makeNewItem<Item_virtual>(name);
 }
 
 QString Item_world::getType() const

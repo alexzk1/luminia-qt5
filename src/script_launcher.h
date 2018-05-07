@@ -26,35 +26,38 @@
 #include <QObject>
 #include <QAction>
 #include <QRegExp>
-#include <QScriptEngine>
+#include "script_extender_engine.h"
+#include "no_copy.h"
 
 class Item;
 class QSInterpreter;
 class QScriptEngine;
 class glwrapper;
 
-class ScriptLauncher : public QObject
+//this is "plugin launcher"
+
+class ScriptLauncher : public QObject, public utility::NoCopyAssignMove
 {
- Q_OBJECT
+    Q_OBJECT
 public:
     ScriptLauncher(QString fn, QObject * parent = nullptr);
     virtual ~ScriptLauncher()override;
-
-    static Item *world;
     QAction *a;
     QRegExp *filter;
-
 public slots:
     void terminate();
 private slots:
     void toggled(bool);
     void launch();
 
-protected:
+private:
     bool toggle;
     QString fileName;
 
     glwrapper *ogl;
-    QScriptEngine *ip;
-    };
+    QPointer<SEngine> ip;
+
+protected:
+    void deleteEngine();
+};
 #endif

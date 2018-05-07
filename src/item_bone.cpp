@@ -43,7 +43,7 @@ Item_bone::Item_bone( Item *parent, const QString& name, Item_armature* _armatur
     menu->addAction( QIcon(":/images/xpm/bone.xpm"), QString("Add Bone"), this, SLOT( addBone()) );
     menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete"), this, SLOT(deleteLater()) );
 
-    SCRIPT2MENU(menu);
+    SCRIPT2MENU();
 
     quat[0] = 0.0;
     quat[1] = 0.0;
@@ -69,8 +69,9 @@ QString Item_bone::statusText() const{
 void addBone(String Name)\n
 add a bone as childobject.
 */
-QObject* Item_bone::addBone(QString label1){
-    return new Item_bone(this, label1, armature);
+QObject* Item_bone::addBone(QString label1)
+{
+    return makeNewItem<Item_bone>(label1, armature);
 }
 
 /*!
