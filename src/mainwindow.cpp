@@ -31,10 +31,12 @@
 #include <QStatusBar>
 #include <QMenuBar>
 #include <QApplication>
+#include <QVBoxLayout>
 
 MainWindow::MainWindow()
 {
-    setWindowTitle(tr("Lumina Modern"));
+    setDockNestingEnabled(true);
+
     treeview = new TreeView (this);
     setCentralWidget(treeview);
 
@@ -76,14 +78,22 @@ void MainWindow::createScriptToolBar( QList<ScriptLauncher*>  launcher)
     }
 }
 
-void MainWindow::recurseWrite(QSettings &settings, QObject *object)
+void MainWindow::recurseWrite(QSettings &settings, QObject*)
 {
-    utility::SaveableWidget<MainWindow>::recurseWrite(settings, object);
+    settings.setValue("LastPath", lastPath);
 }
 
-void MainWindow::recurseRead(QSettings &settings, QObject *object)
+void MainWindow::recurseRead(QSettings &settings, QObject*)
 {
-    utility::SaveableWidget<MainWindow>::recurseRead(settings, object);
+    lastPath = settings.value("LastPath", QDir::homePath()).toString();
+}
+
+void MainWindow::showFileName(const QString &name)
+{
+    if (name.isEmpty())
+        setWindowTitle(tr("Lumina Modern"));
+    else
+        setWindowTitle(QString(tr("Lumina Modern [%1]")).arg(name));
 }
 
 
@@ -91,7 +101,7 @@ void MainWindow::open(const QString & fn)
 {
     if(fn == ""){
         clear();
-        fileName = QFileDialog::getOpenFileName(this, tr("Lumina Open File"), QDir::currentPath(), tr("Lumina Project Files (*.lum *.xml)"));
+        fileName = QFileDialog::getOpenFileName(this, tr("Lumina Open File"), lastPath, tr("Lumina Project Files (*.lum *.xml)"));
     }
     else{ // append mode....
         fileName = fn;
@@ -100,11 +110,11 @@ void MainWindow::open(const QString & fn)
     if (fileName.isEmpty())
         return;
 
-    QString path = QFileInfo(fileName).absolutePath();
+    lastPath = QFileInfo(fileName).absolutePath();
 
 
     //treeWidget->clear();
-    LumHandler handler((Item*)treeview->world, path);
+    LumHandler handler((Item*)treeview->world, lastPath);
     QXmlSimpleReader reader;
     reader.setContentHandler(&handler);
     //	reader.setErrorHandler(&handler);
@@ -118,14 +128,14 @@ void MainWindow::open(const QString & fn)
     QXmlInputSource xmlInputSource(&file);
     if (reader.parse(xmlInputSource))
         statusBar()->showMessage(tr("File loaded"), 2000);
-    setWindowTitle(QString("Lumina-0.4.0 %1").arg(fileName));
+    showFileName(fileName);
 }
 
 void MainWindow::append(){
     QString fnx = fileName; // save the file name
 
 
-    fileName = QFileDialog::getOpenFileName(this, tr("Lumina Append File"), QDir::currentPath(), tr("Lumina Project Files (*.lum *.xml)"));
+    fileName = QFileDialog::getOpenFileName(this, tr("Lumina Append File"), lastPath, tr("Lumina Project Files (*.lum *.xml)"));
     if(fileName != ""){
         open(fileName);
     }
@@ -133,32 +143,31 @@ void MainWindow::append(){
     if(fnx != ""){
         fileName = fnx; //restore filename
     }
-    setWindowTitle(QString("Lumina-0.4.0 %1").arg(fileName));
+    showFileName(fileName);
 }
 
 
 void MainWindow::saveAs(){
-    QString fn = QFileDialog::getSaveFileName(this, tr("Save Lumina File"), QDir::currentPath(), tr("Lumina project Files (*.lum *.xml)"));
+    QString fn = QFileDialog::getSaveFileName(this, tr("Save Lumina File"), lastPath, tr("Lumina project Files (*.lum *.xml)"));
     if (!fn.isEmpty()){
         fileName = fn;
         save();
-        setWindowTitle(QString("Lumina-0.4.0 %1").arg(fileName));
+        showFileName(fileName);
     }
 }
 
 void MainWindow::save(){
     if (fileName.isEmpty()){
-        fileName = QFileDialog::getSaveFileName(this, tr("Save Lumina File"), QDir::currentPath(), tr("Lumina project Files (*.lum *.xml)"));
+        fileName = QFileDialog::getSaveFileName(this, tr("Save Lumina File"), lastPath, tr("Lumina project Files (*.lum *.xml)"));
     }
     QFile file(fileName);
     if (!file.open(QFile::WriteOnly | QFile::Text)) {
         QMessageBox::warning(this, tr("Lumina Project Files"), tr("Cannot write file %1:\n%2.").arg(fileName).arg(file.errorString()));
         return;
     }
-
     LumGenerator generator((Item*)treeview->world);
-
     if (generator.write(&file)) statusBar()->showMessage(tr("File saved"), 2000);
+    lastPath = QFileInfo(fileName).absolutePath();
 }
 
 void MainWindow::clear(){
@@ -166,7 +175,7 @@ void MainWindow::clear(){
 
     if(res == QMessageBox::Ok){
         fileName = "";
-        setWindowTitle(QString("Lumina-0.4.0"));
+        showFileName("");
 
         QList<Item*> allItems = treeview->world->findChildren<Item*>();
 
@@ -181,7 +190,11 @@ void MainWindow::clear(){
 }
 
 void MainWindow::about(){
-    QMessageBox::about(this, tr("About Lumina Modern"),tr("Lumina is a flexible plattform independent development envrionment for GLSL shaders. It uses ECMA-script for tools and emulating opengl engines. This code is distibuted under GNU/GPL license and are made by oc2k1. <br> Contact: <a href='mailto:oc2k1@users.sourceforge.net'>oc2k1@users.sourceforge.net</a><br>Homepage with Tutorials:<a href='http://lumina.sourceforge.net'>http://lumina.sourceforge.net</a>"));
+    QMessageBox::about(this, tr("About Lumina Modern"),tr("Lumina is a flexible plattform independent development envrionment for GLSL shaders. "
+                                                          "It uses ECMA-script for tools and emulating opengl engines. This code is distibuted under GNU/GPL license and are made by oc2k1."
+                                                          "<br> Contact: <a href='mailto:oc2k1@users.sourceforge.net'>oc2k1@users.sourceforge.net</a><br>"
+                                                          "<br>Year 2018 fixes by <a href='https://github.com/alexzk1'>alexzk</a>: <a href = 'mailto:alexzkhr@gmail.com'>email</a><br><br><br>"
+                                                          "Old Expired Homepage with Tutorials:<br><a href='http://lumina.sourceforge.net'>http://lumina.sourceforge.net</a>"));
 }
 
 
@@ -296,15 +309,14 @@ void MainWindow::createMenus(){
 
     menuBar()->addSeparator();
 
-    helpMenu = menuBar()->addMenu(tr("&Help"));
-    helpMenu->addAction(aboutAct);
-    helpMenu->addAction(aboutQtAct);
-
     editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->addAction(hide_all_editors_Act);
     editMenu->addAction(run_all_scripts_Act);
     editMenu->addAction(stop_all_scripts_Act);
 
+    helpMenu = menuBar()->addMenu(tr("&Help"));
+    helpMenu->addAction(aboutAct);
+    helpMenu->addAction(aboutQtAct);
 
 }
 

@@ -24,29 +24,16 @@
 #include <QFileDialog>
 #include <QCoreApplication>
 #include <QDir>
-
+#include "../loaderpaths.h"
 void Item_node::importModel(const QString& filename){
     QString fn;
     if (filename.isEmpty()){
         fn = QFileDialog::getOpenFileName(NULL, tr("Open File"), "" , tr("Any Model (*.md2 *.MD2 *.md3 *.MD3 *.3ds *.3DS *.obj *.OBJ *.cr2 *.CR2 *.x *.X);;Quake2 Model (*.md2 *.MD2);;Quake3 Model (*.md3 *.MD3);;3DS Model (*.3ds *.3DS);;Obj Model (*.obj *.OBJ);;Poser Model (*.cr2 *.CR2);;DirectX Model (*.x *.X);;Cal3d binary Model (*.cmf *.CMF)"));
         //fn = QFileDialog::getOpenFileName(NULL, tr("Open File"), "" , tr("Any Model (*.md2 *.MD2 *.md3 *.MD3 *.3ds *.3DS *.obj *.OBJ *.x *.X *.cmf *.CMF);;Quake2 Model (*.md2 *.MD2);;Quake3 Model (*.md3 *.MD3);;3DS Model (*.3ds *.3DS);;Obj Model (*.obj *.OBJ);;DirectX Model (*.x *.X);;Cal3d binary Model (*.cmf *.CMF)"));
     }
-    else{
-        fn = filename;
-        QString f_app = QFileInfo( QCoreApplication::arguments().at(0)).absolutePath() + "/" + filename;
-        QString f_home = QDir::homePath() + "/.lumina/" + filename;
-        if(QFileInfo (fn ).exists()){
-
-        }
-        else if(QFileInfo (f_app).exists()){
-            fn = f_app;
-        }
-        else if(QFileInfo (f_home).exists()){
-            fn = f_home;
-        }
-
-
-
+    else
+    {
+        fn = LoaderPaths::findObject(filename);
     }
 
     if (fn.endsWith(".md2", Qt::CaseInsensitive)){

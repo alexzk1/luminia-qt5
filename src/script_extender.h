@@ -34,7 +34,7 @@ public:
         text = _text;
         slot = _slot;
         filter = _filter;
-        }
+    }
 
     ~SAction()
     {
@@ -46,12 +46,13 @@ public:
     QString text;		//Action text
     QString slot;		//Slot to call
     QRegExp filter;		//filter for the class name
-    };
+};
 
 class SEngine;
 
-class SSlot{
-friend class SEngine;
+class SSlot
+{
+    friend class SEngine;
 public:
     SSlot(const QString& _type, const QString& _signature, int _id, QRegExp _filter, const QString& _filename){
         type = _type;
@@ -59,7 +60,7 @@ public:
         id = _id;
         filter = _filter;
         filename = _filename;
-        }
+    }
 
 
     QString type;			//slot type
@@ -68,9 +69,10 @@ public:
     int 	id;			//callback id
 
     QString filename;
-    };
+};
 
-class ScriptExtender{
+class ScriptExtender
+{
 public:
 
     static void scanFile(const QString& filename);
@@ -79,10 +81,10 @@ public:
     static void setup();
     static QList<SAction> actionlist;
     static QList<SSlot> slotlist;
-//private:
+    //private:
     static QList<SEngine*> engineList;
 
-    };
+};
 
 #endif
 

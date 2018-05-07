@@ -42,10 +42,9 @@ TreeView::TreeView ( QWidget * parent) : QTreeWidget (parent)
     setColumnCount(1);
     Item::scanScripts();
 
-    Item *null = nullptr;
-    Item_world *w = new Item_world(null, "World");
+    Item_world *w = new Item_world(nullptr, "World");
     ScriptLauncher::world = w;
-    insertTopLevelItem(0,w );
+    insertTopLevelItem(0, w);
     w->setExpanded(true);
     world = w;
 

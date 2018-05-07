@@ -63,7 +63,8 @@ HEADERS	=	src/mainwindow.h \
                 src/script_extender.h \
                 src/script_extender_engine.h \
     src/incgl.h \
-    src/saveable_widget.h
+    src/saveable_widget.h \
+    src/loaderpaths.h
 
 SOURCES =	src/main.cpp \
                 src/mainwindow.cpp \
@@ -112,5 +113,6 @@ SOURCES =	src/main.cpp \
                 src/factory/dialog_factory_dock_private.cpp \
                 src/factory/file_factory_private.cpp \
                 src/factory/colorwidget_factory_private.cpp \
-                src/factory/factory.cpp
+                src/factory/factory.cpp \
+    src/loaderpaths.cpp
 

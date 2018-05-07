@@ -22,15 +22,16 @@
 #include "item_texture.h"
 
 #include "textureformat.h"
+#include "loaderpaths.h"
 
-
-
-#include "incgl.h"
 #include <QFileInfo>
 #include <QDir>
 #include <QFileDialog>
 #include <QCoreApplication>
 #include <QDebug>
+
+
+constexpr auto static lastTexture = GL_TEXTURE31;
 
 #define  DDS_CAPS		0x00000001
 #define  DDS_HEIGHT		0x00000002
@@ -190,7 +191,7 @@ bool Item_texture::isDepth(){
 /*!
 returns the Opengl texture handle
 */
-int Item_texture::getTextureID(){
+GLuint Item_texture::getTextureID(){
     return texture;
 }
 
@@ -222,26 +223,14 @@ void load([String filename])\n
 Load a texture from a file. JPG, BMP, PNG and DDS(flipped in Y direction) are supported. If no file name is set, a filedialog will open.
 */
 void Item_texture::load(const QString& filename){
-    QString f_app = QFileInfo( QCoreApplication::arguments().at(0)).absolutePath() + "/" + filename;
-    QString f_home = QDir::homePath() + "/.lumina/" + filename;
 
-    if(QFileInfo (filename ).exists()){
-        fn = filename;
-        reload();
-    }
-    else if(QFileInfo (f_app).exists()){
-        fn = f_app;
-        reload();
-    }
-    else if(QFileInfo (f_home).exists()){
-        fn = f_home;
-        reload();
-    }
+    fn = LoaderPaths::findObject(filename);
+    reload();
 }
 
 
 void Item_texture::load(){
-    fn =QFileDialog::getOpenFileName(NULL, tr("Open File"), "" , tr("All Files (*.jpg *.png *.dds)"));
+    fn =QFileDialog::getOpenFileName(nullptr, tr("Open File"), "" , tr("All Files (*.jpg *.png *.dds)"));
     reload();
 }
 
@@ -250,19 +239,38 @@ reload function will reload the texture from the file
 */
 
 #include <QGLWidget>
-void Item_texture::reload(){
-    if (boundto > -1){
+void Item_texture::reload()
+{
+    const static auto ends = [](const QString& fn, const QStringList& list)->bool
+    {
+        for (const auto& e : list)
+            if (fn.endsWith(e, Qt::CaseInsensitive))
+                return true;
+        return false;
+    };
+
+    const static QStringList compressed = {
+        ".jpg", ".png", ".jpeg",
+
+    };
+
+    const static QStringList dds = {
+        ".dds",
+    };
+
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
-        glActiveTexture(GL_TEXTURE15);
-    }
-
-    if (texture)glDeleteTextures(1,(GLuint*) &texture);
-    glGenTextures(1, (GLuint*)&texture);
+    else
+        glActiveTexture(lastTexture);
 
 
-    if (fn.contains ( QRegExp("(\\.jpg|\\.JPG|\\.png|\\.PNG)"))){
+    if (texture)
+        glDeleteTextures(1, &texture);
+    glGenTextures(1, &texture);
+
+
+    if (ends(fn, compressed))
+    {
         qWarning( "Load jpg/png" );
         QImage buf;
         if ( !buf.load(fn)) {	// Load first image from file
@@ -293,7 +301,8 @@ void Item_texture::reload(){
     }
 
     //process the dds file header
-    else if (fn.contains( QRegExp("(\\.dds|\\.DDS)"))){
+    if (ends(fn, dds))
+    {
         qWarning( "Load dds" );
         QFile file(fn);
         if ( file.open( QIODevice::ReadOnly ) ) {
@@ -360,16 +369,16 @@ void Item_texture::reload(){
                 type = GL_TEXTURE_2D;
             }
 
-            int datalen =  file.size() - 128;
+            qint64 datalen =  file.size() - 128;
             qDebug() << datalen;
 
-            char *buffer = (char *)malloc(datalen);
+            char *buffer = new char[datalen];
 
             file.read (buffer,datalen);
-            qDebug() << "setData";
+            qDebug() << "setData for texture named: " << getName();
             setData(buffer, datalen);
             qDebug() << "setData complete";
-            free (buffer);
+            delete [] buffer;
         }
     }
     GL_CHECK_ERROR();
@@ -378,18 +387,19 @@ void Item_texture::reload(){
 /*!
 function to fill a texture with rawdata. The format is the same as a DDS file without header.
 */
-void Item_texture::setData(char *data, int len){
+void Item_texture::setData(char *data, qint64 len)
+{
     char *buffer;
     buffer = data;
 
 
-    if (boundto > -1){
+    if (boundto > -1)
+    {
         glActiveTexture(GL_TEXTURE0 + boundto);
-
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
-        qDebug() << "texture was not bound" ;
+        glActiveTexture(lastTexture);
+        qDebug() << "Texture was not bound" ;
         glBindTexture(type, texture);
     }
 
@@ -397,38 +407,36 @@ void Item_texture::setData(char *data, int len){
     GL_CHECK_ERROR();
 
 
-
-
-
     int miplevels = 1;
     if (mipmap) miplevels += int(log2 (width | height | depth));
 
-    int cubeloop = 1; if (type == GL_TEXTURE_CUBE_MAP ) cubeloop = 6;
+    for (GLenum cub = 0, cubeloop = (type == GL_TEXTURE_CUBE_MAP )?cubeloop = 6 : 1; cub < cubeloop; ++cub)
+    {
+        auto w = width;
+        auto h = height;
+        auto d = depth;
 
-    qDebug() << "cubeloop" << cubeloop << "width" <<  width << "height" << height << "depth" <<  depth << data << len ;
-
-    for (int cub = 0; cub < cubeloop; cub++){
-        int w = width;
-        int h = height;
-        int d = depth;
-
-        for (int mip = 0;mip < miplevels; mip++){
-
-            int  num_of_bytes = d * h * w;
-            if (texturetype[formatindex].bits >= 8){
+        for (int mip = 0;mip < miplevels; mip++)
+        {
+            auto  num_of_bytes = d * h * w;
+            if (texturetype[formatindex].bits >= 8)
+            {
                 num_of_bytes *= texturetype[formatindex].bits / 8;
             }
-            else{
+            else
+            {
                 num_of_bytes /= 8 / texturetype[formatindex].bits;
             }
 
-            if (num_of_bytes < texturetype[formatindex].blocksize / 8){
+            if (num_of_bytes < texturetype[formatindex].blocksize / 8)
+            {
                 num_of_bytes =texturetype[formatindex].blocksize / 8;
             }
             qDebug() << "Texture Miplevel "<< mip << " bytes: " << num_of_bytes << w << h << d ;
 
-            if ((buffer - data  + num_of_bytes) > len){
-                qDebug() << "Texture: Not enough data";
+            if ((buffer - data  + num_of_bytes) > static_cast<decltype(num_of_bytes)>(len))
+            {
+                qDebug() << "Texture: Not enough data, canceled loading of \"" << getName() <<"\"";
                 return;
             }
 
@@ -502,7 +510,7 @@ QByteArray Item_texture::getData() const{
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
 
@@ -557,7 +565,7 @@ void Item_texture::MinFilter(int f){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
     glTexParameteri( type, GL_TEXTURE_MIN_FILTER, f );
@@ -573,7 +581,7 @@ void Item_texture::MagFilter(int f){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
     glTexParameteri( type, GL_TEXTURE_MAG_FILTER, f );
@@ -589,7 +597,7 @@ void Item_texture::Anisotropic(int a){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
         glBindTexture(type , texture);
     }
     glTexParameteri( type, GL_TEXTURE_MAX_ANISOTROPY_EXT, a );
@@ -703,7 +711,7 @@ void Item_texture::Image2d(int w,int h, int _format, bool _mipmap){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
     }
 
     if (!texture)glGenTextures(1, (GLuint*)&texture);
@@ -750,7 +758,7 @@ void Item_texture::ImageRect(int w,int h, int _format, bool _mipmap){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
     }
 
     if (!texture)glGenTextures(1, (GLuint*)&texture);
@@ -802,7 +810,7 @@ void Item_texture::Image2dArray(int w, int h, int d, int _format, bool _mipmap){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
     }
 
     if (!texture)glGenTextures(1, (GLuint*)&texture);
@@ -852,7 +860,7 @@ void Item_texture::Image3d(int w, int h, int d, int _format, bool _mipmap){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
     }
 
     if (!texture)glGenTextures(1, (GLuint*)&texture);
@@ -902,7 +910,7 @@ void Item_texture::ImageCube(int w, int _format, bool _mipmap){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
     }
 
     if (!texture)glGenTextures(1, (GLuint*)&texture);
@@ -939,7 +947,7 @@ void Item_texture::CompareMode(bool _compareMode){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
     if (compareMode == false) glTexParameteri( type, GL_TEXTURE_COMPARE_MODE_ARB, GL_FALSE);
@@ -957,7 +965,7 @@ void Item_texture::WrapS(int m){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
     glTexParameteri( type, GL_TEXTURE_WRAP_S, m );
@@ -974,7 +982,7 @@ void Item_texture::WrapT(int m){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
     glTexParameteri( type, GL_TEXTURE_WRAP_T, m );
@@ -991,7 +999,7 @@ void Item_texture::WrapR(int m){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
     glTexParameteri( type, GL_TEXTURE_WRAP_R, m );
@@ -1008,7 +1016,7 @@ void Item_texture::GenerateMipmap(){
         glActiveTexture(GL_TEXTURE0 + boundto);
     }
     else{
-        glActiveTexture(GL_TEXTURE15);
+        glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
 

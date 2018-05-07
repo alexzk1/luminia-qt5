@@ -46,7 +46,6 @@ Item::Item(Item *parent, const QString& name ):
     QTreeWidgetItem(parent, 0)
 {
     dock = nullptr;
-    setup();
     setIcon(0, QIcon(":/images/xmp/world.xpm"));
     setName(name);
     setExpanded(true);
@@ -100,6 +99,11 @@ void Item::setName(const QString& _name){
     if (dock)dock->setWindowTitle (name);
 }
 
+QString Item::getName() const
+{
+    return objectName();
+}
+
 
 void Item::setData ( int column, int role, const QVariant &value )
 {
@@ -128,14 +132,6 @@ void Item::del(){
     deleteLater ();
     }
 */
-
-/*!
-function to init static XPM icons
-*/
-void Item::setup()
-{
-    qDebug() << "Item::setup()";
-}
 
 /*!
 slot for opening the contextmenu

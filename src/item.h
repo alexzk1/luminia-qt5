@@ -86,6 +86,7 @@ public:
     virtual QString statusText() const{return QString();}
     virtual void setData ( int column, int role,  const QVariant &value ) override;
     void setName (const QString& name);
+    QString getName() const;
     Item *parent();
     void appendToWs(QWidget *);
 
@@ -114,8 +115,6 @@ public:
 protected:
     QMenu *menu;
 
-public:
-    static void setup();
 };
 
 /*!

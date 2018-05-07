@@ -24,6 +24,7 @@
 #include "mainwindow.h"
 #include <QFileInfo>
 #include <QDebug>
+#include "script_extender.h"
 
 int main(int argc, char **argv)
 {
@@ -40,8 +41,9 @@ int main(int argc, char **argv)
     Q_INIT_RESOURCE(lumina);
     app.setWindowIcon(QIcon(":/images/lumina.png"));
 
+    ScriptExtender::setup();
+
     MainWindow mainWin;
     mainWin.show();
-    qDebug() << "xxxxxxx " << QFileInfo( QCoreApplication::arguments().at(0) ).absolutePath ();
     return app.exec();
 }

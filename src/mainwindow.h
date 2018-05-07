@@ -62,6 +62,7 @@ private:
     void createDockWindows();
     void createScriptToolBar( QList<ScriptLauncher*>);
     QString fileName;
+    QString lastPath;
 
     TreeView *treeview;
 
@@ -96,6 +97,7 @@ private:
 protected:
     virtual void recurseWrite(QSettings& settings, QObject* object) override;
     virtual void recurseRead(QSettings& settings, QObject* object) override;
+    void showFileName(const QString& name);
 };
 
 #endif

@@ -1,5 +1,5 @@
 /********************************************************************************
-** Lumina is a flexible plattform independent development envrionment for 
+** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
 **
 ** Copyright (C) 2007  oc2k1
@@ -27,42 +27,44 @@ class Item;
 
 class Item_script;
 
-class LumHandler : public QXmlDefaultHandler{
+class LumHandler : public QXmlDefaultHandler
+{
 public:
-	LumHandler(Item *root, const QString & path = "");
-	~LumHandler();
-	bool startElement(const QString &namespaceURI, const QString &localName,const QString &qName, const QXmlAttributes &attributes);
-	bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName);
-	bool characters(const QString &str);
-	bool fatalError(const QXmlParseException &exception);
-	QString errorString() const;
+    LumHandler(Item *root, const QString & path = "");
+    virtual ~LumHandler() override;
+    bool startElement(const QString &namespaceURI, const QString &localName,const QString &qName, const QXmlAttributes &attributes) override;
+    bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName) override;
+    bool characters(const QString &str) override;
+    bool fatalError(const QXmlParseException &exception)override;
+    QString errorString() const override;
 
 private:
-	Item *createChildItem(const QString &tagName);
-	Item *item;
-	QString content;
-	QString errorStr;
-	QString path;
+    Item *createChildItem(const QString &tagName);
+    Item *item;
+    QString content;
+    QString errorStr;
+    QString path;
 
-	bool luminaTag;
-	QList<Item_script*> runlater;
-	};
+    bool luminaTag;
+    QList<Item_script*> runlater;
+};
 
 class QDir;
 
-class LumGenerator{
+class LumGenerator
+{
 public:
-	LumGenerator(Item *rootitem){item = rootitem;}
-	bool write(QIODevice *device);
+    LumGenerator(Item *rootitem){item = rootitem;}
+    bool write(QIODevice *device);
 
 private:
-	QString escapedText(const QString &str);
-	void processItem(Item *item, int depth );
-	QString indent(int depth);
-	Item *item;
-	QTextStream out;
-	QDir *relto;
-	};
+    QString escapedText(const QString &str);
+    void processItem(Item *item, int depth );
+    QString indent(int depth);
+    Item *item;
+    QTextStream out;
+    QDir *relto;
+};
 
 #endif
 

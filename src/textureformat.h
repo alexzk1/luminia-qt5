@@ -1,18 +1,18 @@
-#include <GL/glew.h>
+#include "incgl.h"
 
 
 struct tTyp{
-	int intformat;
-	int format;
-	const char *name;
-	int compressed;
-	int bits;
-	int blocksize;
-	unsigned datatype;
-	};
+        GLuint intformat;
+        GLuint format;
+        const char *name;
+        int compressed;
+        int bits;
+        int blocksize;
+        GLuint datatype;
+        };
 
 const tTyp texturetype[]= {
-//Opengl enum			formatgroup		Name			Comp	Bits	Block	
+//Opengl enum			formatgroup		Name			Comp	Bits	Block
 
 { GL_RGB, 			GL_RGB,			"RGB",			0,	24,	24,	GL_UNSIGNED_BYTE },
 { GL_R3_G3_B2,			GL_RGB,			"R3_G3_B2",		0,	8,	8,	GL_UNSIGNED_BYTE_3_3_2_EXT },
@@ -76,7 +76,7 @@ const tTyp texturetype[]= {
 { GL_COMPRESSED_RGBA_S3TC_DXT3_EXT,	GL_RGBA,	"RGBA_DXT3",		1,	8,	128,	0 },
 { GL_COMPRESSED_RGBA_S3TC_DXT5_EXT,	GL_RGBA,	"RGBA_DXT5",		1,	8,	128,	0 },
 
-{0,				0,			NULL,			0,	0,	0,	0 }
+{0,				0,			nullptr,			0,	0,	0,	0 }
 };
 
 

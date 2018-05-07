@@ -23,6 +23,7 @@
 #define _ITEM_TEXTURE_H
 
 #include "item.h"
+#include "incgl.h"
 
 class half;
 
@@ -48,7 +49,7 @@ public:
     virtual ~Item_texture() override;
     QString getFilename() const {return fn;}
 
-    int getTextureID();
+    GLuint getTextureID();
 
     bool isDepth();
 
@@ -70,7 +71,7 @@ public:
 
     virtual QString statusText() const override;
 
-    void setData(char *data, int datalen);
+    void setData(char *data, qint64 datalen);
     QByteArray getData() const;
 
 public slots:
@@ -116,9 +117,10 @@ public slots:
     virtual QString getType() const override;
 protected:
     QString fn;
-    unsigned int texture, fbo;
-    int width, height, depth;
-    int mipmap, type;
+    GLuint texture, fbo;
+    GLsizei width, height, depth;
+    int mipmap;
+    GLenum type;
 
     int boundto;
 private:

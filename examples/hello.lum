@@ -72,7 +72,7 @@ void main(void){
 	vec2 coord = vec2(fract(16.0 * cha ), floor(16.0 - cha * 16.01)/ 16.0); 
 	coord += fract( gl_TexCoord[0].xy * size)/vec2(16.0,16.0); 
 	gl_TexCoord[0] *= 1;
-	vec4 c = texture2DGrad(Fontmap,coord,dFdx(gl_TexCoord[0].xy) * 2,dFdy(gl_TexCoord[0].xy)); 
+	vec4 c = texture2DGrad(Fontmap, coord, dFdx(gl_TexCoord[0].xy) * 2, dFdy(gl_TexCoord[0].xy)); 
 	gl_FragColor = c * c.a + 0.5 * (1.0 - c.a);
 	}
 

@@ -25,7 +25,7 @@
 #include <QFileDialog>
 #include <QCoreApplication>
 #include <QDebug>
-
+#include "loaderpaths.h"
 
 Item_edit::Item_edit( Item *parent, const QString& name) : Item( parent, name ){
     //fileNormal = new QPixmap( pix_file );
@@ -113,25 +113,10 @@ void Item_edit::load(const QString& filename)
     {
         fn = QFileDialog::getOpenFileName(nullptr, tr("Open File"), "",tr("Text (*.*)"));
     }
-    else{
-        QString f_app = QFileInfo( QCoreApplication::arguments().at(0)).absolutePath() + "/" + filename;
-        QString f_home = QDir::homePath() + "/.lumina/" + filename;
-
-
-        if(QFileInfo (fn ).exists())
-        {
-
-        }
-        else if(QFileInfo (f_app).exists())
-        {
-            fn = f_app;
-        }
-        else if(QFileInfo (f_home).exists())
-        {
-            fn = f_home;
-        }
+    else
+    {
+        fn = LoaderPaths::findObject(filename);
     }
-
     reload();
 }
 
