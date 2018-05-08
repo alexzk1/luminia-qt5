@@ -58,17 +58,21 @@ void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item
             if(as.isForItem(itm))
             {
                 QAction *a = menu->addAction(as.scriptFile->tagXpm(), as.scriptFile->tagName());
-                a->setToolTip(as.scriptFile->tagDescription());
+                a->setToolTip(as.scriptFile->tagDescription() + " (" + as.filePath + ").");
                 ScriptFilePtrW ws = as.scriptFile;
-                QObject::connect(a, &QAction::triggered, itm, [ws, itm]()
+                QPointer<SEngine> engine = new SEngine(itm);
+                engine->useDefaultError();
+
+                //bug fix for old samples code, guess currently it had to use "obj"
+                engine->run(QString("World.getContext = function() { return %1; };").arg(itm->getFullScriptName()));
+
+                QObject::connect(a, &QAction::triggered, itm, [ws, itm, engine]()
                 {
                     auto ptr = ws.lock();
                     //somewhen later, when user clicks
-                    if (itm && ptr)
+                    if (itm && ptr && engine)
                     {
-                        SEngine* engine = new SEngine(itm);
                         engine->run(ptr->getFileText());
-                        engine->deleteLater();
                     }
                 });
             }
@@ -81,15 +85,20 @@ void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item
             {
                 for (const auto& ac : as.sactions)
                 {
+                    //damn...for each action will have own engine...need that, because ...some actions open dialogs for long
                     QAction *a = menu->addAction(ac.icon, "*" + ac.text);
-                    QObject::connect(a, &QAction::triggered, itm, [ac, itm]()
+                    QPointer<SEngine> engine = new SEngine(itm);
+                    engine->useDefaultError();
+
+                    //bug fix for old samples code, guess currently it had to use "obj"
+                    engine->run(QString("World.getContext = function() { return %1; };").arg(itm->getFullScriptName()));
+
+                    QObject::connect(a, &QAction::triggered, itm, [ac, itm, engine]()
                     {
                         //somewhen later, when user clicks
-                        if (itm)
+                        if (engine)
                         {
-                            SEngine* engine = new SEngine(itm);
                             engine->execJsFunc(ac.slot.funcNameOnly, {});
-                            engine->deleteLater();
                         }
                     });
                 }

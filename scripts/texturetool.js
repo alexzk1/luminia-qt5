@@ -134,7 +134,7 @@ function resizeGL(){
 
 
 function textureTool(){
-	print ("context menu starts script function");
+	print ("context menu starts script function, dock = ", dock);
 
 	if (dock == 0){
 		dock = new Dock();
@@ -155,13 +155,14 @@ function textureTool(){
 
 		lb = new Button();
 		lb.text = "Load" ;
-		lb.clicked.connect(obj.load);
+		lb.clicked.connect(obj.load); //this is C++ slot
 		dock.add(lb);
 
 
 		btb = new Button();
-		btb.text = "BRDF factor";
-		btb.clicked.connect(obj.brdfToolDialog);
+		btb.text = "BRDF factor";				
+		btb.clicked.connect(obj, brdfToolDialog); //this is  engine variable now, so syntax differs
+		
 		dock.add(btb);
 
 
@@ -187,10 +188,9 @@ function textureTool(){
 		alphacheck.text = "RGB * A";
 		alphacheck.checked = false;
 		alphacheck.clicked.connect(changed);
-		dock.add(alphacheck);
-
-		dock.show();
+		dock.add(alphacheck);		
 		}
+	  dock.show();
 	}
 
 

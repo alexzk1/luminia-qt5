@@ -28,16 +28,13 @@
 #include "factory/factory.h"
 
 Item_script::Item_script( Item *parent, const QString& name) :
-    Item_edit( parent, name)
+    Item_edit( parent, name),
+    running(false),
+    engine(nullptr)
 {
-    setIcon(0, QIcon(":/images/xpm/script.xpm"));
-    ogl = new glwrapper(this, "gl");
-
+    switchIcon(false);
     connect(edit, SIGNAL(requestCompletationList(QString)), this, SLOT(completationHandler(QString)));
     connect(edit, SIGNAL(requestHelpString(QString)), this, SLOT(helpHandler(QString)));
-
-    ip = nullptr;
-    running = false;
 }
 
 void Item_script::addMenu(QMenu *menu)
@@ -50,14 +47,16 @@ void Item_script::addMenu(QMenu *menu)
     menu->addAction ( QIcon(":/images/xpm/reload.xpm"),tr("Reload File"), this, SLOT(reload()) );
 }
 
-
+void Item_script::deleteEngine()
+{
+    if (engine)
+        engine->deleteLater();
+    engine = nullptr;
+}
 
 Item_script::~Item_script()
 {
-    if(ip)
-        delete ip;
-    if (ogl)
-        delete ogl;
+    deleteEngine();
 }
 
 /*!
@@ -65,96 +64,41 @@ Start a script. QT-4.3 part is not full compatible to QSA
 */
 void Item_script::run()
 {
-    if(ip)
-        delete ip;
-    ip = new QScriptEngine();
-
-    ogl->cleartrasher();
-
-    QScriptValue globalObject = ip->globalObject();
-
-    Factory::Factory(*ip); //Dialog and File factory
-
-    ip->globalObject().setProperty("World" , ip->newQObject(world));
-
-    QScriptValue ogl_sv = ip->newQObject(ogl);
-    ogl_sv.setPrototype(ip->scriptValueFromQMetaObject<glwrapper>());
-    ip->globalObject().setProperty("gl" , ogl_sv );
-
-    QObjectList QObjectList = parent()->findChildren<QObject *>();
-    for ( int i = 0; i < QObjectList.count();i++)
+    deleteEngine();
+    engine = new SEngine(parent());
+    engine->useDefaultError();
+    connect(engine, &SEngine::scriptError, this, [this](const QString&)
     {
-        if (QObjectList[i]->parent() == parent())
-        {
-            ip->globalObject().setProperty(QObjectList[i]->objectName() ,ip->newQObject(QObjectList[i]));
-        }
+        stop();
+        deleteEngine();
+    });
+    //doing kinda local bind, so no need full path from root
+    QList<Item*> directs = parent()->findChildren<Item*>(QString(), Qt::FindDirectChildrenOnly);
+    qDebug() << directs.size() << " items to bind local.";
+    for (const auto& o : directs)
+    {
+        qDebug() << "Binding local: " << o->getName();
+        engine->bindItem(o, true);
     }
 
-    QScriptValue r = ip->evaluate(edit->getText());
+    switchIcon(true);
+    engine->run(edit->getText());
 
-    if (ip->hasUncaughtException())
-    {
-        int line = ip->uncaughtExceptionLineNumber();
-        QMessageBox::critical ( nullptr, QString("Script error"), QString("Error processing Script at Line %1 ").arg(line));
-
-    }
-
-    //mark an active script with render() function
-    //if(ip->globalObject().property("render").isValid()){
-    setIcon( 0,QIcon(":/images/xpm/script_run.xpm"));
-    //	}
-
-    running=true;
-    busy=false;
-
-    Item_world *w = static_cast<Item_world*>(world);
-    w->setTime(w->getTime()); //ugly hack for updating the QOpengl widget
+    world->setTime(world->getTime()); //ugly hack for updating the QOpengl widget
 }
-
-/*!
-call a scriptfunction from a script.
-*/
 
 void Item_script::Call(const QString& function, const QVariantList& args)
 {
-    if (!isRunning() && ip)
+    if (isRunning() && engine)
     {
-        QScriptValueList qsarglist = QScriptValueList();
-        for (int i = 0, sz = args.size(); i < sz; ++i)
-        {
-            QObject* obj = args.at(i).value<QObject*>();
-            if(obj)
-            {
-                qsarglist <<  ip->newQObject (obj);
-            }
-            else switch(args.at(i).type())
-            {
-                case QVariant::Double:
-                case QVariant::Bool:
-                case QVariant::Int:
-                case QVariant::UInt:
-                case QVariant::ULongLong:
-                    qsarglist <<  QScriptValue (ip, args.at(i).toDouble());
-                    break;
-
-                default:
-                    qsarglist <<  QScriptValue (ip, args.at(i).toString());
-            }
-            qDebug() << "Item_script::Call" << args.at(i).type();
-        }
-
-        QScriptValue f = ip->globalObject().property(function).call(ip->globalObject(),qsarglist);
-
-        if (! f.isUndefined())
-        {
-            if (f.toString().contains("Error:"))
-            {
-                qDebug() << f.toString();
-                stop();
-                QMessageBox::critical (nullptr, QString("Script error"),f.toString());
-            }
-        }
+        //qDebug()<<"Item script, exec for: " << function;
+        engine->execJsFunc(function, args);
     }
+}
+
+QString Item_script::getType() const
+{
+    return "Script";
 }
 
 /*!
@@ -162,8 +106,7 @@ stopt the excution. "render()" will not be called anymore
 */
 void Item_script::stop()
 {
-    running=false;
-    setIcon( 0,QIcon(":/images/xpm/script_run.xpm"));
+    switchIcon(false);
 }
 /*!
 returns true if the script is running. A "render()" function is needed or the script will
@@ -177,7 +120,9 @@ bool Item_script::isRunning() const
 complettation handler, that searchs the object by the last line and generates complettations
 (childobjects, functions and enums) from the objects metadata.
 */
-void Item_script::completationHandler(const QString& line){
+void Item_script::completationHandler(const QString& line)
+{
+    glwrapper ogl(nullptr);
     meta = nullptr;
     QStringList complettations;
     edit->setCompleatationList(complettations,0); //default no completation box
@@ -195,11 +140,13 @@ void Item_script::completationHandler(const QString& line){
         {
             obj = Item::world;
         }
-        else if (parts[0] == "gl")
+        else
+            if (parts[0] == "gl")
         {
-            obj = ogl;
+            obj = &ogl;
         }
-        else{
+        else
+        {
             //Factory prototypes
             QRegExp searchProto(parts[0]+"\\s*=\\s*new\\s*(\\w+)[\\(|;]");
             searchProto.indexIn(text());
@@ -221,7 +168,8 @@ void Item_script::completationHandler(const QString& line){
         }
         if (obj == nullptr)
             return;
-        else{
+        else
+        {
             bool found = true;
             //find the correct child object
             for(int depth = 1; depth < parts.count() -1; depth++){
@@ -337,4 +285,12 @@ void Item_script::helpHandler(const QString& string)
     QRegExp remove("<.*>");
     remove.setMinimal(true);
     edit->setHelpString(parser2.cap(1).replace(remove,""));
+}
+
+void Item_script::switchIcon(bool isRunning)
+{
+    const static QIcon norm(":/images/xpm/script.xpm");
+    const static QIcon run (":/images/xpm/script_run.xpm");
+    setIcon(0, (isRunning)?run:norm);
+    running = isRunning;
 }

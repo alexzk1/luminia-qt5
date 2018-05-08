@@ -99,10 +99,10 @@ QScriptValue SEngine::execJsFunc(const QString &function, const QVariantList &ar
     return f;
 }
 
-void SEngine::bindItem(QPointer<Item> itm)
+void SEngine::bindItem(QPointer<Item> itm, bool localy)
 {
     if (itm)
-        itm->bindToEngine(&eng);
+        itm->bindToEngine(&eng, localy);
 }
 
 void SEngine::useDefaultError()

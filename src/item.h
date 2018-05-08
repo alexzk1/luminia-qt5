@@ -31,8 +31,7 @@
 #define DQMENU(classname,menu)
 #define SCRIPTSLOTS(classname, classtype)
 
-#include <QtScript>
-
+#include "script_extender_engine.h"
 #include "script_extender.h"
 #include "profiler.h"
 
@@ -65,7 +64,7 @@ public:
 
     virtual void deleteLater();
     QString getFullScriptName() const;
-    void bindToEngine(QScriptEngine *eng);
+    void bindToEngine(QScriptEngine *eng, bool localNames = false);
     void resetMenu(); //support for reloading plugins maybe ...because menu is built once
 public slots:
     Item *findChild(const QString& name) const;
@@ -80,7 +79,7 @@ public slots:
 protected:
     virtual void addMenu(QMenu *menu){Q_UNUSED(menu);}
     QScriptValue getEngineParentObject(QScriptEngine &eng) const;
-    static QScriptValue getEngineObject(QScriptEngine &eng, const Item *object);
+    static QScriptValue getEngineObject(QScriptEngine &eng, const Item *object, bool localName = false);
 
     template<class T, class ...Args>
     T* makeNewItemNoThis(Args... args)
@@ -319,16 +318,20 @@ public slots:
     void stop();
     bool isRunning() const;
     void Call(const QString& function, const QVariantList& args = QVariantList());
-    virtual QString getType()const override{return QString("Script");}
+    virtual QString getType()const override;
 private slots:
     void completationHandler(const QString&);
     void helpHandler(const QString&);
+    void switchIcon(bool isRunning);
 protected:
-    bool running,busy;
-    glwrapper *ogl;
-    const QMetaObject *meta;
-    QScriptEngine *ip;
     virtual void addMenu(QMenu *menu) override;
+private:
+    void deleteEngine();
+    bool running;
+    QPointer<SEngine> engine;
+    const QMetaObject *meta;
+
+
 };
 
 

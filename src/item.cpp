@@ -94,6 +94,9 @@ void Item::setName(const QString& _name)
 
     setObjectName(name);
     setText(0, name);
+
+    resetMenu(); // menu holds actions, which holds engines, which are using old name
+
     if (dock)
         dock->setWindowTitle (name);
 }
@@ -128,7 +131,7 @@ void Item::contextmenu(const QPoint& point)
 {
     if (!menu)
     {
-        menu = new QMenu(getType());
+        menu = new QMenu(ws);
         addMenu(menu);
         if (menu->actions().size())
             menu->addSeparator();
@@ -186,7 +189,7 @@ QString Item::getFullScriptName() const
     return parent()->getFullScriptName() + "." + getName();
 }
 
-void Item::bindToEngine(QScriptEngine *eng)
+void Item::bindToEngine(QScriptEngine *eng, bool localNames)
 {
     if (eng)
     {
@@ -203,11 +206,11 @@ void Item::bindToEngine(QScriptEngine *eng)
             }
         };
 
-        QScriptValue val = getEngineObject(*eng, this);
+        QScriptValue val = getEngineObject(*eng, this, localNames);
         if (!val.isValid() || val.isUndefined() || val.isNull())
         {
-            recursive(getEngineParentObject(*eng), this);
-            val = getEngineObject(*eng, this);
+            recursive((localNames)?eng->globalObject():getEngineParentObject(*eng), this);
+            val = getEngineObject(*eng, this, localNames);
         }
 
         //now exposing methods
@@ -215,7 +218,15 @@ void Item::bindToEngine(QScriptEngine *eng)
         for (const auto& method : mlist)
         {
             //qDebug() << "Binding " << method.funcNameOnly << "to " << getType();
-            QString expr = QString("%1.%2 = %2").arg(getFullScriptName()).arg(method.funcNameOnly);
+            QString expr = QString("%1.%2 = function() {"
+                                   "var tmp = obj;"
+                                   "obj = %1;"
+                                   "var r = %2(arguments);"
+                                   "obj = tmp;"
+                                   "return r;"
+                                   "};")
+                           .arg(getFullScriptName()).arg(method.funcNameOnly);
+            qDebug() <<expr;
             eng->evaluate(expr);
         }
     }
@@ -224,7 +235,7 @@ void Item::bindToEngine(QScriptEngine *eng)
 void Item::resetMenu()
 {
     if (menu)
-        delete menu;
+        menu->deleteLater();
     menu = nullptr;
 }
 
@@ -261,11 +272,11 @@ QScriptValue Item::getEngineParentObject(QScriptEngine &eng) const
     return getEngineObject(eng, parent());
 }
 
-QScriptValue Item::getEngineObject(QScriptEngine &eng, const Item* obj)
+QScriptValue Item::getEngineObject(QScriptEngine &eng, const Item* obj, bool localName)
 {
     if (obj)
     {
-        QString name = obj->getFullScriptName();
+        QString name = (localName)? obj->getName() : obj->getFullScriptName();
         return eng.globalObject().property(name);
     }
     return eng.globalObject();

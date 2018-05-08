@@ -46,7 +46,7 @@ public:
     QScriptValue run(QFile &file);
     QScriptValue execJsFunc(const QString& function, const QVariantList& args);
 
-    void bindItem(QPointer<Item> itm);
+    void bindItem(QPointer<Item> itm, bool localy = false);
 
     void useDefaultError();
     QScriptEngine& getEngine();

@@ -27,8 +27,10 @@ QGLWidget* GLCam::shareWidget = nullptr;
 
 
 //GLCam::GLCam( QWidget* parent, Item_cam* _cam, const QGLWidget *shareWidget): QGLWidget( parent, shareWidget ){
-GLCam::GLCam( QWidget* parent, Item_cam* _cam): QGLWidget( parent, GLCam::shareWidget ){
-    if(!shareWidget)shareWidget = this;
+GLCam::GLCam( QWidget* parent, Item_cam* _cam): QGLWidget( parent, GLCam::shareWidget )
+{
+    if(!shareWidget)
+        shareWidget = this;
 
     cam = _cam;
 
@@ -40,17 +42,19 @@ GLCam::GLCam( QWidget* parent, Item_cam* _cam): QGLWidget( parent, GLCam::shareW
 
     near_plane = 5.0;
     far_plane = 60.0;
-    }
+}
 
 
-GLCam::~GLCam(){
+GLCam::~GLCam()
+{
     makeCurrent();
-    }
+}
 
 /*!
 paintfuntion cals every "render" function from every active script
 */
-void GLCam::paintGL(){
+void GLCam::paintGL()
+{
     glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
     glEnable(GL_DEPTH_TEST);
 
@@ -61,7 +65,8 @@ void GLCam::paintGL(){
     cam->profiler->newFrame();
 
     QTreeWidgetItemIterator it(cam->world);
-    while (*it) {
+    while (*it)
+    {
         float mat[16];
         cam->getInverseMatrix(mat);
         glLoadMatrixf(mat);
@@ -69,20 +74,20 @@ void GLCam::paintGL(){
             //simple code to apply the nodes matices, a stack based could be better
             QList<float*> matrixlist;
             Item_matrix* m = reinterpret_cast<Item_matrix*>(scriptitem); //Only used to get the parent
-            while( (m = dynamic_cast<Item_matrix*>(m->parent()))!= NULL){
+            while( (m = dynamic_cast<Item_matrix*>(m->parent()))!= nullptr){
                 float *mat =  m->getMatrix();
                 matrixlist.append(mat);
-                }
+            }
 
             for (int k = matrixlist.size()-1; k >= 0; k--){
                 glMultMatrixf(matrixlist.at(k));
-                }
+            }
 
             scriptitem->Call("render");
             Item_buffer::UnbindAll(); //unbind all VBOs
-            }
-        ++it;
         }
+        ++it;
+    }
 
     glUseProgramObjectARB(0); //disable all active shaders
 
@@ -97,8 +102,8 @@ void GLCam::paintGL(){
     if (error != GL_NO_ERROR){
         qDebug() << "glerror in rendering profiler text" << error;
         //exit (1);
-        }
     }
+}
 
 
 /*!
@@ -112,11 +117,11 @@ void GLCam::initializeGL(){
     else {
         qDebug() << "No GLSL support\n";
         exit(1);
-        }
+    }
     if (!GLEW_EXT_framebuffer_object){
         qDebug() << "No GL_EXT_framebuffer_object support\n";
         exit(1);
-        }
+    }
 
     if (GL_EXT_geometry_shader4)
         qDebug() << "Ready for Geometrieshader\n";
@@ -138,13 +143,13 @@ void GLCam::initializeGL(){
 
     glPixelStorei(GL_PACK_ALIGNMENT,1); //avoid trouble with non power of two textures
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
-    }
+}
 
 /*!
 mousePressEvent placeholder
 */
 void GLCam::mousePressEvent (QMouseEvent*){
-/*
+    /*
     glClear( GL_COLOR_BUFFER_BIT );
     glLoadIdentity();
     glTranslatef( 0.0, 0.0, -10.0 );
@@ -166,13 +171,13 @@ void GLCam::mousePressEvent (QMouseEvent*){
     printf("Color: %d %d %d\n",abs(readpixel[0]*255),abs(readpixel[1]*255),abs(readpixel[2]*255));
     //abs((rgbpixels[p]*255)
     return; */
-    }
+}
 
 /*!
 mouseMoveEvent placeholder
 */
 void GLCam::mouseMoveEvent (QMouseEvent*){
-    }
+}
 
 /*!
 mouseReleaseEvent placeholder
@@ -181,7 +186,7 @@ void GLCam::mouseReleaseEvent (QMouseEvent*){
     /*glReadPixels(ev->pos().x(),height()- ev->pos().y(),1,1,GL_RGB,GL_FLOAT,&readpixel);
     printf("Color: %d %d %d\n",abs(readpixel[0]*255),abs(readpixel[1]*255),abs(readpixel[2]*255));
     //abs((rgbpixels[p]*255)*/
-    }
+}
 
 /*!
 wheel event modifies the FOV (zoom) of the projection matrix
@@ -205,7 +210,7 @@ void GLCam::wheelEvent (QWheelEvent *ev){
     paintGL();
     swapBuffers();
     qDebug() << "Zoom: " << zoom;
-    }
+}
 
 
 /*!
@@ -229,13 +234,13 @@ void GLCam::resizeGL( int width, int height ){
     while (*it){
         if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))scriptitem->Call(QString("resizeEvent"),QVariantList() << width << height);
         ++it;
-        }
     }
+}
 
 
 void GLCam::resizeEvent(QResizeEvent *e ){
     QGLWidget::resizeEvent(e);
-    }
+}
 
 /*!
 keypress event calles the "keypressEvent" function from each running script
@@ -246,25 +251,25 @@ void GLCam::keyPressEvent(QKeyEvent *e){
         fullscreen = parentWidget();
         setParent(0);
         showFullScreen();
-        }
+    }
     else if (e->key() == Qt::Key_F && fullscreen){
         setParent(fullscreen);
         if (QDockWidget *w = dynamic_cast<QDockWidget*>(fullscreen))w->setWidget(this);
         fullscreen = NULL;
-        }
+    }
 
     QTreeWidgetItemIterator it(cam->world);
     while (*it){
-//#ifndef QTSCRIPT
+        //#ifndef QTSCRIPT
         if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))scriptitem->Call(QString("keypressEvent"),QVariantList() << e->text ());
-//#endif
-//#ifdef QTSCRIPT
+        //#endif
+        //#ifdef QTSCRIPT
         //if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))scriptitem->call(QString("keypressEvent"),  QScriptValueList()<< QScriptValue (e->text ()));
-//#endif
+        //#endif
 
         ++it;
-        }
     }
+}
 
 /*!
 internal function for setting the Near plane
@@ -278,7 +283,7 @@ void GLCam::setNear(double val){
     glLoadIdentity();
     glFrustum( -w, w, -h, h, near_plane, far_plane );
     glMatrixMode(GL_MODELVIEW);
-    }
+}
 
 /*!
 internal function for setting the Far plane
@@ -292,6 +297,6 @@ void GLCam::setFar(double val){
     glLoadIdentity();
     glFrustum( -w, w, -h, h, near_plane, far_plane );
     glMatrixMode(GL_MODELVIEW);
-    }
+}
 
 
