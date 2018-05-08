@@ -66,11 +66,7 @@ public slots:
     virtual QString getType() const {return QString("Mesh");}
 protected:
     int num_of_vertices;
-
-public slots:
-    virtual void contextmenu(const QPoint&);
-private:
-    bool menuinit;
+    virtual void addMenu(QMenu *menu);
 };
 
 #endif

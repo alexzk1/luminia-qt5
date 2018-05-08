@@ -46,6 +46,8 @@ public:
     QScriptValue run(QFile &file);
     QScriptValue execJsFunc(const QString& function, const QVariantList& args);
 
+    void bindItem(QPointer<Item> itm);
+
     void useDefaultError();
     QScriptEngine& getEngine();
 signals:

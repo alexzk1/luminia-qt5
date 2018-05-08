@@ -24,6 +24,7 @@
 #include "item.h"
 
 static std::vector<PreloadedScript> scripts;
+static std::vector<PreloadedScript> plugins;
 
 PreloadedScript::PreloadedScript(const QString &fileName):
     filePath(fileName),
@@ -51,6 +52,16 @@ void ScriptExtender::addActions(QPointer<QMenu> menu, const QPointer<Item> itm)
 {
     if (menu && itm)
     {
+        //building "plugins actions"
+        for (const auto& as : plugins)
+        {
+            if(as.isForItem(itm))
+            {
+
+            }
+        }
+
+        //building "script actions"
         for (const auto& as : scripts)
         {
             if(as.isForItem(itm) && !as.sactions.isEmpty())
@@ -58,14 +69,14 @@ void ScriptExtender::addActions(QPointer<QMenu> menu, const QPointer<Item> itm)
                 for (const auto& ac : as.sactions)
                 {
                     QAction *a = menu->addAction(ac.icon, "*" + ac.text);
-                    QObject::connect(a, &QAction::triggered, itm, [itm, ac]()
+                    QObject::connect(a, &QAction::triggered, itm, [ac, itm]()
                     {
-                        //making special "action engine" and execute function inside it
+                        //somewhen later, when user clicks
                         if (itm)
                         {
-                            SEngine *e = new SEngine(itm); //constructor will load all imports
-                            e->execJsFunc(ac.slot.funcNameOnly, {});
-                            e->deleteLater();
+                            SEngine* engine = new SEngine(itm);
+                            engine->execJsFunc(ac.slot.funcNameOnly, {});
+                            engine->deleteLater();
                         }
                     });
                 }
@@ -74,9 +85,37 @@ void ScriptExtender::addActions(QPointer<QMenu> menu, const QPointer<Item> itm)
     }
 }
 
-void ScriptExtender::setup()
+script_header_parser::FuncsList ScriptExtender::getImportedMethods(const QPointer<Item> itm)
 {
-    QStringList paths = LoaderPaths::listFilesInSubfolder(LoaderPaths::SCRIPTS);
+    script_header_parser::FuncsList result;
+    result.reserve(100);
+    //getting list of methods (slots) which object should export
+    for (const auto& as : scripts)
+    {
+        if(as.isForItem(itm))
+            result.append(as.sexports);
+    }
+    return result;
+}
+
+void ScriptExtender::reloadExports()
+{
+    scripts.clear();
+    auto paths = LoaderPaths::listFilesInSubfolder(LoaderPaths::SCRIPTS);
     for(const auto& p : paths)
         scripts.emplace_back(p);
+}
+
+void ScriptExtender::reloadPlugins()
+{
+    plugins.clear();
+    auto paths = LoaderPaths::listFilesInSubfolder(LoaderPaths::PLUGINS);
+    for(const auto& p : paths)
+        plugins.emplace_back(p);
+}
+
+void ScriptExtender::reloadAll()
+{
+    reloadExports();
+    reloadPlugins();
 }

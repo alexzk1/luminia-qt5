@@ -25,7 +25,6 @@
 bool Item_virtual::exist = false;
 Item_virtual::Item_virtual( Item *parent, const QString& name): Item( parent, name)
 {
-    menuinit = false;
     exist = true;
 }
 
@@ -33,29 +32,6 @@ Item_virtual::~Item_virtual()
 {
     exist = false;
 }
-
-/*!
-slot for opening the contextmenu
-*/
-void Item_virtual::contextmenu(const QPoint& point)
-{
-
-    context = this;
-
-    if(!menuinit)
-    {
-        DQMENU(Item_virtual, menu);
-        menu->addSeparator();
-        menu->addSeparator();
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-        menuinit = true;
-    }
-    menu->popup( point );
-}
-
-
 
 
 

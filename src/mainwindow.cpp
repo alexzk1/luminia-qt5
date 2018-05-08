@@ -36,7 +36,9 @@
 MainWindow::MainWindow()
 {
     setDockNestingEnabled(true);
+
     Item::ws = this;
+
     treeview = new TreeView (this);
     setCentralWidget(treeview);
 
@@ -47,7 +49,7 @@ MainWindow::MainWindow()
     createMenus();
     createToolBars();
     createStatusBar();
-    createScriptToolBar(treeview->world->launcher);
+    createScriptToolBar();
 
     timeToolBar = addToolBar(tr("Time"));
     time = new TimeWidget(this);
@@ -66,16 +68,16 @@ MainWindow::~MainWindow()
     delete treeview;
 }
 
-void MainWindow::createScriptToolBar( QList<ScriptLauncher*>  launcher)
+void MainWindow::createScriptToolBar()
 {
     scriptToolBar = addToolBar(tr("ScriptTools"));
-    for (int i = 0; i < launcher.size(); ++i)
-    {
-        if (launcher.at(i)->isForItem("ScriptToolBar"))
-        {
-            scriptToolBar->addAction(launcher.at(i)->getAction());
-        }
-    }
+//    for (int i = 0; i < launcher.size(); ++i)
+//    {
+//        if (launcher.at(i)->isForItem("ScriptToolBar"))
+//        {
+//            scriptToolBar->addAction(launcher.at(i)->getAction());
+//        }
+//    }
 }
 
 void MainWindow::recurseWrite(QSettings &settings, QObject*)

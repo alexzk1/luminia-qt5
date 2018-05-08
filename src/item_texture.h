@@ -123,6 +123,7 @@ protected:
     GLenum type;
 
     int boundto;
+    virtual void addMenu(QMenu* menu) override;
 private:
 
     //property functions
@@ -145,11 +146,6 @@ private:
 
     int formatindex; //index to the correct texture format structure
     int viewport[4];
-
-public slots:
-    virtual void contextmenu(const QPoint&) override;
-private:
-    bool menuinit;
 };
 
 #endif

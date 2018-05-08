@@ -27,38 +27,14 @@ Item_mesh::Item_mesh( Item *parent, const QString& label1, int vertices) : Item(
     setIcon( 0, QIcon(":/images/xpm/stream.xpm") );
 
     num_of_vertices = vertices;
-    menuinit = false;
 }
 
-
-/*!
-slot for opening the contextmenu
-*/
-void Item_mesh::contextmenu(const QPoint& point){
-
-    context = this;
-
-    if(!menuinit){
-        QMenu *add = menu->addMenu (QString("Add"));
-
-        DQMENU(Item_mesh, add);
-
-
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/normal.xpm"), QString("generate Normal"), this, SLOT( genNormal()) );
-        menu->addAction( QIcon(":/images/xpm/normal.xpm"), QString("generate Tangent"), this, SLOT( genTangent()) );
-        menu->addAction( QIcon(":/images/xpm/quaternion.xpm"), QString("generate Texspace Quaternion"), this, SLOT( genTexSpaceQuaternion()));
-
-        menu->addSeparator();
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-
-
-        menuinit = true;
-    }
-
-    menu->popup( point );
+void Item_mesh::addMenu(QMenu *menu)
+{
+    QMenu *add = menu->addMenu (tr("Add"));
+    menu->addAction( QIcon(":/images/xpm/normal.xpm"), tr("Create Normal"), this, SLOT( genNormal()) );
+    menu->addAction( QIcon(":/images/xpm/normal.xpm"), tr("Create Tangent"), this, SLOT( genTangent()) );
+    menu->addAction( QIcon(":/images/xpm/quaternion.xpm"), tr("Create Texspace Quaternion"), this, SLOT( genTexSpaceQuaternion()));
 }
 
 

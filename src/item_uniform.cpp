@@ -40,7 +40,6 @@ Item_uniform::Item_uniform( Item *parent, const QString& name, unsigned _dim, un
     setDim( _dim, _size, _keyframes, _format);
 
     ref_pos = -1;
-    menuinit = false;
 }
 
 Item_uniform::~Item_uniform()
@@ -49,26 +48,9 @@ Item_uniform::~Item_uniform()
 }
 
 
-/*!
-slot for opening the contextmenu
-*/
-void Item_uniform::contextmenu(const QPoint& point){
-
-    context = this;
-
-    if(!menuinit){
-        menu->addAction( QString( "Properties"), this, SLOT(PropertiesDialog()) );
-        menu->addSeparator();
-        DQMENU(Item_edit, menu);
-        menu->addSeparator();
-
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-        menuinit = true;
-    }
-
-    menu->popup( point );
+void Item_uniform::addMenu(QMenu *menu)
+{
+    menu->addAction( tr( "Properties"), this, SLOT(PropertiesDialog()));
 }
 
 

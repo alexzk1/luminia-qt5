@@ -45,9 +45,6 @@ Item_index::Item_index( Item *parent, const QString& name, int ipp, int num) : I
     setIcon( 0, QIcon(":/images/xpm/index.xpm") );
     glGenBuffersARB( 1, (GLuint*)&VBO);
     needrefresh = 1;
-
-    menuinit = false;
-
 }
 
 
@@ -55,30 +52,6 @@ Item_index::~Item_index()
 {
     glDeleteBuffersARB(1, (GLuint*)&VBO);
     free(index);
-}
-
-
-/*!
-slot for opening the contextmenu
-*/
-void Item_index::contextmenu(const QPoint& point)
-{
-
-    context = this;
-
-    if(!menuinit){
-
-        menu->addSeparator();
-        DQMENU(Item_index, menu);
-        menu->addSeparator();
-
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-        menuinit = true;
-    }
-
-    menu->popup( point );
 }
 
 

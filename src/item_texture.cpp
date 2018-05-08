@@ -119,7 +119,6 @@ Item_texture::Item_texture( Item *parent, const QString& name ) : Item( parent, 
     width = 0;
     height = 0;
     depth = 0;
-    menuinit = false;
 }
 
 Item_texture::~Item_texture()
@@ -127,30 +126,6 @@ Item_texture::~Item_texture()
     glDeleteTextures(1, &texture);
     glDeleteFramebuffersEXT (1, &fbo);
 }
-
-
-/*!
-slot for opening the contextmenu
-*/
-void Item_texture::contextmenu(const QPoint& point){
-
-    context = this;
-
-    if(!menuinit)
-    {
-        menu->addSeparator();
-        menu->addAction ( QIcon(":/images/xpm/load.xpm"), QString("Load file"), this, SLOT(load()) );
-        DQMENU(Item_edit, menu);
-        menu->addSeparator();
-
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-        menuinit = true;
-    }
-    menu->popup( point );
-}
-
 
 /*!
 returns some information about the texture
@@ -1068,6 +1043,11 @@ void Item_texture::Print(int x, int y, QString text){
 QString Item_texture::getType() const
 {
     return QString("Texture");
+}
+
+void Item_texture::addMenu(QMenu *menu)
+{
+    menu->addAction ( QIcon(":/images/xpm/load.xpm"), tr("Load File..."), this, SLOT(load()) );
 }
 
 /*!

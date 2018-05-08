@@ -36,35 +36,12 @@ Item_node::Item_node( Item *parent, const QString& name) : Item_matrix( parent, 
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
     //Icon = xpm_node;
     setIcon(0, QIcon(":/images/xpm/node.xpm"));
-    menuinit = false;
 }
 
-/*!
-slot for opening the contextmenu
-*/
-void Item_node::contextmenu(const QPoint& point)
+void Item_node::addMenu(QMenu *menu)
 {
-
-    context = this;
-
-    if(!menuinit)
-    {
-        DQMENU(Item_node, menu);
-
-        menu->addAction( QIcon(":/images/xpm/armature.xpm"), QString("Add Armature") , this, SLOT( addArmature()));
-
-        menu->addSeparator();
-        menu->addAction( QIcon( ":/images/xpm/importer.xpm"), QString("Import Model"), this, SLOT(importModel()) );
-        menu->addSeparator();
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon( ":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-
-
-        menuinit = true;
-    }
-
-    menu->popup( point );
+    menu->addAction( QIcon(":/images/xpm/armature.xpm"),  tr("Add Armature") , this, SLOT( addArmature()));
+    menu->addAction( QIcon( ":/images/xpm/importer.xpm"), tr("Import Model"), this, SLOT(importModel()) );
 }
 
 /*!

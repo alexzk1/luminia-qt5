@@ -35,33 +35,13 @@ Item_shader::Item_shader( Item *parent, const QString& name, int _shadertype) : 
 
     connect(edit, SIGNAL(requestCompletationList(QString)), this, SLOT(completationHandler(QString)));
     connect(edit, SIGNAL(requestHelpString(QString)), this, SLOT(helpHandler(QString)));
-    menuinit = false;
 }
 
-/*!
-slot for opening the contextmenu
-*/
-void Item_shader::contextmenu(const QPoint& point){
-
-    context = this;
-
-    if(!menuinit){
-
-        menu->addSeparator();
-        DQMENU(Item_edit, menu);
-        menu->addAction ( QIcon(":/images/xpm/load.xpm"), "Load file", this, SLOT(load()) );
-        menu->addAction ( QIcon(":/images/xpm/save.xpm"), "Save as file", this, SLOT(saveas()) );
-        menu->addAction ( QIcon(":/images/xpm/reload.xpm"), "Reload file", this, SLOT(reload()) );
-        menu->addSeparator();
-
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-        menuinit = true;
-
-    }
-
-    menu->popup( point );
+void Item_shader::addMenu(QMenu *menu)
+{
+    menu->addAction ( QIcon(":/images/xpm/load.xpm"), tr("Load File"), this, SLOT(load()) );
+    menu->addAction ( QIcon(":/images/xpm/save.xpm"), tr("Save as File"), this, SLOT(saveas()) );
+    menu->addAction ( QIcon(":/images/xpm/reload.xpm"), tr("Reload File"), this, SLOT(reload()) );
 }
 
 

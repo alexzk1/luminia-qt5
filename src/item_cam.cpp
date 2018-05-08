@@ -27,21 +27,11 @@
 Item_cam::Item_cam(Item_world *parent, const QString& name) : Item_matrix( parent, name)
 {
     setIcon( 0,  QIcon(":/images/xpm/cam.xpm"));
-
-    deletable = true;
-    if (!GLCam::shareWidget)deletable = false;
-
-    else menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-
     cam = new  GLCam(nullptr, this);
-
     qDebug() << GLCam::shareWidget << cam;
-
     appendToWs(cam);
-    SCRIPT2MENU();
     connect(world, SIGNAL(update()),(QObject*)cam, SLOT(update()) );
     Translate(0.0,0.0,10.0);
-
 
     qDebug() << GLCam::shareWidget << cam;
 }
@@ -79,16 +69,18 @@ void Item_cam::Far(double val){
     cam->setFar(val);
 }
 
+bool Item_cam::isDeletable() const
+{
+    return GLCam::shareWidget && GLCam::shareWidget != cam;
+}
+
 /*!
 modified deleteLater() function to protect undeletable cams
 */
-void Item_cam::deleteLater(){
-    //if(deletable)QObject::deleteLater();
-
-    qDebug() << GLCam::shareWidget << cam;
-
-    if(GLCam::shareWidget != cam)QObject::deleteLater();
-
+void Item_cam::deleteLater()
+{
+    if(GLCam::shareWidget != cam)
+        QObject::deleteLater();
 }
 
 

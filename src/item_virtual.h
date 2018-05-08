@@ -37,9 +37,7 @@ public:
 public slots:
     void registerTexSpaceCallback(QObject*, const QString&){}
     void analyse(QObject*, QObject*){}
-    virtual void contextmenu(const QPoint&) override;
 private:
-    bool menuinit;
     static bool exist;
 
     //char *data;

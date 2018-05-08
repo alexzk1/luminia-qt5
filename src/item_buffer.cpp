@@ -60,36 +60,15 @@ Item_buffer::Item_buffer(Item *parent, const QString& name, unsigned _dim, unsig
 
     transformFeedbackName = "";
     transformFeedbackKeyFrame = 0;
-
-    menuinit = false;
-
 }
 
 Item_buffer::~Item_buffer(){
     glDeleteBuffers(1,(GLuint*) &glbuf);
 }
 
-
-/*!
-slot for opening the contextmenu
-*/
-void Item_buffer::contextmenu(const QPoint& point){
-
-    context = this;
-
-    if(!menuinit){
-        menu->addAction( QString( "Properties"), this, SLOT(PropertiesDialog()) );
-        menu->addSeparator();
-        DQMENU(Item_edit, menu);
-        menu->addSeparator();
-
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-        menuinit = true;
-    }
-
-    menu->popup( point );
+void Item_buffer::addMenu(QMenu *menu)
+{
+    menu->addAction( tr( "Properties"), this, SLOT(PropertiesDialog()) );
 }
 
 /*!
@@ -179,8 +158,8 @@ void Item_buffer::setDim(int _dim, int _size, int _keyframes, int _format, bool 
                 tmp_buf.i = new int[elements];
                 memset(tmp_buf.i,0,elements * 4);
                 tmp_normalized_scalefactor = _normalized_int ? 2147483648.0 : 1.0;
-                COPY_DATA(tmp_buf.i, tmp_normalized_scalefactor)
-                        format = GL_INT;
+                COPY_DATA(tmp_buf.i, tmp_normalized_scalefactor);
+                format = GL_INT;
                 break;
             case GL_UNSIGNED_INT:
                 tmp_buf.ui = new unsigned int[elements];
@@ -193,15 +172,15 @@ void Item_buffer::setDim(int _dim, int _size, int _keyframes, int _format, bool 
                 tmp_buf.h = new half[elements];
                 memset(tmp_buf.h,0,elements * 2);
                 tmp_normalized_scalefactor = 1.0;
-                COPY_DATA(tmp_buf.h, tmp_normalized_scalefactor)
-                        format = GL_HALF_FLOAT_ARB;
+                COPY_DATA(tmp_buf.h, tmp_normalized_scalefactor);
+                format = GL_HALF_FLOAT_ARB;
                 break;
             default:
                 tmp_buf.f = new float[elements];
                 memset(tmp_buf.f,0,elements * 4);
                 tmp_normalized_scalefactor = 1.0;
-                COPY_DATA(tmp_buf.f, 1.0)
-                        format =  GL_FLOAT;
+                COPY_DATA(tmp_buf.f, 1.0);
+                format =  GL_FLOAT;
         }
 
         qDebug()<< " Item_buffer::setDim tmp_buf"  << tmp_buf.f;
@@ -413,9 +392,9 @@ void Item_buffer::set(int index, double x, double y, double z, double w){
 void Item_buffer::setInKeyFrame(int key, int index, double x, double y, double z, double w){
     switch (dim){
         case 4:  (*this)(3, index, key) = w;
-        [[clang::fallthrough]]; case 3:  (*this)(2, index, key) = z;
-        [[clang::fallthrough]]; case 2:  (*this)(1, index, key) = y;
-        [[clang::fallthrough]]; default: (*this)(0, index, key) = x;
+            [[clang::fallthrough]]; case 3:  (*this)(2, index, key) = z;
+            [[clang::fallthrough]]; case 2:  (*this)(1, index, key) = y;
+            [[clang::fallthrough]]; default: (*this)(0, index, key) = x;
     }
 }
 

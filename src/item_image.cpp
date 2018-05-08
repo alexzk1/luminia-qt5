@@ -25,41 +25,10 @@
 
 Item_image::Item_image( Item *parent, const QString& name): Item( parent, name)
 {
-
-    menuinit = false;
-
 }
-
-/*!
-slot for opening the contextmenu
-*/
-void Item_image::contextmenu(const QPoint& point){
-
-    context = this;
-
-    if(!menuinit){
-
-        DQMENU(Item_image, menu);
-        menu->addSeparator();
-        menu->addSeparator();
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-
-
-        menuinit = true;
-    }
-
-    menu->popup( point );
-}
-
 
 void Item_image::load(const QString& )
 {
-
-
-
-
 }
 
 void Item_image::subImage(Item_texture *tex, int xTexOfs,int yTexOfs, int, int, int, int )

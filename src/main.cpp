@@ -45,9 +45,7 @@ int main(int argc, char **argv)
     Q_INIT_RESOURCE(lumina);
     app.setWindowIcon(QIcon(":/images/lumina.png"));
 
-    ScriptExtender::setup();
-    Item::scanScripts();
-
+    ScriptExtender::reloadAll();
     MainWindow mainWin;
     mainWin.show();
     return app.exec();

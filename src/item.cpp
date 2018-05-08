@@ -34,34 +34,28 @@
 
 #include "loaderpaths.h"
 
-Item * Item::context = nullptr;
-Item_world * Item::world = nullptr;
+QPointer<Item_world> Item::world = nullptr;
 QPointer<MainWindow> Item::ws = nullptr;
 Profiler * Item::profiler = nullptr;
 
-
-QList<ScriptLauncher *> Item::launcher;
-
-
 Item::Item(Item *parent, const QString& name ):
     QObject(parent),
-    QTreeWidgetItem(parent, 0)
+    QTreeWidgetItem(parent, 0),
+    menu(nullptr),
+    dock(nullptr)
 {
-    dock = nullptr;
     setIcon(0, QIcon(":/images/xmp/world.xpm"));
     setName(name);
     setExpanded(true);
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDropEnabled);
     setName ( name );
-    menu = new QMenu();
 }
 
 Item::~Item()
 {
     if (dock)
         dock->deleteLater(); // owned by Mainwindow
-    delete menu;
-    qDebug() << "destroyed:" <<  this << childCount ()  ;
+    resetMenu();
 }
 
 
@@ -83,17 +77,20 @@ Function for setting the objects name.
 */
 void Item::setName(const QString& _name)
 {
-    static std::map<QString, size_t> renameCounter;
+    static std::map<QString, int64_t> renameCounter;
     const auto key = getType();
     if (!renameCounter.count(key))
         renameCounter[key] = 0;
 
     QString name = _name;
     Item* p;
+    int64_t counter = std::max(0l, renameCounter.at(key));
+
     while ((p = parent()->findChild(name)) && p != this)
     {
-        name = QString("%1_%2").arg(_name).arg(renameCounter[key]++);
+        name = QString("%1_%2").arg(_name).arg(counter++);
     }
+    renameCounter[key] = counter - 1;
 
     setObjectName(name);
     setText(0, name);
@@ -124,26 +121,21 @@ Item* Item::parent() const
     return qobject_cast<Item*>(QObject::parent());
 }
 
-
-/*!
-Function for destroying an object from a script
-*//*
-void Item::del(){
-    //delete(this);
-    deleteLater ();
-    }
-*/
-
 /*!
 slot for opening the contextmenu
 */
 void Item::contextmenu(const QPoint& point)
 {
-    if (menu)
+    if (!menu)
     {
-        context = this;
-        menu->popup( point );
+        menu = new QMenu(getType());
+        addMenu(menu);
+        if (menu->actions().size())
+            menu->addSeparator();
+        buildMenu(menu);
     }
+
+    menu->popup( point );
 }
 
 QString Item::getType() const
@@ -213,25 +205,42 @@ void Item::bindToEngine(QScriptEngine *eng)
 
         QScriptValue val = getEngineObject(*eng, this);
         if (!val.isValid() || val.isUndefined() || val.isNull())
+        {
             recursive(getEngineParentObject(*eng), this);
+            val = getEngineObject(*eng, this);
+        }
+
+        //now exposing methods
+        auto mlist = ScriptExtender::getImportedMethods(this);
+        for (const auto& method : mlist)
+        {
+            //qDebug() << "Binding " << method.funcNameOnly << "to " << getType();
+            QString expr = QString("%1.%2 = %2").arg(getFullScriptName()).arg(method.funcNameOnly);
+            eng->evaluate(expr);
+        }
     }
 }
 
-void Item::binding(QScriptEngine *ep)
+void Item::resetMenu()
 {
-
+    if (menu)
+        delete menu;
+    menu = nullptr;
 }
 
-void Item::SCRIPT2MENU()
+void Item::buildMenu(QMenu *menu)
 {
     if (menu)
     {
-        for (int i = 0; i < launcher.size(); ++i)
-        {
-            if (launcher.at(i)->isForItem(this))
-                menu->addAction ( launcher.at(i)->getAction());
-        }
+        int b1 = menu->actions().size();
         ScriptExtender::addActions(menu, this);
+
+        if (isDeletable())
+        {
+            if (menu->actions().size() != b1)
+                menu->addSeparator();
+            menu->addAction( QIcon(":/images/xpm/del.xpm"), QString(tr("Delete")) , this, SLOT( deleteLater()));
+        }
     }
 }
 
@@ -250,14 +259,9 @@ QScriptValue Item::getEngineObject(QScriptEngine &eng, const Item* obj)
     return eng.globalObject();
 }
 
-/*!
-scan the plugin script directory for tool scripts
-*/
-void Item::scanScripts()
+bool Item::isDeletable() const
 {
-    QStringList paths = LoaderPaths::listFilesInSubfolder(LoaderPaths::PLUGINS, "js");
-    for(const QString& p : paths)
-        launcher.append(new ScriptLauncher(p, Item::ws));
+    return true;
 }
 
 Item* Item::findChild(const QString& name) const
@@ -288,3 +292,4 @@ bool Item::dragAccept(Item*)
 {
     return false;
 }
+

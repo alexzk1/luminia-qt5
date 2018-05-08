@@ -99,6 +99,12 @@ QScriptValue SEngine::execJsFunc(const QString &function, const QVariantList &ar
     return f;
 }
 
+void SEngine::bindItem(QPointer<Item> itm)
+{
+    if (itm)
+        itm->bindToEngine(&eng);
+}
+
 void SEngine::useDefaultError()
 {
     connect(this, &SEngine::scriptError, this, &SEngine::defaultError, Qt::QueuedConnection);
@@ -124,11 +130,12 @@ bool SEngine::testErrors() const
 void SEngine::setupEngine(QObject *o)
 {
     obj = qobject_cast<Item*>(o);
+    qDebug() <<"Binding " << o << obj;
     if (obj)
     {
+        qDebug() <<"Binding " << obj->getType() << " as OBJ to javascr";
         connect(obj, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-        QScriptValue obj_sv = eng.newQObject(obj);
-        eng.globalObject().setProperty("obj" , obj_sv );
+        eng.globalObject().setProperty("obj" , eng.newQObject(obj));
     }
 
     ogl = new glwrapper(this, "gl");
@@ -140,7 +147,7 @@ void SEngine::setupEngine(QObject *o)
     Factory::Factory(eng);
 
     ScriptExtender::loadImported(this);
-    Item::world->bindToEngine(&eng);
+    bindItem(Item::world.data());
 }
 
 #include <QMessageBox>

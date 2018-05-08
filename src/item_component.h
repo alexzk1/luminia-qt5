@@ -50,10 +50,7 @@ public slots:
 protected:
     int comptype;
     Item_mesh *parent;
-public slots:
-    virtual void contextmenu(const QPoint&) override;
-private:
-    bool menuinit;
+    virtual void addMenu(QMenu *menu) override;
 };
 
 

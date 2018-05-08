@@ -49,7 +49,6 @@ HEADERS	=	src/mainwindow.h \
                 src/sourceedit.h \
                 src/lumfile.h \
                 src/timewidget.h \
-                src/script_launcher.h \
                 src/profiler.h \
                 src/console.h \
                 src/factory/dialog_factory_private.h \
@@ -91,7 +90,6 @@ SOURCES =	src/main.cpp \
                 src/item_uniform.cpp \
                 src/item_image.cpp \
                 src/item_virtual.cpp \
-                src/script_launcher.cpp \
                 src/sourceedit.cpp \
                 src/lumfile.cpp \
                 src/timewidget.cpp \

@@ -37,50 +37,7 @@ Item_component::Item_component( Item_mesh *_parent, const QString& name, int _co
         case BONEDEP:	 setIcon( 0, QIcon(":/images/xpm/matrix.xpm"));	break;
         case QUATERNION: setIcon( 0, QIcon(":/images/xpm/quaternion.xpm"));	break;
     }
-
-    menuinit = false;
 }
-
-/*!
-slot for opening the contextmenu
-*/
-void Item_component::contextmenu(const QPoint& point){
-
-    context = this;
-
-    if(!menuinit){
-        menu->addAction( QString( "Properties"), this, SLOT(PropertiesDialog()) );
-        menu->addSeparator();
-        DQMENU(Item_edit, menu);
-        menu->addSeparator();
-
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-        menuinit = true;
-    }
-
-    menu->popup( point );
-}
-
-
-
-
-
-
-
-
-
-/*
-QString Item_component::statusText(){
-    if (keyframes > 1){
-        return QString("%1 Keyframes with %2 %3D Vertices").arg(keyframes).arg(size).arg(dim);
-        }
-    else{
-        return QString("%1 %2D Vertices").arg(size).arg(dim);
-        }
-    }
-*/
 
 /*!
 void Bind([number location])\n
@@ -121,6 +78,11 @@ void Item_component::Unbind(){
 QString Item_component::getType() const
 {
     return QString("Component");
+}
+
+void Item_component::addMenu(QMenu *menu)
+{
+    menu->addAction( tr( "Properties"), this, SLOT(PropertiesDialog()) );
 }
 
 /*!

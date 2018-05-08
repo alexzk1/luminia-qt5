@@ -34,16 +34,8 @@ Item_edit::Item_edit( Item *parent, const QString& name) :
 
     edit =  new SourceEdit(nullptr);
     appendToWs(edit);
-
-    QAction *dockaction = dock->toggleViewAction ();
-    dockaction->setIcon(QIcon(":/images/xpm/edit.xpm"));
-    menu->addAction ( dockaction  );
-
-
     setIcon(0, QIcon(":/images/xpm/edit.xpm"));
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled);
-
-    menuinit = false;
 }
 
 QString Item_edit::getType() const
@@ -58,31 +50,15 @@ Item_edit::~Item_edit()
     else qDebug() << "~Item_edit: edit already deleted";
 }
 
-/*!
-slot for opening the contextmenu
-*/
-void Item_edit::contextmenu(const QPoint& point){
-
-    context = this;
-
-    if(!menuinit)
-    {
-
-        menu->addSeparator();
-        DQMENU(Item_edit, menu);
-
-        menu->addAction ( QIcon(":/images/xpm/load.xpm"), "Load file", this, SLOT(load()) );
-        menu->addAction ( QIcon(":/images/xpm/save.xpm"), "Save as file", this, SLOT(saveas()) );
-        menu->addAction ( QIcon(":/images/xpm/reload.xpm"), "Reload file", this, SLOT(reload()) );
-        menu->addSeparator();
-
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-        menuinit = true;
-    }
-
-    menu->popup( point );
+void Item_edit::addMenu(QMenu *menu)
+{
+    QAction *dockaction = dock->toggleViewAction ();
+    dockaction->setIcon(QIcon(":/images/xpm/edit.xpm"));
+    menu->addAction ( dockaction  );
+    menu->addSeparator();
+    menu->addAction ( QIcon(":/images/xpm/load.xpm"),  tr("Load File"), this, SLOT(load()) );
+    menu->addAction ( QIcon(":/images/xpm/save.xpm"),  tr("Save as File"), this, SLOT(saveas()) );
+    menu->addAction ( QIcon(":/images/xpm/reload.xpm"),tr("Reload File"), this, SLOT(reload()) );
 }
 
 /*!

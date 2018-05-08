@@ -31,7 +31,6 @@ class QMenu;
 class QTextEdit;
 class TreeView;
 class Console;
-class ScriptLauncher;
 class TimeWidget;
 
 class MainWindow : public QMainWindow, public utility::SaveableWidget<MainWindow>
@@ -60,7 +59,7 @@ private:
     void createToolBars();
     void createStatusBar();
     void createDockWindows();
-    void createScriptToolBar( QList<ScriptLauncher*>);
+    void createScriptToolBar();
     QString fileName;
     QString lastPath;
 

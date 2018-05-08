@@ -26,37 +26,10 @@
 Item_world::Item_world():
     Item(nullptr, "World")
 {
-
     Item::world = this;
-
-    //setIcon(0, QIcon(*xpm_world));
-    //menu->addAction ( QIcon(*xpm_node),QString("Add Node"),this, SLOT( addNode()));
-    //menu->addAction ( QIcon(*xpm_cam),QString("Add Cam"),this, SLOT( addCam()));
-    //DQMENU(Item_world)
-
-    //SCRIPT2MENU
     setIcon(0, QIcon(":/images/xpm/world.xpm"));
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsDropEnabled);
     new Item_cam(this, "Cam");
-}
-
-/*!
-slot for opening the contextmenu
-*/
-void Item_world::contextmenu(const QPoint& point)
-{
-
-    context = this;
-
-    static bool init = false;
-    if(!init){
-        //	menu->addAction ( QIcon(*xpm_node),QString("Add Node"),this, SLOT( addNode()));
-        DQMENU(Item_world, menu);
-        SCRIPT2MENU();
-        init = true;
-    }
-
-    menu->popup( point );
 }
 
 QObject *Item_world::addCam(const QString &name)
@@ -77,6 +50,19 @@ QObject *Item_world::addVirtual(const QString &name)
 QString Item_world::getType() const
 {
     return QString("World");
+}
+
+bool Item_world::isDeletable() const
+{
+    return false;
+}
+
+void Item_world::addMenu(QMenu *menu)
+{
+    menu->addAction ( QIcon(),tr("Add Virtual"),this, SLOT( addVirtual()));
+    menu->addAction ( QIcon(":/images/xpm/node.xpm"),tr("Add Node"),this, SLOT( addNode()));
+    menu->addAction ( QIcon(":/images/xpm/cam.xpm"),tr("Add Cam"),this, SLOT( addCam()));
+
 }
 /*!
 accept only Node items for dragging
@@ -99,14 +85,6 @@ set the worlds time. Usefull for rendering videos
 void Item_world::setTime(double t){
     timev = t;
     emit update();
-}
-
-/*!
-get the selected Item, function is currently not working and retuns "this"
-*/
-QObject* Item_world::getSelected(){
-    //QListViewItem *tmp = parent->selectedItem();
-    return (Item*)this;
 }
 
 

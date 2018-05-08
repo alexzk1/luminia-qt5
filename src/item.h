@@ -33,7 +33,6 @@
 
 #include <QtScript>
 
-#include "script_launcher.h"
 #include "script_extender.h"
 #include "profiler.h"
 
@@ -64,37 +63,24 @@ public:
     Item *parent() const;
     void appendToWs(QWidget *);
 
-    static void scanScripts();
-
-    QPointer<QDockWidget> dock;
-
-    static QPointer<MainWindow> ws;
-    static Item_world *world;
-    static Item *context;
-    static Profiler *profiler;
-    static QList<ScriptLauncher *> launcher;
-
+    virtual void deleteLater();
+    QString getFullScriptName() const;
+    void bindToEngine(QScriptEngine *eng);
+    void resetMenu(); //support for reloading plugins maybe ...because menu is built once
 public slots:
     Item *findChild(const QString& name) const;
     QList<Item*> findChildrenByType ( const QString &) const;
 
     QObject* getParent(){return parent();}
-    virtual void contextmenu(const QPoint&);
+    void contextmenu(const QPoint&);
     virtual QString getType()const;
 
     void destroyAll();//destroys all childs
-public:
-    virtual void deleteLater();
-    QString getFullScriptName() const;
-    void bindToEngine(QScriptEngine *eng);
 
 protected:
-    QMenu *menu;
-    void SCRIPT2MENU();
+    virtual void addMenu(QMenu *menu){Q_UNUSED(menu);}
     QScriptValue getEngineParentObject(QScriptEngine &eng) const;
     static QScriptValue getEngineObject(QScriptEngine &eng, const Item *object);
-    virtual void binding(QScriptEngine* ep);
-
 
     template<class T, class ...Args>
     T* makeNewItemNoThis(Args... args)
@@ -104,7 +90,6 @@ protected:
         if (eng)
         {
             ptr->bindToEngine(eng);
-            ptr->binding(eng);
         }
         return ptr;
     }
@@ -114,7 +99,15 @@ protected:
     {
         return makeNewItemNoThis<T>(this, args...);
     }
+    virtual bool isDeletable() const;
 private:
+    QPointer<QMenu> menu;
+    void buildMenu(QMenu *menu);
+public:
+    QPointer<QDockWidget> dock;
+    static QPointer<MainWindow> ws;
+    static QPointer<Item_world> world;
+    static Profiler *profiler;
 };
 
 /*!
@@ -137,14 +130,13 @@ public slots:
     int getCamWidth();
     int getCamHeight();
     void Call(const QString& function, const QVariantList& args = QVariantList());
-
-    QObject* getSelected();
-    QObject* getContext(){return context;}
     virtual QString getType()const override;
-    virtual void contextmenu(const QPoint&)override;
+
 protected:
     double timev;
     int CamWidth,CamHeight;
+    virtual bool isDeletable() const override;
+    virtual void addMenu(QMenu *menu) override;
 signals:
     void update();
 public:
@@ -158,7 +150,8 @@ public:
 Implementation for rotating and translating objects. It is also as interface for the spaceball functionality.
 */
 class GLCam;
-class Item_matrix : public Item {
+class Item_matrix : public Item
+{
     Q_OBJECT
     friend class GLCam;
 
@@ -196,8 +189,6 @@ public:
     virtual bool dragAccept(Item*) override;
 public slots:
     virtual QString getType()const override;
-    virtual void contextmenu(const QPoint&) override;
-
     void Call(const QString& function, const QVariantList& args = QVariantList());
     //Model importer section: Source in importer/
     void importModel(const QString& filename = "");
@@ -222,8 +213,8 @@ protected:
     void importCR2(const QString& filename);
     void importX  (const QString& filename);
     void importCMF(const QString& filename);
-private:
-    bool menuinit;
+
+    virtual void addMenu(QMenu *menu) override;
 };
 
 //**********************************************************
@@ -231,7 +222,8 @@ class GLCam;
 /*!
 This is the tree representation for the cam.
 */
-class Item_cam : public Item_matrix {
+class Item_cam : public Item_matrix
+{
     Q_OBJECT
     Q_PROPERTY(int Near READ getNear WRITE Near)
     Q_PROPERTY(int Far READ getFar WRITE Far)
@@ -247,10 +239,8 @@ protected:
     double getFar();
     void Near(double val);
     void Far(double val);
-
-    bool deletable;
-
     GLCam *cam;
+    virtual bool isDeletable() const override;
 };
 
 
@@ -284,11 +274,7 @@ public slots:
 protected:
     QPointer<SourceEdit> edit;
     QString fn;
-
-public slots:
-    virtual void contextmenu(const QPoint&) override;
-private:
-    bool menuinit;
+    virtual void addMenu(QMenu *menu) override;
 };
 
 //**********************************************************
@@ -311,11 +297,7 @@ private slots:
     void helpHandler(const QString&);
 protected:
     int shadertype;
-public slots:
-    virtual void contextmenu(const QPoint&) override;
-private:
-    bool menuinit;
-
+    virtual void addMenu(QMenu *menu) override;
 };
 //**********************************************************
 
@@ -338,7 +320,6 @@ public slots:
     bool isRunning() const;
     void Call(const QString& function, const QVariantList& args = QVariantList());
     virtual QString getType()const override{return QString("Script");}
-    virtual void contextmenu(const QPoint&) override;
 private slots:
     void completationHandler(const QString&);
     void helpHandler(const QString&);
@@ -347,8 +328,7 @@ protected:
     glwrapper *ogl;
     const QMetaObject *meta;
     QScriptEngine *ip;
-private:
-    bool menuinit;
+    virtual void addMenu(QMenu *menu) override;
 };
 
 
@@ -409,15 +389,10 @@ protected:
         int *i;
         float *f;
     }buf,tmp_buf;
-
+    virtual void addMenu(QMenu *menu) override;
 private:
     double ref_buf; //doublebuffering for reference
     int ref_pos; //position in double buffer
-
-public slots:
-    virtual void contextmenu(const QPoint&) override;
-private:
-    bool menuinit;
 };
 /*************************************************************************************/
 
@@ -466,7 +441,7 @@ public slots:
     int getFormat();
     bool isNormalizedInt();
 
-    virtual QString getType() const{return QString("Buffer");}
+    virtual QString getType() const override{return QString("Buffer");}
 
 
 
@@ -507,14 +482,10 @@ protected:
     bool bound_by_GPU; // bound by GPU
     bool is_mapped;
 
+    virtual void addMenu(QMenu *menu) override;
 private:
     double ref_buf,ref_buf_old; //doublebuffering for reference, old to detect writing.
     int ref_pos; //position in double buffer
-
-public slots:
-    virtual void contextmenu(const QPoint&);
-private:
-    bool menuinit;
 };
 
 //**********************************************************
@@ -523,7 +494,8 @@ class Item_armature;
 /*!
 Quaternion based bon class. Always a child of a Bone or Armature
 */
-class Item_bone : public Item{
+class Item_bone : public Item
+{
     Q_OBJECT
     friend class Item_armature;
 public:
@@ -545,7 +517,7 @@ public slots:
     void EulerRotate(float,float,float);
     void EulerRotation(float,float,float);
 
-    virtual QString getType() const {return QString("Bone");}
+    virtual QString getType() const override;
 
 protected:
     int id;
@@ -559,6 +531,7 @@ protected:
     void qmult(float *qa, float *qb, float *out);
     void qrot(float *v, float *q, float *out);
     void qrotaround(float *v, float *p, float *q, float *out);
+    virtual void addMenu(QMenu *menu) override;
 };
 
 
@@ -567,7 +540,8 @@ protected:
 /*!
 Armature: a framework for handling quaternion and matrix based bone vertexshaders
 */
-class Item_armature : public Item_bone {
+class Item_armature : public Item_bone
+{
     Q_OBJECT
     friend class Item_bone;
 public:

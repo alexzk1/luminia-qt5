@@ -58,9 +58,5 @@ protected:
     int indices_per_primitive;
 
     void resize();
-public slots:
-    virtual void contextmenu(const QPoint&) override;
-private:
-    bool menuinit;
 };
 #endif

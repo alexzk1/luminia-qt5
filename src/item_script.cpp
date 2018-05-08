@@ -38,37 +38,16 @@ Item_script::Item_script( Item *parent, const QString& name) :
 
     ip = nullptr;
     running = false;
-
-    menuinit = false;
 }
 
-
-/*!
-slot for opening the contextmenu
-*/
-void Item_script::contextmenu(const QPoint& point)
+void Item_script::addMenu(QMenu *menu)
 {
-    context = this;
-
-    if(!menuinit)
-    {
-        menu->addSeparator();
-        menu->addAction ( QIcon(":/images/xpm/run.xpm"),QString( "Run Script") , this, SLOT( run()));
-        menu->addAction ( QIcon(":/images/xpm/stop.xpm"),QString( "Stop Script") , this, SLOT( stop()));
-        menu->addSeparator ();
-
-        DQMENU(Item_edit, menu);
-        menu->addAction ( QIcon(":/images/xpm/load.xpm"), "Load file", this, SLOT(load()) );
-        menu->addAction ( QIcon(":/images/xpm/save.xpm"), "Save as file", this, SLOT(saveas()) );
-        menu->addAction ( QIcon(":/images/xpm/reload.xpm"), "Reload file", this, SLOT(reload()) );
-        menu->addSeparator();
-
-        SCRIPT2MENU();
-        menu->addSeparator();
-        menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete") , this, SLOT( deleteLater()));
-        menuinit = true;
-    }
-    menu->popup( point );
+    menu->addAction ( QIcon(":/images/xpm/run.xpm"),tr( "Run Script") , this, SLOT( run()));
+    menu->addAction ( QIcon(":/images/xpm/stop.xpm"),tr( "Stop Script") , this, SLOT( stop()));
+    menu->addSeparator ();
+    menu->addAction ( QIcon(":/images/xpm/load.xpm"), tr("Load File"), this, SLOT(load()) );
+    menu->addAction ( QIcon(":/images/xpm/save.xpm"), tr("Save as File"), this, SLOT(saveas()) );
+    menu->addAction ( QIcon(":/images/xpm/reload.xpm"),tr("Reload File"), this, SLOT(reload()) );
 }
 
 

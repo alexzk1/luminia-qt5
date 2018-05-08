@@ -36,14 +36,8 @@ public:
 public slots:
     void load(const QString& filename = "");
 
-public slots:
-    virtual void contextmenu(const QPoint&) override;
-
 public:
     Q_INVOKABLE void subImage(Item_texture *tex, int xTexOfs,int yTexOfs, int width, int height, int xImgOfs = 0, int yImgofs = 0);
-
-private:
-    bool menuinit;
 };
 
 #endif

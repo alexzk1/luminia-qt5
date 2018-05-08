@@ -40,22 +40,16 @@ Item_bone::Item_bone( Item *parent, const QString& name, Item_armature* _armatur
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
     setIcon( 0, QIcon(":/images/xpm/bone.xpm") );
 
-    menu->addAction( QIcon(":/images/xpm/bone.xpm"), QString("Add Bone"), this, SLOT( addBone()) );
-    menu->addAction( QIcon(":/images/xpm/del.xpm"), QString("Delete"), this, SLOT(deleteLater()) );
-
-    SCRIPT2MENU();
-
     quat[0] = 0.0;
     quat[1] = 0.0;
     quat[2] = 0.0;
     quat[3] = 1.0;
 }
 
-Item_bone::~Item_bone(){
+Item_bone::~Item_bone()
+{
     //	armature->dec_num_of_bones();
     if (id == armature->max_bone_id)armature->max_bone_id--; // fix holes later
-
-
 }
 
 /*!
@@ -203,6 +197,11 @@ void Item_bone::EulerRotation(float a, float b , float c){
     Rotation(x,y,z,w);
 }
 
+QString Item_bone::getType() const
+{
+    return "Bone";
+}
+
 
 /*!
 internal function for muliply two quaternions
@@ -249,6 +248,11 @@ void Item_bone::qrotaround(float *vin, float * p, float *q, float *out){
     out[0] = p[0] + t[0]*q[3] - t[1]*q[2] + t[2]*q[1] - t[3]*q[0]; //x
     out[1] = p[1] + t[0]*q[2] + t[1]*q[3] - t[2]*q[0] - t[3]*q[1]; //y
     out[2] = p[2] - t[0]*q[1] + t[1]*q[0] + t[2]*q[3] - t[3]*q[2]; //z
+}
+
+void Item_bone::addMenu(QMenu *menu)
+{
+    menu->addAction( QIcon(":/images/xpm/bone.xpm"), tr("Add Bone"), this, SLOT( addBone()) );
 }
 
 
