@@ -29,7 +29,8 @@
 #include "mainwindow.h"
 
 Item_edit::Item_edit( Item *parent, const QString& name) :
-    Item( parent, name )
+    Item( parent, name ),
+    commonActions()
 {
     //fileNormal = new QPixmap( pix_file );
 
@@ -37,6 +38,20 @@ Item_edit::Item_edit( Item *parent, const QString& name) :
     appendToWs(edit);
     setIcon(0, QIcon(":/images/xpm/edit.xpm"));
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled);
+
+    const auto addAction = [this](auto a, auto b, auto c)
+    {
+        QAction *act = new QAction(a, b, this);
+        connect(act, &QAction::triggered, this, c);
+        commonActions.push_back(act);
+    };
+    addAction ( QIcon(":/images/xpm/load.xpm"),  tr("Load File"),    std::bind(&Item_edit::load,   this, QString()));
+    addAction ( QIcon(":/images/xpm/save.xpm"),  tr("Save as File"), std::bind(&Item_edit::saveas, this, QString()));
+    addAction ( QIcon(":/images/xpm/reload.xpm"),tr("Reload File"),  &Item_edit::reload);
+
+    for (const auto& a : commonActions)
+        edit->appendActionToBar(a);
+
 }
 
 QString Item_edit::getType() const
@@ -53,13 +68,11 @@ Item_edit::~Item_edit()
 
 void Item_edit::addMenu(QMenu *menu)
 {
-    QAction *dockaction = dock->toggleViewAction ();
-    dockaction->setIcon(QIcon(":/images/xpm/edit.xpm"));
-    menu->addAction ( dockaction  );
-    menu->addSeparator();
-    menu->addAction ( QIcon(":/images/xpm/load.xpm"),  tr("Load File"), this, SLOT(load()) );
-    menu->addAction ( QIcon(":/images/xpm/save.xpm"),  tr("Save as File"), this, SLOT(saveas()) );
-    menu->addAction ( QIcon(":/images/xpm/reload.xpm"),tr("Reload File"), this, SLOT(reload()) );
+    for (const auto& a : commonActions)
+    {
+        if (a)
+            menu->addAction(a);
+    }
 }
 
 /*!
@@ -70,7 +83,7 @@ void Item_edit::saveas(const QString& filename)
     fn = filename;
     if (filename=="")
     {
-        fn = QFileDialog::getSaveFileName(ws, tr("Open File"), "",tr("Text (*.*)"));
+        fn = QFileDialog::getSaveFileName(ws, tr("Save File"), "",tr("Text (*.*)"));
     }
     if (fn != "")
     {

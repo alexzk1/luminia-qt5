@@ -48,7 +48,7 @@ public:
     glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, QString inFragment, int inPrimitive, int outPrimitive, int outVertices);
     glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, int inPrimitive, int outPrimitive, int outVertices);
 
-    ~glwrapper_shader();
+    ~glwrapper_shader() override;
 
 public slots:
     void Bind();
@@ -115,8 +115,7 @@ class glwrapper: public QObject
 
 public:
     glwrapper( QObject * parent, QString name = "gl");
-    ~glwrapper() override
-    {trasher.clear();}
+    virtual ~glwrapper() override = default;
 
     enum glconst {
         POINTS			= GL_POINTS,
@@ -362,11 +361,7 @@ public slots:
     void BeginTransformFeedback(int primitive, bool discard = false);
     void EndTransformFeedback();
 
-
 protected:
     static glwrapper_shader *currentShader;
-
-private:
-    QList<QObject*> trasher;
 };
 #endif

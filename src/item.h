@@ -272,6 +272,7 @@ public slots:
 
 protected:
     QPointer<SourceEdit> edit;
+    QList<QPointer<QAction>> commonActions;
     QString fn;
     virtual void addMenu(QMenu *menu) override;
 };
@@ -296,7 +297,6 @@ private slots:
     void helpHandler(const QString&);
 protected:
     int shadertype;
-    virtual void addMenu(QMenu *menu) override;
 };
 //**********************************************************
 
@@ -323,15 +323,11 @@ private slots:
     void completationHandler(const QString&);
     void helpHandler(const QString&);
     void switchIcon(bool isRunning);
-protected:
-    virtual void addMenu(QMenu *menu) override;
 private:
     void deleteEngine();
     bool running;
     QPointer<SEngine> engine;
     const QMetaObject *meta;
-
-
 };
 
 

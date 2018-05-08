@@ -35,16 +35,19 @@ Item_script::Item_script( Item *parent, const QString& name) :
     switchIcon(false);
     connect(edit, SIGNAL(requestCompletationList(QString)), this, SLOT(completationHandler(QString)));
     connect(edit, SIGNAL(requestHelpString(QString)), this, SLOT(helpHandler(QString)));
-}
 
-void Item_script::addMenu(QMenu *menu)
-{
-    menu->addAction ( QIcon(":/images/xpm/run.xpm"),tr( "Enable Script") , this, SLOT( run()));
-    menu->addAction ( QIcon(":/images/xpm/stop.xpm"),tr( "Disable Script") , this, SLOT( stop()));
-    menu->addSeparator ();
-    menu->addAction ( QIcon(":/images/xpm/load.xpm"), tr("Load File"), this, SLOT(load()) );
-    menu->addAction ( QIcon(":/images/xpm/save.xpm"), tr("Save as File"), this, SLOT(saveas()) );
-    menu->addAction ( QIcon(":/images/xpm/reload.xpm"),tr("Reload File"), this, SLOT(reload()) );
+    const auto addAction = [this](auto a, auto b, auto c)
+    {
+        QAction *act = new QAction(a, b, this);
+        connect(act, &QAction::triggered, this, c);
+        commonActions.push_front(act);
+    };
+    addAction ( QIcon(":/images/xpm/stop.xpm"),tr( "Disable Script") ,&Item_script::stop);
+    addAction ( QIcon(":/images/xpm/run.xpm"),tr( "Enable Script") ,  &Item_script::run);
+
+    edit->appendActionToBar(nullptr);
+    edit->appendActionToBar(commonActions.at(0));
+    edit->appendActionToBar(commonActions.at(1));
 }
 
 void Item_script::deleteEngine()
@@ -64,13 +67,15 @@ Start a script. QT-4.3 part is not full compatible to QSA
 */
 void Item_script::run()
 {
+    stop();
     deleteEngine();
     engine = new SEngine(parent());
     engine->useDefaultError();
     connect(engine, &SEngine::scriptError, this, [this](const QString&)
     {
         stop();
-        deleteEngine();
+        //damn, do not delete engine on error
+        //deleteEngine();
     });
     //doing kinda local bind, so no need full path from root
     QList<Item*> directs = parent()->findChildren<Item*>(QString(), Qt::FindDirectChildrenOnly);
@@ -89,7 +94,7 @@ void Item_script::run()
 
 void Item_script::Call(const QString& function, const QVariantList& args)
 {
-    if (isRunning() && engine)
+    if (isRunning())
     {
         //qDebug()<<"Item script, exec for: " << function;
         engine->execJsFunc(function, args);
@@ -114,7 +119,7 @@ stop at the end.
 */
 bool Item_script::isRunning() const
 {
-    return running;
+    return running && engine;
 }
 /*!
 complettation handler, that searchs the object by the last line and generates complettations
@@ -142,30 +147,30 @@ void Item_script::completationHandler(const QString& line)
         }
         else
             if (parts[0] == "gl")
-        {
-            obj = &ogl;
-        }
-        else
-        {
-            //Factory prototypes
-            QRegExp searchProto(parts[0]+"\\s*=\\s*new\\s*(\\w+)[\\(|;]");
-            searchProto.indexIn(text());
-            meta = Factory::metaObjectFrom(searchProto.cap(1));
-            if (meta != nullptr)
             {
-                goto META_OBJ_KNOWN;
+                obj = &ogl;
             }
-
-            //Object from treeview
-            QObjectList QObjectList = parent()->findChildren<QObject *>();
-            for ( int i = 0; i < QObjectList.count();i++)
+            else
             {
-                if (QObjectList[i]->parent() == (QObject*)parent())
+                //Factory prototypes
+                QRegExp searchProto(parts[0]+"\\s*=\\s*new\\s*(\\w+)[\\(|;]");
+                searchProto.indexIn(text());
+                meta = Factory::metaObjectFrom(searchProto.cap(1));
+                if (meta != nullptr)
                 {
-                    if (parts[0] ==QObjectList[i]->objectName())obj = QObjectList[i];
+                    goto META_OBJ_KNOWN;
+                }
+
+                //Object from treeview
+                QObjectList QObjectList = parent()->findChildren<QObject *>();
+                for ( int i = 0; i < QObjectList.count();i++)
+                {
+                    if (QObjectList[i]->parent() == (QObject*)parent())
+                    {
+                        if (parts[0] ==QObjectList[i]->objectName())obj = QObjectList[i];
+                    }
                 }
             }
-        }
         if (obj == nullptr)
             return;
         else

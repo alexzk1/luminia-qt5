@@ -29,7 +29,7 @@
 TextEdit::TextEdit(QWidget *_parent):QTextEdit(_parent){
     parent = static_cast<SourceEdit*>(_parent);
     completationOpen = false;
-    }
+}
 
 void TextEdit::keyPressEvent(QKeyEvent *e){
 
@@ -53,9 +53,9 @@ void TextEdit::keyPressEvent(QKeyEvent *e){
             connect(parent,SIGNAL(HelpStringSignal(const QString&)),box,SLOT(setHelpString(const QString&)));
             connect(box,SIGNAL(requestHelpString(const QString&)), parent, SLOT(emitRequestHelpString(const QString&)));
 
-            }
         }
     }
+}
 
 /******************** compleationbox *******************************************/
 
@@ -107,7 +107,7 @@ void AbstractCompletionBox::keyPressEvent(QKeyEvent *e){
                 r = false;
                 QApplication::sendEvent(listwidget, e);
                 r = true;
-                }
+            }
             emit requestHelpString(listwidget->currentItem()->data(Qt::UserRole).toString());
             break;
         case Qt::Key_Enter:
@@ -125,10 +125,10 @@ void AbstractCompletionBox::keyPressEvent(QKeyEvent *e){
                 if (searchString.isEmpty())
                     window()->close();
                 searchString.chop(1);
-                }
+            }
             else {
                 searchString.append(e->text());
-                }
+            }
 
 
             QApplication::sendEvent(parent, e);
@@ -136,8 +136,8 @@ void AbstractCompletionBox::keyPressEvent(QKeyEvent *e){
             populate();
 
             break;
-        }
     }
+}
 
 void AbstractCompletionBox::setHelpString(const QString& txt){
     label->setText(txt);
@@ -146,8 +146,8 @@ void AbstractCompletionBox::setHelpString(const QString& txt){
     else{
         label->show();
         //setHeight (180 + label->height());
-        }
     }
+}
 
 
 void AbstractCompletionBox::populate(){
@@ -159,12 +159,12 @@ void AbstractCompletionBox::populate(){
         QListWidgetItem *item = new QListWidgetItem(str);
         item->setData(Qt::UserRole, str);
         listwidget->addItem(item);
-        }
+    }
 
     if (listwidget->count() == 0 || (listwidget->count() == 1 && listwidget->item(0)->data(Qt::UserRole).toString() == searchString)){
         window()->close();
-        }
     }
+}
 
 
 /******************** compleationbox *******************************************/
@@ -172,12 +172,12 @@ void AbstractCompletionBox::populate(){
 CompletionBox::CompletionBox(TextEdit *_editor, const QStringList& _completions, const QString& _searchString) :	AbstractCompletionBox( _editor, _completions, _searchString){
     editor = _editor;
     editor->completationOpen = true;
-    }
+}
 
 
 CompletionBox::~CompletionBox(){
     editor->completationOpen = false;
-    }
+}
 
 void CompletionBox::finishCompletion(){
     QListWidgetItem *item = listwidget->currentItem();
@@ -185,7 +185,7 @@ void CompletionBox::finishCompletion(){
         return;
     QString s = item->data(Qt::UserRole).toString().mid(searchString.length());
     editor->insertPlainText(s);
-    }
+}
 
 /**************************** Line Number Widget ***************************************/
 
@@ -219,14 +219,14 @@ void LineNumberWidget::paintEvent(QPaintEvent *)
 
         const QString txt = QString::number(lineNumber);
         p.drawText(width() - fm.width(txt), qRound(position.y()) - contentsY + ascent, txt);
-        }
     }
+}
 
 Highlighter::Highlighter(QTextEdit *parent) : QSyntaxHighlighter(parent){
-    }
+}
 
 Highlighter::~Highlighter(){
-    }
+}
 
 void Highlighter::highlightBlock( const QString &text){
 
@@ -240,7 +240,7 @@ void Highlighter::highlightBlock( const QString &text){
         length = floats.matchedLength();
         setFormat(index, length , myClassFormat);
         index = text.indexOf(floats, index + length);
-        }
+    }
 
     static QRegExp function("([A-Za-z0-9]+)\\s*\\(");
     myClassFormat.setForeground(Qt::blue);
@@ -249,18 +249,18 @@ void Highlighter::highlightBlock( const QString &text){
         length = function.matchedLength();
         setFormat(index, length - 1, myClassFormat);
         index = text.indexOf(function, index + length);
-        }
+    }
 
     static QRegExp glsltypes("\\b(float|int|void|bool|true|false|mat2|mat3|mat4|mat2x2|mat3x2|mat4x2|mat2x3|mat3x3|mat4x3|mat2x4|mat3x4|mat4x4|vec2|vec3|vec4|bvec2|bvec3|bvec4|ivec2|ivec3|ivec4|sampler1D|sampler2D|sampler3D|samplerCube|sampler1DShadow|sampler2DShadow|attribute|const|uniform|varying|in|out|inout|input|output|hvec2|hvec3|vec4|dvec2|dvec3|dvec4|fvec2|fvec3|fvec4|sampler2DRect|sampler3DRect|sampler2dRectShadow|long|short|double|half|fixed|unsigned|lowp|mediump|highp|precision)\\b");
 
-  //   myClassFormat.setFontWeight(QFont::Bold);
+    //   myClassFormat.setFontWeight(QFont::Bold);
     myClassFormat.setForeground(Qt::darkRed);
     index = text.indexOf(glsltypes);
     while (index >= 0) {
         length = glsltypes.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(glsltypes, index + length);
-        }
+    }
 
     static QRegExp string("\"[.\n]*\"");
     index = text.indexOf(string);
@@ -268,7 +268,7 @@ void Highlighter::highlightBlock( const QString &text){
         length = string.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(string, index + length);
-        }
+    }
 
     myClassFormat.setFontWeight(QFont::Bold);
 
@@ -280,7 +280,7 @@ void Highlighter::highlightBlock( const QString &text){
         length = buildin.matchedLength();
         setFormat(index, length - 1, myClassFormat);
         index = text.indexOf(buildin, index + length);
-        }
+    }
 
     static QRegExp glslkeywords("\\b(break|continue|do|for|while|if|else|discard|return|goto|switch|default|case|struct|asm|class|union|enum|typedef|template|this|packed|centroid)\\b");
 
@@ -292,7 +292,7 @@ void Highlighter::highlightBlock( const QString &text){
         length = glslkeywords.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(glslkeywords, index + length);
-        }
+    }
 
 
     static QRegExp comment("//.*");
@@ -304,7 +304,7 @@ void Highlighter::highlightBlock( const QString &text){
         length = comment.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(comment, index + length);
-        }
+    }
 
     static QRegExp pre("#.*");
     myClassFormat.setFontWeight(0);
@@ -315,59 +315,89 @@ void Highlighter::highlightBlock( const QString &text){
         length = pre.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(pre, index + length);
-        }
-        }
+    }
+}
 
 /*********************************************************************/
+#include <QFontDatabase>
+SourceEdit::SourceEdit(QWidget *parent):
+    QWidget(parent)
+{
+    const static QStringList prefFontsFamilies = {
+        "Source Code Pro",
+        "Ubuntu Mono",
+        "Courier",
+    };
+    static QFontDatabase db;
+    static QStringList current = db.families();
 
-SourceEdit::SourceEdit(QWidget *parent):QWidget(parent){
-    layout = new QHBoxLayout(this);
-    layout->setSpacing (0);
-    layout->setMargin ( 0);
+    auto layout = new QHBoxLayout(this);
+    setLayout(layout);
+    buttonsBar = new QToolBar(this);
+    buttonsBar->setOrientation(Qt::Vertical);
+
     edit =  new TextEdit(this);
-
     linenumbers = new LineNumberWidget(edit);
     highlighter = new Highlighter(edit);
 
+
+    layout->setSpacing (0);
+    layout->setMargin ( 0);
     layout->addWidget(linenumbers);
     layout->addWidget(edit);
+    layout->addWidget(buttonsBar);
 
-    setLayout(layout);
 
-    QFont font;
-        font.setFamily("Courier");
-        font.setFixedPitch(true);
-        font.setPointSize(10);
-    edit->setFont(font);
+    for (const auto& fs : prefFontsFamilies)
+    {
+        if (current.contains(fs, Qt::CaseInsensitive))
+        {
+            QFont font;
+            font.setFamily(fs);
+            font.setFixedPitch(true);
+            font.setPointSize(11);
+            edit->setFont(font);
+            break;
+        }
     }
+
+}
 
 
 SourceEdit::~SourceEdit(){
-    }
+}
 
 void SourceEdit::setText(const QString& t){
     edit->setText(t);
-    }
+}
 
 QString SourceEdit::getText()const{
     return edit->toPlainText();
-    }
+}
 
 void SourceEdit::setCompleatationList( const QStringList &c, int _offset){
     completationList = c;
     completationOffset = _offset;
-    }
+}
 
 void SourceEdit::setHelpString(const QString &hs){
     //HelpString = hs;
     emit HelpStringSignal(hs);
 
-    }
+}
+
+void SourceEdit::appendActionToBar(QAction *act)
+{
+    if (act)
+        buttonsBar->addAction(act);
+    else
+        buttonsBar->addSeparator();
+}
 
 void SourceEdit::emitRequestCompletationList(const QString &s){
     emit requestCompletationList(s);
-    }
+}
 
 void SourceEdit::emitRequestHelpString(const QString &s){
     emit requestHelpString(s);
-    }
+}

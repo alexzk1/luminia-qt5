@@ -55,7 +55,7 @@ function render(){
 	Torus.Normal.Unbind();
 
 	shader.Unbind();
-	}</script>
+}</script>
         <shader name="Vertexshader" type="vertex">void main(void)
 {
  gl_Position = gl_ModelViewProjectionMatrix * gl_Vertex;
@@ -74,12 +74,16 @@ void main(void){
 	gl_TexCoord[0] *= 1;
 	vec4 c = texture2DGrad(Fontmap, coord, dFdx(gl_TexCoord[0].xy) * 2, dFdy(gl_TexCoord[0].xy)); 
 	gl_FragColor = c * c.a + 0.5 * (1.0 - c.a);
-	}
+}
 
 </shader>
-        <texture name="Fontmap" filename="media/font1.png" >
+        <texture name="Fontmap" filename="../../../../.luminia/media/font1.png" >
         </texture>
-        <texture name="Textmap" filename="" >
+        <texture name="Textmap" format="ALPHA8" width="16" height="16" >
+            ICB3aXRoIDEgdGV4ZWwgICBjb25zb2xlIG91dHB1dCAgICBmb3Igc2ltcGxlICAgIEZyYWdtZW50c2hhZGVyICoqKioqKioqKioq
+            KioqKiogICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAg
+            ICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAgICAq
+            KioqKioqKioqKioqKioqICAgcGVyIGNoYXIgISAgIA==
         </texture>
         <mesh name="Torus" vertices="1089">
             <component name="Vertex" type="vertex" dim="3" keyframes="1" format="float" >

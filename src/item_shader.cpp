@@ -21,7 +21,8 @@
 #include "item.h"
 #include "sourceedit.h"
 
-Item_shader::Item_shader( Item *parent, const QString& name, int _shadertype) : Item_edit( parent, name)
+Item_shader::Item_shader( Item *parent, const QString& name, int _shadertype) :
+    Item_edit( parent, name)
 {
     shadertype = _shadertype;
     if (shadertype==Vertexshader){
@@ -36,14 +37,6 @@ Item_shader::Item_shader( Item *parent, const QString& name, int _shadertype) : 
     connect(edit, SIGNAL(requestCompletationList(QString)), this, SLOT(completationHandler(QString)));
     connect(edit, SIGNAL(requestHelpString(QString)), this, SLOT(helpHandler(QString)));
 }
-
-void Item_shader::addMenu(QMenu *menu)
-{
-    menu->addAction ( QIcon(":/images/xpm/load.xpm"), tr("Load File"), this, SLOT(load()) );
-    menu->addAction ( QIcon(":/images/xpm/save.xpm"), tr("Save as File"), this, SLOT(saveas()) );
-    menu->addAction ( QIcon(":/images/xpm/reload.xpm"), tr("Reload File"), this, SLOT(reload()) );
-}
-
 
 int Item_shader::getShaderType()
 {

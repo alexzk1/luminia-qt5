@@ -120,7 +120,7 @@ void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item
                 for (const auto& ac : as.sactions)
                 {
                     //damn...for each action will have own engine...need that, because ...some actions open dialogs for long
-                    QAction *a = menu->addAction(ac.icon, "*" + ac.text);
+                    QAction *a = menu->addAction(ac.icon, ac.text);
                     eptr_t engine = new SEngine(itm);
                     engine->useDefaultError();
 

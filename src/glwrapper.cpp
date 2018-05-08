@@ -36,7 +36,6 @@ glwrapper::glwrapper( QObject * parent, QString name ): QObject( parent ){
 internal used slot. don't use...
 */
 void glwrapper::cleartrasher(){
-    trasher.clear();
 }
 
 /*!
@@ -306,7 +305,6 @@ QObject* glwrapper::Shader(QObject* _inVertex){
     Item_shader* inVertex = dynamic_cast<Item_shader*>(_inVertex);
 
     glwrapper_shader* tmp = new glwrapper_shader(this,inVertex->text());
-    trasher.append(tmp);
     return tmp;
 }
 
@@ -316,7 +314,6 @@ compile all shaders at the beginning of a script.
 */
 QObject* glwrapper::Shader(QString vertex){
     glwrapper_shader* tmp = new glwrapper_shader(this,vertex);
-    trasher.append(tmp);
     return tmp;
 }
 
@@ -329,7 +326,6 @@ QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inFragment){
     Item_shader* inFragment = dynamic_cast<Item_shader*>(_inFragment);
 
     glwrapper_shader* tmp = new glwrapper_shader(this,inVertex->text(),inFragment->text());
-    trasher.append(tmp);
     return tmp;
 }
 
@@ -337,9 +333,9 @@ QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inFragment){
 Object Shader(String|Item vertexshader, String|Item fragmentshader);
 compile all shaders at the beginning of a script.
 */
-QObject* glwrapper::Shader(QString vertex, QString fragment){
-    glwrapper_shader* tmp = new glwrapper_shader(this,vertex,fragment);
-    trasher.append(tmp);
+QObject* glwrapper::Shader(QString vertex, QString fragment)
+{
+    glwrapper_shader* tmp = new glwrapper_shader(this, vertex, fragment);
     return tmp;
 }
 
@@ -353,7 +349,7 @@ QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inGeometric, int inPrim
     Item_shader* inGeometric = dynamic_cast<Item_shader*>(_inGeometric);
 
     glwrapper_shader* tmp = new glwrapper_shader(this,inVertex->text(),inGeometric->text(), inPrimitive, outPrimitive, outVertices);
-    trasher.append(tmp);
+
     return tmp;
 }
 /*!
@@ -362,7 +358,6 @@ compile all shaders at the beginning of a script.
 */
 QObject* glwrapper::Shader(QString vertex, QString geometric, int inPrimitive, int outPrimitive, int outVertices){
     glwrapper_shader* tmp = new glwrapper_shader(this,vertex,geometric,  inPrimitive, outPrimitive, outVertices);
-    trasher.append(tmp);
     return tmp;
 }
 
@@ -377,7 +372,6 @@ QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inGeometric, QObject* _
     Item_shader* inFragment = dynamic_cast<Item_shader*>(_inFragment);
 
     glwrapper_shader* tmp = new glwrapper_shader(this,inVertex->text(),inGeometric->text(),inFragment->text(), inPrimitive, outPrimitive, outVertices);
-    trasher.append(tmp);
     return tmp;
 }
 
@@ -387,7 +381,7 @@ compile all shaders at the beginning of a script.
 */
 QObject* glwrapper::Shader(QString vertex, QString geometric, QString fragment, int inPrimitive, int outPrimitive, int outVertices){
     glwrapper_shader* tmp = new glwrapper_shader(this,vertex,geometric,fragment,  inPrimitive, outPrimitive, outVertices);
-    trasher.append(tmp);
+
     return tmp;
 }
 
@@ -398,7 +392,6 @@ Create a new Framebuffer object. This is usefull for multiple rendertarget
 */
 QObject* glwrapper::Framebuffer(){
     glwrapper_framebuffer* tmp = new glwrapper_framebuffer(this);
-    trasher.append(tmp);
     return tmp;
 }
 

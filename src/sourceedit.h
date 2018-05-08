@@ -28,6 +28,7 @@
 #include <QVBoxLayout>
 #include <QLabel>
 #include <QSyntaxHighlighter>
+#include <QToolBar>
 
 class SourceEdit;
 
@@ -134,14 +135,11 @@ public:
     QString getText()const;
     void setCompleatationList(const QStringList&, int offset = 0);
     void setHelpString(const QString&);
-
-
+    void appendActionToBar(QAction *act);
 protected:
     void emitRequestCompletationList(const QString&);
-
-
-    QHBoxLayout *layout;
     TextEdit *edit;
+    QToolBar *buttonsBar;
     LineNumberWidget *linenumbers;
     Highlighter *highlighter;
     QStringList completationList;
