@@ -42,7 +42,7 @@ public:
 };
 
 //this is global exports/includes to all scripts
-
+class QToolBar;
 class ScriptExtender
 {
 public:
@@ -50,6 +50,7 @@ public:
     static void addActionsForItem(QPointer<QMenu> menu, const QPointer<Item> itm);
     static ScriptFile::FuncsList getImportedMethods(const QPointer<Item> itm);
 
+    static void buildToolbar(const QPointer<QToolBar>& toolBar);
 
     static void reloadExports();
     static void reloadPlugins();

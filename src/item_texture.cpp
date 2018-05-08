@@ -245,10 +245,11 @@ void Item_texture::reload()
 
     if (ends(fn, compressed))
     {
-        qWarning( "Load jpg/png" );
+        //qWarning( "Load jpg/png" );
         QImage buf;
-        if ( !buf.load(fn)) {	// Load first image from file
-            qWarning( "Could not read image file, using single-color instead." );
+        if ( !buf.load(fn))
+        {	// Load first image from file
+            //qWarning( "Could not read image file, using single-color instead." );
             QImage dummy( 128, 128, QImage::Format_ARGB32 );
             dummy.fill( Qt::green );
             buf = dummy;
@@ -286,7 +287,7 @@ void Item_texture::reload()
             const auto dds_magic = le2cpu(readIntegralFromFile<uint32_t>(file));
             const auto dds_size  = le2cpu(readIntegralFromFile<uint32_t>(file));
             const auto trueSize  = std::min(static_cast<size_t>(dds_size) - sizeof (dds_size), sizeof(DDS_Header_t));
-            qDebug() << "Loading DDS, magic: " << dds_magic <<", size: " << dds_size <<", effectiveSize = " << trueSize;
+           // qDebug() << "Loading DDS, magic: " << dds_magic <<", size: " << dds_size <<", effectiveSize = " << trueSize;
             DDS_Header_t DDS_Header;memset(&DDS_Header, 0, sizeof (DDS_Header));
             readFromFile(file, DDS_Header, trueSize);
 
@@ -381,7 +382,7 @@ void Item_texture::reload()
         }
     }
     GL_CHECK_ERROR();
-    qDebug() << "Texture type: " <<type;
+ //   qDebug() << "Texture type: " <<type;
 }
 
 /*!

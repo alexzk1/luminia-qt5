@@ -209,7 +209,7 @@ void GLCam::wheelEvent (QWheelEvent *ev){
 
     paintGL();
     swapBuffers();
-    qDebug() << "Zoom: " << zoom;
+
 }
 
 
@@ -246,16 +246,16 @@ void GLCam::resizeEvent(QResizeEvent *e ){
 keypress event calles the "keypressEvent" function from each running script
 */
 void GLCam::keyPressEvent(QKeyEvent *e){
-    static QWidget *fullscreen = NULL;
+    static QWidget *fullscreen = nullptr;
     if (e->key() == Qt::Key_F && !fullscreen){
         fullscreen = parentWidget();
-        setParent(0);
+        setParent(nullptr);
         showFullScreen();
     }
     else if (e->key() == Qt::Key_F && fullscreen){
         setParent(fullscreen);
         if (QDockWidget *w = dynamic_cast<QDockWidget*>(fullscreen))w->setWidget(this);
-        fullscreen = NULL;
+        fullscreen = nullptr;
     }
 
     QTreeWidgetItemIterator it(cam->world);

@@ -71,13 +71,7 @@ MainWindow::~MainWindow()
 void MainWindow::createScriptToolBar()
 {
     scriptToolBar = addToolBar(tr("ScriptTools"));
-//    for (int i = 0; i < launcher.size(); ++i)
-//    {
-//        if (launcher.at(i)->isForItem("ScriptToolBar"))
-//        {
-//            scriptToolBar->addAction(launcher.at(i)->getAction());
-//        }
-//    }
+    ScriptExtender::buildToolbar(scriptToolBar);
 }
 
 void MainWindow::recurseWrite(QSettings &settings, QObject*)
@@ -173,7 +167,7 @@ void MainWindow::save(){
 }
 
 void MainWindow::clear(){
-    int res = QMessageBox::question ( nullptr, "Clear World", "Clear the world may cause data loss... ", QMessageBox::Ok ,QMessageBox::Cancel );
+    int res = QMessageBox::question ( this, "Clear World", "Clear the world may cause data loss... ", QMessageBox::Ok ,QMessageBox::Cancel );
 
     if(res == QMessageBox::Ok)
     {
@@ -280,10 +274,10 @@ void MainWindow::createActions()
     hide_all_editors_Act = new QAction(tr("Hide all Editors"), this);
     connect(hide_all_editors_Act, SIGNAL(triggered()), this, SLOT(hide_all_editors()));
 
-    run_all_scripts_Act = new QAction(tr("Run all Scripts"), this);
+    run_all_scripts_Act = new QAction(tr("Enable All Scripts"), this);
     connect(run_all_scripts_Act, SIGNAL(triggered()), this, SLOT(run_all_scripts()));
 
-    stop_all_scripts_Act = new QAction(tr("Stop all Spripts"), this);
+    stop_all_scripts_Act = new QAction(tr("Disable All Spripts"), this);
     connect(stop_all_scripts_Act, SIGNAL(triggered()), this, SLOT(stop_all_scripts()));
 
 }

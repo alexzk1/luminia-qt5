@@ -19,12 +19,15 @@
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************************/
 #include <vector>
+#include <QToolBar>
+
 #include "script_extender.h"
 #include "loaderpaths.h"
 #include "item.h"
 
 static std::vector<PreloadedScript> scripts;
 static std::vector<PreloadedScript> plugins;
+using eptr_t = QPointer<SEngine>;
 
 PreloadedScript::PreloadedScript(const QString &fileName):
     filePath(fileName),
@@ -59,22 +62,53 @@ void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item
             {
                 QAction *a = menu->addAction(as.scriptFile->tagXpm(), as.scriptFile->tagName());
                 a->setToolTip(as.scriptFile->tagDescription() + " (" + as.filePath + ").");
+                a->setCheckable(as.scriptFile->tagToggle());
+                a->setChecked(false);
+
+                std::shared_ptr<eptr_t> ppEng(new eptr_t(nullptr));
                 ScriptFilePtrW ws = as.scriptFile;
-                QPointer<SEngine> engine = new SEngine(itm);
-                engine->useDefaultError();
 
-                //bug fix for old samples code, guess currently it had to use "obj"
-                engine->run(QString("World.getContext = function() { return %1; };").arg(itm->getFullScriptName()));
-
-                QObject::connect(a, &QAction::triggered, itm, [ws, itm, engine]()
+                if (!a->isCheckable())
                 {
-                    auto ptr = ws.lock();
-                    //somewhen later, when user clicks
-                    if (itm && ptr && engine)
+                    QObject::connect(a, &QAction::triggered, itm, [ws, itm, ppEng]()
                     {
-                        engine->run(ptr->getFileText());
-                    }
-                });
+                        if (*ppEng)
+                        {
+                            (*ppEng)->deleteLater();
+                        }
+                        auto ptr = ws.lock();
+                        //somewhen later, when user clicks
+                        if (itm && ptr)
+                        {
+                            (*ppEng) = new SEngine(itm);
+                            (*ppEng)->useDefaultError();
+                            //bug fix for old samples code, guess currently it had to use "obj"
+                            (*ppEng)->run(QString("World.getContext = function() { return %1; };").arg(itm->getFullScriptName()));
+                            (*ppEng)->run(ptr->getFileText());
+                        }
+                    });
+                }
+                else
+                {
+                    QObject::connect(a, &QAction::triggered, itm, [ws, itm, ppEng](bool checked)
+                    {
+                        auto ptr = ws.lock();
+                        //somewhen later, when user clicks
+                        if (*ppEng)
+                            (*ppEng)->deleteLater();
+                        if (itm && ptr)
+                        {
+                            if (checked)
+                            {
+                                (*ppEng) = new SEngine(itm);
+                                (*ppEng)->useDefaultError();
+                                //bug fix for old samples code, guess currently it had to use "obj"
+                                (*ppEng)->run(QString("World.getContext = function() { return %1; };").arg(itm->getFullScriptName()));
+                                (*ppEng)->run(ptr->getFileText());
+                            }
+                        }
+                    });
+                }
             }
         }
 
@@ -87,7 +121,7 @@ void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item
                 {
                     //damn...for each action will have own engine...need that, because ...some actions open dialogs for long
                     QAction *a = menu->addAction(ac.icon, "*" + ac.text);
-                    QPointer<SEngine> engine = new SEngine(itm);
+                    eptr_t engine = new SEngine(itm);
                     engine->useDefaultError();
 
                     //bug fix for old samples code, guess currently it had to use "obj"
@@ -118,6 +152,66 @@ script_header_parser::FuncsList ScriptExtender::getImportedMethods(const QPointe
             result.append(as.sexports);
     }
     return result;
+}
+
+void ScriptExtender::buildToolbar(const QPointer<QToolBar> &toolBar)
+{
+
+    if (toolBar)
+    {
+        for (const auto& as : plugins)
+        {
+            if(as.isForItem("ScriptToolBar"))
+            {
+                QAction *a = toolBar->addAction(as.scriptFile->tagXpm(), as.scriptFile->tagName());
+                a->setToolTip(as.scriptFile->tagDescription() + " (" + as.filePath + ").");
+                a->setCheckable(as.scriptFile->tagToggle());
+                a->setChecked(false);
+
+                std::shared_ptr<eptr_t> ppEng(new eptr_t(nullptr));
+                ScriptFilePtrW ws = as.scriptFile;
+
+                if (!a->isCheckable())
+                {
+                    QObject::connect(a, &QAction::triggered, toolBar, [ws, toolBar, ppEng]()
+                    {
+                        if (*ppEng)
+                        {
+                            (*ppEng)->deleteLater();
+                        }
+                        auto ptr = ws.lock();
+                        //somewhen later, when user clicks
+                        if (ptr)
+                        {
+                            (*ppEng) = new SEngine(toolBar);
+                            (*ppEng)->useDefaultError();
+                            (*ppEng)->run(ptr->getFileText());
+                        }
+                    });
+                }
+                else
+                {
+                    QObject::connect(a, &QAction::triggered, toolBar, [ws, toolBar, ppEng](bool checked)
+                    {
+                        auto ptr = ws.lock();
+                        //somewhen later, when user clicks
+                        if (*ppEng)
+                            (*ppEng)->deleteLater();
+
+                        if (toolBar && ptr)
+                        {
+                            if (checked)
+                            {
+                                (*ppEng) = new SEngine(toolBar);
+                                (*ppEng)->useDefaultError();
+                                (*ppEng)->run(ptr->getFileText());
+                            }
+                        }
+                    });
+                }
+            }
+        }
+    }
 }
 
 void ScriptExtender::reloadExports()

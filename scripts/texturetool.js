@@ -188,9 +188,9 @@ function textureTool(){
 		alphacheck.text = "RGB * A";
 		alphacheck.checked = false;
 		alphacheck.clicked.connect(changed);
-		dock.add(alphacheck);		
+		dock.add(alphacheck);				
 		}
-	  dock.show();
+	    dock.show();
 	}
 
 
