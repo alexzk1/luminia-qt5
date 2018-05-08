@@ -47,7 +47,7 @@ class ScriptExtender
 {
 public:
     static void loadImported(SEngine *engine); //loads all imports into engine (global namespace)
-    static void addActions(QPointer<QMenu> menu, const QPointer<Item> itm);
+    static void addActionsForItem(QPointer<QMenu> menu, const QPointer<Item> itm);
     static ScriptFile::FuncsList getImportedMethods(const QPointer<Item> itm);
 
 

@@ -26,6 +26,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include "loaderpaths.h"
+#include "mainwindow.h"
 
 Item_edit::Item_edit( Item *parent, const QString& name) :
     Item( parent, name )
@@ -69,7 +70,7 @@ void Item_edit::saveas(const QString& filename)
     fn = filename;
     if (filename=="")
     {
-        fn = QFileDialog::getSaveFileName(nullptr, tr("Open File"), "",tr("Text (*.*)"));
+        fn = QFileDialog::getSaveFileName(ws, tr("Open File"), "",tr("Text (*.*)"));
     }
     if (fn != "")
     {
@@ -89,7 +90,7 @@ void Item_edit::load(const QString& filename)
     fn = filename;
     if (filename == "")
     {
-        fn = QFileDialog::getOpenFileName(nullptr, tr("Open File"), "",tr("Text (*.*)"));
+        fn = QFileDialog::getOpenFileName(ws, tr("Open File"), "",tr("Text (*.*)"));
     }
     else
     {

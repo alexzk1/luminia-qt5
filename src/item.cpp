@@ -233,8 +233,20 @@ void Item::buildMenu(QMenu *menu)
     if (menu)
     {
         int b1 = menu->actions().size();
-        ScriptExtender::addActions(menu, this);
-
+        ScriptExtender::addActionsForItem(menu, this);
+        if (dock)
+        {
+            if (menu->actions().size() != b1)
+                menu->addSeparator();
+            auto a = menu->addAction(QIcon(":/images/xpm/edit.xpm"), QString(tr("Show...")) , this, [this]()
+            {
+                if (dock)
+                {
+                    dock->show();
+                }
+            });
+            menu->setDefaultAction(a);
+        }
         if (isDeletable())
         {
             if (menu->actions().size() != b1)

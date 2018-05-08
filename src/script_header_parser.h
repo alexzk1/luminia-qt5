@@ -60,7 +60,7 @@ private:
     static QIcon       getXpm(QString tag);
 };
 
-using ScriptFile    = script_header_parser; //alias, think its better name
-using ScriptFilePtr = std::shared_ptr<ScriptFile>;
-
+using ScriptFile     = script_header_parser; //alias, think its better name
+using ScriptFilePtr  = std::shared_ptr<ScriptFile>;
+using ScriptFilePtrW = std::weak_ptr<ScriptFile>;
 #endif // SCRIPT_HEADER_PARSER_H

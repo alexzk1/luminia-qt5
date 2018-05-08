@@ -28,12 +28,12 @@ static std::vector<PreloadedScript> plugins;
 
 PreloadedScript::PreloadedScript(const QString &fileName):
     filePath(fileName),
-    scriptFile(nullptr),
+    scriptFile(),
     sactions(),
     sexports()
 {
     QFile file(fileName);
-    scriptFile = std::make_shared<ScriptFile>(file);
+    scriptFile.reset(new ScriptFile(file)); //make_shared will keep locked by weak ptrs too
     setFilter(scriptFile->tagFilter());
     sactions = scriptFile->tagAction();
     sexports = scriptFile->tagFunction();
@@ -48,20 +48,33 @@ void ScriptExtender::loadImported(SEngine *engine)
     }
 }
 
-void ScriptExtender::addActions(QPointer<QMenu> menu, const QPointer<Item> itm)
+void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item> itm)
 {
     if (menu && itm)
     {
-        //building "plugins actions"
+        //building "plugins actions" (those are launched as single-file program)
         for (const auto& as : plugins)
         {
             if(as.isForItem(itm))
             {
-
+                QAction *a = menu->addAction(as.scriptFile->tagXpm(), as.scriptFile->tagName());
+                a->setToolTip(as.scriptFile->tagDescription());
+                ScriptFilePtrW ws = as.scriptFile;
+                QObject::connect(a, &QAction::triggered, itm, [ws, itm]()
+                {
+                    auto ptr = ws.lock();
+                    //somewhen later, when user clicks
+                    if (itm && ptr)
+                    {
+                        SEngine* engine = new SEngine(itm);
+                        engine->run(ptr->getFileText());
+                        engine->deleteLater();
+                    }
+                });
             }
         }
 
-        //building "script actions"
+        //building "script actions" (those should contain functions only which are loaded into namespace later)
         for (const auto& as : scripts)
         {
             if(as.isForItem(itm) && !as.sactions.isEmpty())
