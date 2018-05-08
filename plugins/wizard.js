@@ -42,4 +42,4 @@ World.Wizard.addTexture("Normalmap");
 World.Wizard.addTexture("Depthmap");
 
 World.Wizard.createSphere(5);
-//World.Wizard.Script.run();
+World.Wizard.Script.run();

@@ -2,13 +2,13 @@
 
 
 struct tTyp{
-        GLuint intformat;
-        GLuint format;
+        GLint intformat;
+        GLenum format;
         const char *name;
         int compressed;
         int bits;
         int blocksize;
-        GLuint datatype;
+        GLenum datatype;
         };
 
 const tTyp texturetype[]= {

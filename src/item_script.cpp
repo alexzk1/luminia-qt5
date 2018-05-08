@@ -39,8 +39,8 @@ Item_script::Item_script( Item *parent, const QString& name) :
 
 void Item_script::addMenu(QMenu *menu)
 {
-    menu->addAction ( QIcon(":/images/xpm/run.xpm"),tr( "Run Script") , this, SLOT( run()));
-    menu->addAction ( QIcon(":/images/xpm/stop.xpm"),tr( "Stop Script") , this, SLOT( stop()));
+    menu->addAction ( QIcon(":/images/xpm/run.xpm"),tr( "Enable Script") , this, SLOT( run()));
+    menu->addAction ( QIcon(":/images/xpm/stop.xpm"),tr( "Disable Script") , this, SLOT( stop()));
     menu->addSeparator ();
     menu->addAction ( QIcon(":/images/xpm/load.xpm"), tr("Load File"), this, SLOT(load()) );
     menu->addAction ( QIcon(":/images/xpm/save.xpm"), tr("Save as File"), this, SLOT(saveas()) );

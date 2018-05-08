@@ -130,8 +130,10 @@ Item_texture::~Item_texture()
 /*!
 returns some information about the texture
 */
-QString Item_texture::statusText() const{
-    switch (type){
+QString Item_texture::statusText() const
+{
+    switch (type)
+    {
         case GL_TEXTURE_3D:
             return QString("3D Texture %1 x %2 x %3 %4").arg(width).arg(height).arg(depth).arg(texturetype[formatindex].name);
         case GL_TEXTURE_2D:
@@ -167,9 +169,11 @@ GLuint Item_texture::getTextureID()
 void Bind(number Tmu)\n
 Tmu is the number of the "Texture mapping unit" on current graphics cards 0-15
 */
-void Item_texture::Bind(int tmu){
+void Item_texture::Bind(int tmu)
+{
     GL_CHECK_ERROR();
     glActiveTexture(GL_TEXTURE0 + tmu);
+    GL_CHECK_ERROR();
     glBindTexture(type, texture);
     GL_CHECK_ERROR();
     boundto = tmu;
@@ -338,12 +342,14 @@ void Item_texture::reload()
             }
 
             bool m = false;
-            if(DDS_Header.Flags & DDS_MIPMAPCOUNT) {
+            if(DDS_Header.Flags & DDS_MIPMAPCOUNT)
+            {
                 qDebug() << "DDS File: Mipmap found" << DDS_Header.MipMapCount;
                 m = true;
             }
 
-            if (DDS_Header.Caps2 & DDS_VOLUME){
+            if (DDS_Header.Caps2 & DDS_VOLUME)
+            {
                 qDebug() << "DDS File: 3D texture";
                 Image3d (DDS_Header.Width, DDS_Header.Height, DDS_Header.Depth, format, m);
                 type = GL_TEXTURE_3D;
@@ -375,6 +381,7 @@ void Item_texture::reload()
         }
     }
     GL_CHECK_ERROR();
+    qDebug() << "Texture type: " <<type;
 }
 
 /*!
