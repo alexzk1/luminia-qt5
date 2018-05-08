@@ -22,41 +22,35 @@
 #ifndef SCRIPT_LAUNCHER_H
 #define SCRIPT_LAUNCHER_H
 
-
-#include <QObject>
 #include <QAction>
-#include <QRegExp>
+#include <QPointer>
+#include <QString>
 #include "script_extender_engine.h"
+#include "script_header_parser.h"
 #include "no_copy.h"
-
-class Item;
-class QSInterpreter;
-class QScriptEngine;
-class glwrapper;
+#include "filterableitem.h"
 
 //this is "plugin launcher"
 
-class ScriptLauncher : public QObject, public utility::NoCopyAssignMove
+class ScriptLauncher : public QObject, public FilterableItem, public utility::NoCopyAssignMove
 {
     Q_OBJECT
 public:
-    ScriptLauncher(QString fn, QObject * parent = nullptr);
+    ScriptLauncher(const QString &fn, QObject *parent = nullptr);
     virtual ~ScriptLauncher()override;
-    QAction *a;
-    QRegExp *filter;
+    operator QPointer<QAction>() const;
+    QPointer<QAction> getAction() const;
 public slots:
     void terminate();
 private slots:
     void toggled(bool);
     void launch();
-
 private:
+    QPointer<QAction> action;
     bool toggle;
     QString fileName;
-
-    glwrapper *ogl;
     QPointer<SEngine> ip;
-
+    ScriptFilePtr scriptFile;
 protected:
     void deleteEngine();
 };

@@ -320,7 +320,6 @@ private:
 //**********************************************************
 
 class QSInterpreter;
-class QSInterpreter;
 class glwrapper;
 /*!
 The script editor, including the completation handler

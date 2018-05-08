@@ -67,7 +67,9 @@ HEADERS	=	src/mainwindow.h \
     src/loaderpaths.h \
     src/file_loader.h \
     src/palgorithm.h \
-    src/no_copy.h
+    src/no_copy.h \
+    src/script_header_parser.h \
+    src/filterableitem.h
 
 SOURCES =	src/main.cpp \
                 src/mainwindow.cpp \
@@ -118,5 +120,7 @@ SOURCES =	src/main.cpp \
                 src/factory/colorwidget_factory_private.cpp \
                 src/factory/factory.cpp \
     src/loaderpaths.cpp \
-    src/script_extender_engine.cpp
+    src/script_extender_engine.cpp \
+    src/script_header_parser.cpp \
+    src/filterableitem.cpp
 

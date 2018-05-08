@@ -71,9 +71,9 @@ void MainWindow::createScriptToolBar( QList<ScriptLauncher*>  launcher)
     scriptToolBar = addToolBar(tr("ScriptTools"));
     for (int i = 0; i < launcher.size(); ++i)
     {
-        if (launcher.at(i)->filter->exactMatch("ScriptToolBar"))
+        if (launcher.at(i)->isForItem("ScriptToolBar"))
         {
-            scriptToolBar->addAction (launcher.at(i)->a);
+            scriptToolBar->addAction(launcher.at(i)->getAction());
         }
     }
 }

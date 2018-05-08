@@ -18,108 +18,50 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************************/
-
-
-
-
-#include <qscriptengine.h>
-
-#include "factory/factory.h"
-
 #include "script_launcher.h"
 
-#include "item.h"
-#include "glwrapper.h"
-#include <QMessageBox>
-#include "mainwindow.h"
-
-ScriptLauncher::ScriptLauncher(QString fn, QObject * parent):
-    QObject( parent)
+//plugin launcher
+ScriptLauncher::ScriptLauncher(const QString& fn, QObject *parent):
+    QObject(parent),
+    FilterableItem (),
+    action(nullptr),
+    toggle(false),
+    fileName(fn),
+    ip(nullptr),
+    scriptFile(nullptr)
 {
-    QPixmap *pix;
-    QString name;
-    ip = nullptr;
-    fileName = fn;
-    //Load XPM
     QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text ))
-        qDebug() << "Error launching script";
+    scriptFile = std::make_shared<ScriptFile>(file);
 
-    QRegExp rx( "<XPM>.+\"(.+)\".+</XPM>" );
-    QString in = file.readAll();
-    rx.indexIn(in,0);
-    QString captured = rx.cap( 1 );
-    captured.replace( QRegExp("\"[^\"&.]+\""), "\n" );
-    QByteArray ascii = captured.toUtf8();
-    const char *xpmbytes=ascii.data();
-
-    char * xpmfinal = new char[captured.length()];
-    int lines = 1;
-    for (int i=0;i<captured.length();i++){
-        if (xpmbytes[i]=='\n'){
-            xpmfinal[i]=0;
-            lines++;
-        }
-        else xpmfinal[i]=xpmbytes[i];
-    }
-
-    const char ** xpmptrs = new const char*[lines+1];
-    xpmptrs[0] = xpmfinal;
-    int j = 1;
-    for (int i=0;i<captured.length();i++){
-        if (xpmfinal[i]=='\0'){
-            xpmptrs[j]=xpmfinal + i + 1;
-            j++;
-        }
-    }
-
-    pix = new QPixmap(xpmptrs);
-    delete[] xpmfinal;
-    delete[] xpmptrs;
-
-    QRegExp fx( "<FILTER>(.+)</FILTER>" );
-
-    if (fx.indexIn(in,0))filter = new QRegExp(fx.cap( 1 ));
-    else filter = new QRegExp("(.+)");
-
-    QRegExp nx( "<NAME>(.+)</NAME>" );
-    if (nx.indexIn(in,0))
-        name = nx.cap( 1 );
+    action = new QAction(scriptFile->tagXpm(), scriptFile->tagName(), parent);
+    if ((toggle = scriptFile->tagToggle()))
+        connect( action, SIGNAL(triggered(bool)), this, SLOT(toggled(bool)));
     else
-        name = fn;
+        connect( action, SIGNAL(triggered()), this, SLOT(launch()));
 
-    QString tooltip;
-    QRegExp tx( "<DESCRIPTION>(.+)</DESCRIPTION>" );
-    if (tx.indexIn(in,0))tooltip = tx.cap( 1 );
+    action->setCheckable(toggle);
+    action->setChecked(false);
+    action->setStatusTip (scriptFile->tagDescription());
 
-
-    a = new QAction(QIcon(*pix), name , parent);
-    a->setStatusTip ( tooltip );
-
-    toggle = false;
-    QRegExp px( ".*<TOGGLE/>.*" );
-    if (px.exactMatch(in))
-    {
-        toggle=true;
-        qDebug() << "toggle";
-        a->setCheckable ( true );
-        QObject::connect( a, SIGNAL(triggered(bool)), this, SLOT(toggled(bool)));
-    }
-    else
-    {
-        QObject::connect( a, SIGNAL(triggered()), this, SLOT(launch()));
-    }
-    delete pix;
-
-    ogl = new glwrapper(this,"gl");
+    setFilter(scriptFile->tagFilter());
 }
 
 ScriptLauncher::~ScriptLauncher()
 {
     deleteEngine();
-    delete a;
-    delete filter;
-    delete ogl;
+    if (action)
+        action->deleteLater();
+    scriptFile.reset();
+}
+
+QPointer<QAction> ScriptLauncher::getAction() const
+{
+    return action;
+}
+
+ScriptLauncher::operator QPointer<QAction>() const
+{
+    return getAction();
 }
 
 #include <QGLContext>
@@ -128,7 +70,7 @@ void ScriptLauncher::launch()
 {
     qDebug() << "Current context" << QGLContext::currentContext ();
     deleteEngine();
-    ip = new SEngine(this, fileName);
+    ip = new SEngine(this);
     ip->useDefaultError();
 
     QScriptValue globalObject = ip->getEngine().globalObject();
@@ -136,7 +78,7 @@ void ScriptLauncher::launch()
     if (toggle)
         globalObject.setProperty("Launcher" ,ip->getEngine().newQObject(this));
 
-    ip->run();
+    ip->run(*scriptFile);
     deleteEngine();
 }
 
@@ -150,7 +92,8 @@ void ScriptLauncher::deleteEngine()
 void ScriptLauncher::terminate()
 {
     deleteEngine();
-    a->setChecked (false);
+    if (action)
+        action->setChecked(false);
 }
 
 void ScriptLauncher::toggled(bool run)

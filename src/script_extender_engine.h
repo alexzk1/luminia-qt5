@@ -44,6 +44,7 @@ public:
     QScriptValue run();
     QScriptValue run(const QString& src);
     QScriptValue run(QFile &file);
+    QScriptValue execJsFunc(const QString& function, const QVariantList& args);
 
     void useDefaultError();
     QScriptEngine& getEngine();
@@ -54,10 +55,10 @@ private slots:
 private:
     QScriptEngine eng;
     QPointer<Item> obj; // assigned object
+    QPointer<glwrapper> ogl;
     QString filename; //script filename
-    glwrapper *ogl;
 
-    void testErrors() const;
+    bool testErrors() const;
     void setupEngine(QObject *o);
 };
 #endif

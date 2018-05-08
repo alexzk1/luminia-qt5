@@ -18,129 +18,58 @@
 ** along with this program; if not, write to the Free Software
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************************/
-
+#include <vector>
 #include "script_extender.h"
-#include "script_extender_engine.h"
 #include "loaderpaths.h"
+#include "item.h"
 
-QList<SAction> ScriptExtender::actionlist;
-QList<SSlot> ScriptExtender::slotlist;
+static std::vector<PreloadedScript> scripts;
 
-QList<QPointer<SEngine>> ScriptExtender::engineList;
-
-
-void ScriptExtender::scanFile(const QString& filename)
+PreloadedScript::PreloadedScript(const QString &fileName):
+    filePath(fileName),
+    scriptFile(nullptr),
+    sactions(),
+    sexports()
 {
-
-    QFile file(filename);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text ))
-    {
-        qDebug() << "Error launching script";
-        return;
-    }
-    QString in = file.readAll();
-
-    QRegExp rx;
-
-
-    rx = QRegExp( "<FILTER>(.+)</FILTER>" );
-    rx.setMinimal(true);
-    if (!rx.indexIn(in,0))return;
-    QString filter = rx.cap(1);
-
-    //for each found function
-    rx = QRegExp( "<FUNCTION>(.+)</FUNCTION>" );
-    rx.setMinimal(true);
-    for (int pos = 0; (pos = rx.indexIn(in, pos)) != -1; pos += rx.matchedLength())
-    {
-        QStringList split = rx.cap(1).split(" ");
-
-        switch (split.size())
-        {
-            case 1:
-                slotlist << SSlot("", split.at(0), slotlist.size(), QRegExp(filter),filename );
-                break;
-            case 2:
-                slotlist << SSlot(split.at(0), split.at(1), slotlist.size(), QRegExp(filter),filename );
-                break;
-            default:
-                qDebug() << "<FUNCTION>....</FUNCTION> with illegal content";
-        }
-
-    }
-
-
-
-    rx = QRegExp( "<ACTION>(.+)</ACTION>" );
-    rx.setMinimal(true);
-    for (int pos = 0; (pos = rx.indexIn(in, pos)) != -1; pos += rx.matchedLength()) {
-
-        QRegExp tx;
-
-
-        tx = QRegExp( "<TEXT>(.+)</TEXT>" );
-        if (!tx.indexIn(rx.cap(1),0))return;
-        QString text = tx.cap(1);
-
-        tx = QRegExp( "<SLOT>(.+)</SLOT>" );
-        if (!tx.indexIn(rx.cap(1),0))return;
-        QString slot = tx.cap(1);
-
-        const char** icon = xpm(rx.cap(1));
-        actionlist << SAction(icon,text,QString("1%1").arg(slot),QRegExp(filter));
-
-    }
-
-    //qDebug() << " sssssss" <<  SLOT(test());
-
-
-
+    QFile file(fileName);
+    scriptFile = std::make_shared<ScriptFile>(file);
+    setFilter(scriptFile->tagFilter());
+    sactions = scriptFile->tagAction();
+    sexports = scriptFile->tagFunction();
 }
 
-const char** ScriptExtender::xpm(const QString& in){
 
-    QRegExp rx( "<XPM>.+\"(.+)\".+</XPM>" );
-    rx.indexIn(in,0);
-    QString captured = rx.cap( 1 );
-
-    captured.replace( QRegExp("\"[^\"&.]+\""), "\n" );
-    QByteArray ascii = captured.toUtf8();
-    const char *xpmbytes=ascii.data();
-
-    char * xpmfinal = new char[captured.length() + 1]; //memory will never be deleted
-    int lines = 1;
-    for (int i=0;i<captured.length();i++){
-        if (xpmbytes[i]=='\n'){
-            xpmfinal[i]=0;
-            lines++;
-        }
-        else xpmfinal[i]=xpmbytes[i];
+void ScriptExtender::loadImported(SEngine *engine)
+{
+    for (const auto& as : scripts)
+    {
+        engine->run(as.scriptFile->getFileText());
     }
-
-    const char ** xpmptrs = new const char*[lines];  //memory will never be deleted
-    xpmptrs[0] = xpmfinal;
-    int j = 1;
-
-    for (int i=0;i<captured.length();i++){
-        if (xpmfinal[i]=='\0'){
-            xpmptrs[j]=xpmfinal + i + 1;
-            j++;
-            //qDebug() << j << " "<< i;
-        }
-    }
-
-    return xpmptrs;
 }
 
-void ScriptExtender::addActions(QMenu *menu, const QString &type)
+void ScriptExtender::addActions(QPointer<QMenu> menu, const QPointer<Item> itm)
 {
-    for (const auto& as : ScriptExtender::actionlist)
+    if (menu && itm)
     {
-        if(as.filter.exactMatch(type))
+        for (const auto& as : scripts)
         {
-             QAction *a = menu->addAction(QIcon(QPixmap(as.icon)), "*" + as.text);
-
-             //, ScriptExtender::actionlist.at(i).text, this, ScriptExtender::actionlist.at(i).slot.toLatin1().constData());
+            if(as.isForItem(itm) && !as.sactions.isEmpty())
+            {
+                for (const auto& ac : as.sactions)
+                {
+                    QAction *a = menu->addAction(ac.icon, "*" + ac.text);
+                    QObject::connect(a, &QAction::triggered, itm, [itm, ac]()
+                    {
+                        //making special "action engine" and execute function inside it
+                        if (itm)
+                        {
+                            SEngine *e = new SEngine(itm); //constructor will load all imports
+                            e->execJsFunc(ac.slot.funcNameOnly, {});
+                            e->deleteLater();
+                        }
+                    });
+                }
+            }
         }
     }
 }
@@ -149,7 +78,5 @@ void ScriptExtender::setup()
 {
     QStringList paths = LoaderPaths::listFilesInSubfolder(LoaderPaths::SCRIPTS);
     for(const auto& p : paths)
-        scanFile(p);
+        scripts.emplace_back(p);
 }
-
-

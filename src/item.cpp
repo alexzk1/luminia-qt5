@@ -54,7 +54,6 @@ Item::Item(Item *parent, const QString& name ):
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDropEnabled);
     setName ( name );
     menu = new QMenu();
-    qDebug() << "Created Item, engine:" << engine();
 }
 
 Item::~Item()
@@ -229,10 +228,10 @@ void Item::SCRIPT2MENU()
     {
         for (int i = 0; i < launcher.size(); ++i)
         {
-            if (launcher.at(i)->filter->exactMatch(getType()))
-                menu->addAction ( launcher.at(i)->a);
+            if (launcher.at(i)->isForItem(this))
+                menu->addAction ( launcher.at(i)->getAction());
         }
-        ScriptExtender::addActions(menu, getType());
+        ScriptExtender::addActions(menu, this);
     }
 }
 

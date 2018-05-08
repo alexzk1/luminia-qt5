@@ -19,71 +19,36 @@
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************************/
 
-#include <QRegExp>
-#include <QObject>
 #include <QMenu>
+#include <QImage>
+#include "filterableitem.h"
+#include "script_header_parser.h"
+#include "script_extender_engine.h"
 
 #ifndef _SCRIPT_EXTENDER_H
 #define _SCRIPT_EXTENDER_H
 
-class SAction{
-public:
-public:
-    SAction(const char ** _icon, const QString& _text, const QString& _slot, const QRegExp& _filter)
-    {
-        icon = _icon;
-        text = _text;
-        slot = _slot;
-        filter = _filter;
-    }
-
-    ~SAction()
-    {
-        //delete[] icon[0]; //xpm data
-        //delete[] icon;  //xpm ptr
-    }
-
-    const char **icon;	//xpm storage
-    QString text;		//Action text
-    QString slot;		//Slot to call
-    QRegExp filter;		//filter for the class name
-};
-
-class SEngine;
-
-class SSlot
+class PreloadedScript : public FilterableItem
 {
-    friend class SEngine;
+private:
 public:
-    SSlot(const QString& _type, const QString& _signature, int _id, QRegExp _filter, const QString& _filename)
-    {
-        type = _type;
-        signature = _signature;
-        id = _id;
-        filter = _filter;
-        filename = _filename;
-    }
+    PreloadedScript(const QString &fileName);
+    virtual ~PreloadedScript() override = default;
 
-
-    QString type;			//slot type
-    QString signature;		//Slot to call
-    QRegExp filter;		//filter for the class name
-    int 	id;			//callback id
-
-    QString filename;
+    QString filePath;
+    ScriptFilePtr scriptFile;
+    ScriptFile::ActionsList sactions;
+    ScriptFile::FuncsList   sexports;
 };
+
+//this is global exports/includes to all scripts
 
 class ScriptExtender
 {
 public:
-    static void addActions(QMenu* menu, const QString& type);
+    static void loadImported(SEngine *engine); //loads all imports into engine (global namespace)
+    static void addActions(QPointer<QMenu> menu, const QPointer<Item> itm);
     static void setup();
-    static void scanFile(const QString& filename);
-    static const char** xpm(const QString& in); //move to SAction later
-    static QList<SAction> actionlist;
-    static QList<SSlot>   slotlist;
-    //private:
-    static QList<QPointer<SEngine>> engineList;
 };
 
 #endif
