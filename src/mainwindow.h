@@ -98,6 +98,8 @@ private:
 
     TimeWidget *time;
     Console *console;
+
+    QPointer<QAction> switchDockTree;
 protected:
     virtual void recurseWrite(QSettings& settings, QObject* object) override;
     virtual void recurseRead(QSettings& settings, QObject* object) override;

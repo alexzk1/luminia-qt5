@@ -32,6 +32,7 @@
 #include <QFontInfo>
 #include <QFileInfoList>
 #include "loaderpaths.h"
+#include "dock_prep.h"
 
 QPointer<Item_world> Item::world = nullptr;
 QPointer<MainWindow> Item::ws = nullptr;

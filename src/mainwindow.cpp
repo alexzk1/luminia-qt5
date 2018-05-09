@@ -33,6 +33,8 @@
 #include <QApplication>
 #include <QVBoxLayout>
 #include "script_extender_engine.h"
+#include "dock_prep.h"
+
 QPointer<MainWindow> MainWindow::instance;
 extern const Qt::DockWidgetAreas DOCK_AREAS;
 
@@ -43,16 +45,34 @@ MainWindow::MainWindow()
 
     setDockNestingEnabled(true);
 
-    auto dock = new QDockWidget("World Tree", this);
-    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea); //yeh, dont want possible top/bottom for the tree
+    QPointer<QDockWidget> dockTree = new QDockWidget("World Tree", this);
+    dockTree->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea); //yeh, dont want possible top/bottom for the tree
 
-    treeview = new TreeView (dock);
-    dock->setWidget(treeview);
-    addDockWidget(Qt::LeftDockWidgetArea, dock);
+    treeview = new TreeView (dockTree);
+    dockTree->setWidget(treeview);
+
+    addDockWidget(Qt::LeftDockWidgetArea, dockTree);
 
     auto dumb = new QLabel(this);
     setCentralWidget(dumb);
     dumb->setVisible(false);
+
+    switchDockTree = new QAction(QIcon(":/images/xpm/world.xpm"), tr("Show/Hide World Tree"), this);
+    switchDockTree->setShortcut(QKeySequence("ctrl+W"));
+    switchDockTree->setCheckable(true);
+    switchDockTree->setChecked(true);
+
+    connect(switchDockTree, &QAction::triggered, [dockTree](bool check)
+    {
+        if (dockTree)
+        {
+            if (check)
+                dockTree->show();
+            else
+                dockTree->hide();
+        }
+    });
+
 
 
     treeview->world->profiler = new Profiler();
@@ -68,6 +88,7 @@ MainWindow::MainWindow()
     time = new TimeWidget(this);
     timeToolBar->addWidget(time);
     connect(time, SIGNAL(timeChanged(double)), treeview->world, SLOT(setTime(double)));
+
 
     readSettings(this);
 }
@@ -89,7 +110,7 @@ void MainWindow::setupErrorHandler(SEngine *engine)
 
         QTimer::singleShot(150, this, [this, msg]()
         {
-           QMessageBox::critical(this, tr("Script Error"), msg);
+            QMessageBox::critical(this, tr("Script Error"), msg);
         });
     });
 }
@@ -103,11 +124,13 @@ void MainWindow::createScriptToolBar()
 void MainWindow::recurseWrite(QSettings &settings, QObject*)
 {
     settings.setValue("LastPath", lastPath);
+    settings.setValue("DOCK_LOCATIONS",this->saveState(1));
 }
 
 void MainWindow::recurseRead(QSettings &settings, QObject*)
 {
     lastPath = settings.value("LastPath", QDir::homePath()).toString();
+    this->restoreState(settings.value("DOCK_LOCATIONS").toByteArray(), 1);
 }
 
 void MainWindow::showFileName(const QString &name)
@@ -246,13 +269,13 @@ void MainWindow::stop_all_scripts(){
 void MainWindow::createActions()
 {
     clearAct = new QAction(QIcon(":/images/new.png"), tr("&New"), this);
-    clearAct->setShortcut(tr("Ctrl+N"));
+    clearAct->setShortcut(QKeySequence("Ctrl+N"));
     clearAct->setStatusTip(tr("Start a new project"));
     connect(clearAct, SIGNAL(triggered()), this, SLOT(clear()));
 
 
     saveAct = new QAction(QIcon(":/images/save.png"), tr("&Save"), this);
-    saveAct->setShortcut(tr("Ctrl+S"));
+    saveAct->setShortcut(QKeySequence("Ctrl+S"));
     saveAct->setStatusTip(tr("Save the current project"));
     connect(saveAct, SIGNAL(triggered()), this, SLOT(save()));
 
@@ -261,31 +284,31 @@ void MainWindow::createActions()
     connect(saveAsAct, SIGNAL(triggered()), this, SLOT(saveAs()));
 
     openAct = new QAction(QIcon(":/images/open.png"), tr("&Open"), this);
-    openAct->setShortcut(tr("Ctrl+O"));
+    openAct->setShortcut(QKeySequence("Ctrl+O"));
     openAct->setStatusTip(tr("Open a Lumina project"));
     connect(openAct, SIGNAL(triggered()), this, SLOT(open()));
 
     appendAct = new QAction(QIcon(":/images/open.png"), tr("Append"), this);
-    appendAct->setShortcut(tr("Ctrl+A"));
+    appendAct->setShortcut(QKeySequence("Ctrl+A"));
     appendAct->setStatusTip(tr("Append a Lumina project"));
     connect(appendAct, SIGNAL(triggered()), this, SLOT(append()));
 
 
 
     profilerToggleAct = new QAction(QIcon(":/images/profiler.png"), tr("&Profiler"), this);
-    profilerToggleAct->setShortcut(tr("Ctrl+P"));
+    profilerToggleAct->setShortcut(QKeySequence("Ctrl+P"));
     profilerToggleAct->setStatusTip(tr("Toggle profiling"));
     profilerToggleAct->setCheckable (true);
     connect(profilerToggleAct, SIGNAL(toggled(bool)),treeview->world->profiler , SLOT(toggle(bool)));
 
     consoleToggleAct = new QAction(QIcon(":/images/console.png"),  tr("&Console"), this);
-    consoleToggleAct->setShortcut(tr("Ctrl+C"));
+    consoleToggleAct->setShortcut(QKeySequence("Ctrl+K"));
     consoleToggleAct->setStatusTip(tr("Toggle console"));
     consoleToggleAct->setCheckable (true);
     connect(consoleToggleAct, SIGNAL(toggled(bool)),console , SLOT(toggle(bool)));
 
     quitAct = new QAction(tr("&Quit"), this);
-    quitAct->setShortcut(tr("Ctrl+Q"));
+    quitAct->setShortcut(QKeySequence("alt+X"));
     quitAct->setStatusTip(tr("Quit the application"));
     connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -297,13 +320,16 @@ void MainWindow::createActions()
     aboutQtAct->setStatusTip(tr("Show the Qt library's About box"));
     connect(aboutQtAct, SIGNAL(triggered()), qApp, SLOT(aboutQt()));
 
-    hide_all_editors_Act = new QAction(tr("Hide all Editors"), this);
+    hide_all_editors_Act = new QAction(QIcon(":/images/closealleditors.png"), tr("Hide all Editors"), this);
+    hide_all_editors_Act->setShortcut(QKeySequence("ctrl+H"));
     connect(hide_all_editors_Act, SIGNAL(triggered()), this, SLOT(hide_all_editors()));
 
-    run_all_scripts_Act = new QAction(tr("Enable All Scripts"), this);
+    run_all_scripts_Act = new QAction(QIcon(":/images/xpm/run.xpm"), tr("Enable All Scripts"), this);
+    run_all_scripts_Act->setShortcut(QKeySequence("F5"));
     connect(run_all_scripts_Act, SIGNAL(triggered()), this, SLOT(run_all_scripts()));
 
-    stop_all_scripts_Act = new QAction(tr("Disable All Spripts"), this);
+    stop_all_scripts_Act = new QAction(QIcon(":/images/xpm/stop.xpm"), tr("Disable All Spripts"), this);
+    stop_all_scripts_Act->setShortcut(QKeySequence("F2"));
     connect(stop_all_scripts_Act, SIGNAL(triggered()), this, SLOT(stop_all_scripts()));
 
 }
@@ -328,6 +354,8 @@ void MainWindow::createMenus(){
     editMenu->addAction(hide_all_editors_Act);
     editMenu->addAction(run_all_scripts_Act);
     editMenu->addAction(stop_all_scripts_Act);
+    editMenu->addSeparator();
+    editMenu->addAction(switchDockTree);
 
     helpMenu = menuBar()->addMenu(tr("&Help"));
     helpMenu->addAction(aboutAct);
@@ -335,13 +363,22 @@ void MainWindow::createMenus(){
 
 }
 
-void MainWindow::createToolBars(){
-    fileToolBar = addToolBar(tr("File"));
+void MainWindow::createToolBars()
+{
+    fileToolBar = addToolBar(tr("Main"));
     fileToolBar->addAction(appendAct);
     fileToolBar->addAction(saveAct);
+
+    fileToolBar->addSeparator();
+
+    fileToolBar->addAction(switchDockTree);
     fileToolBar->addAction(profilerToggleAct);
     fileToolBar->addAction(consoleToggleAct);
 
+    fileToolBar->addSeparator();
+    fileToolBar->addAction(hide_all_editors_Act);
+    fileToolBar->addAction(run_all_scripts_Act);
+    fileToolBar->addAction(stop_all_scripts_Act);
 }
 
 void MainWindow::createStatusBar(){
@@ -376,7 +413,7 @@ void MainWindow::hasErrorText(const QString &error)
 {
     QTimer::singleShot(150, this, [this, error]()
     {
-       QMessageBox::critical(this, tr("Error"), error);
+        QMessageBox::critical(this, tr("Error"), error);
     });
 }
 

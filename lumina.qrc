@@ -1,44 +1,44 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-	<file>images/new.png</file>
-	<file>images/open.png</file>
-	<file>images/save.png</file>
-	<file>images/undo.png</file>
-	<file>images/profiler.png</file>
-	<file>images/console.png</file>
-	<file>images/lumina.png</file>
-
-	<file>images/xpm/matrix.xpm</file>
-	<file>images/xpm/vertex.xpm</file>
-	<file>images/xpm/normal.xpm</file>
-	<file>images/xpm/uvcoord.xpm</file>
-	<file>images/xpm/color.xpm</file>
-	<file>images/xpm/script.xpm</file>
-	<file>images/xpm/del.xpm</file>
-	<file>images/xpm/edit.xpm</file>
-	<file>images/xpm/vertexshader.xpm</file>
-	<file>images/xpm/fragmentshader.xpm</file>
-	<file>images/xpm/reload.xpm</file>
-	<file>images/xpm/load.xpm</file>
-	<file>images/xpm/text.xpm</file>
-	<file>images/xpm/node.xpm</file>
-	<file>images/xpm/stream.xpm</file>
-	<file>images/xpm/run.xpm</file>
-	<file>images/xpm/texture.xpm</file>
-	<file>images/xpm/world.xpm</file>
-	<file>images/xpm/cam.xpm</file>
-	<file>images/xpm/index.xpm</file>
-	<file>images/xpm/start.xpm</file>
-	<file>images/xpm/config.xpm</file>
-	<file>images/xpm/stop.xpm</file>
-	<file>images/xpm/script_run.xpm</file>
-	<file>images/xpm/quaternion.xpm</file>
-	<file>images/xpm/armature.xpm</file>
-	<file>images/xpm/bone.xpm</file>
-	<file>images/xpm/importer.xpm</file>
-	<file>images/xpm/buffer.xpm</file>
-	<file>images/xpm/breaks.xpm</file>
-	<file>images/xpm/save.xpm</file>
-	<file>images/xpm/uniform.xpm</file>
-</qresource>
+<RCC>
+    <qresource prefix="/">
+        <file>images/new.png</file>
+        <file>images/open.png</file>
+        <file>images/save.png</file>
+        <file>images/undo.png</file>
+        <file>images/profiler.png</file>
+        <file>images/console.png</file>
+        <file>images/lumina.png</file>
+        <file>images/xpm/matrix.xpm</file>
+        <file>images/xpm/vertex.xpm</file>
+        <file>images/xpm/normal.xpm</file>
+        <file>images/xpm/uvcoord.xpm</file>
+        <file>images/xpm/color.xpm</file>
+        <file>images/xpm/script.xpm</file>
+        <file>images/xpm/del.xpm</file>
+        <file>images/xpm/edit.xpm</file>
+        <file>images/xpm/vertexshader.xpm</file>
+        <file>images/xpm/fragmentshader.xpm</file>
+        <file>images/xpm/reload.xpm</file>
+        <file>images/xpm/load.xpm</file>
+        <file>images/xpm/text.xpm</file>
+        <file>images/xpm/node.xpm</file>
+        <file>images/xpm/stream.xpm</file>
+        <file>images/xpm/run.xpm</file>
+        <file>images/xpm/texture.xpm</file>
+        <file>images/xpm/world.xpm</file>
+        <file>images/xpm/cam.xpm</file>
+        <file>images/xpm/index.xpm</file>
+        <file>images/xpm/start.xpm</file>
+        <file>images/xpm/config.xpm</file>
+        <file>images/xpm/stop.xpm</file>
+        <file>images/xpm/script_run.xpm</file>
+        <file>images/xpm/quaternion.xpm</file>
+        <file>images/xpm/armature.xpm</file>
+        <file>images/xpm/bone.xpm</file>
+        <file>images/xpm/importer.xpm</file>
+        <file>images/xpm/buffer.xpm</file>
+        <file>images/xpm/breaks.xpm</file>
+        <file>images/xpm/save.xpm</file>
+        <file>images/xpm/uniform.xpm</file>
+        <file>images/closealleditors.png</file>
+    </qresource>
 </RCC>
