@@ -64,7 +64,7 @@ private:
 
     Item_cam* cam;
     QPoint startpoint;
-    float zoom;
+    GLdouble zoom;
     GLuint object;
 
     GLfloat readpixel[4];

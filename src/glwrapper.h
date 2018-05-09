@@ -26,17 +26,9 @@
 #include "incgl.h"
 #include <math.h>
 #include "item.h"
-
-#define GL_CHECK_ERROR()                         \
-    do                                              \
-{                                               \
-    GLenum error = glGetError();                \
-    if (error != GL_NO_ERROR)                   \
-    fprintf(stderr, "E: %s(%d): %s 0x%X\n", \
-    __FILE__, __LINE__,             \
-    __PRETTY_FUNCTION__, error);    \
-    } while(0)
-
+#include "globals.h"
+#include <memory>
+#include <atomic>
 
 class glwrapper_shader: public QObject
 {
@@ -49,7 +41,6 @@ public:
     glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, int inPrimitive, int outPrimitive, int outVertices);
 
     ~glwrapper_shader() override;
-
 public slots:
     void Bind();
     void Unbind();
@@ -70,23 +61,22 @@ public slots:
     void Uniform (QString var, QObject *obj); //bindable uniform
 
     void NormalQuaternion(QString var);
-
-    //deprecated functions use a buffer object instead
-    //void UniformArray(QString var, int comp, QStringList val);
-    //void UniformArrayInterpolator(QString var, int comp, float mix, QStringList val1, QStringList val2);
-
+    bool isErrored() const;
 public:
-    int getShaderHandle();
+    GLhandleARB getShaderHandle();
 
 protected:
     GLhandleARB shader;
-    void printInfoLog(GLhandleARB obj);
     GLhandleARB  v,g,f;
+    std::atomic<bool> errored;
+
+    void printInfoLog(GLhandleARB obj);
 };
 
 
 
-class glwrapper_framebuffer: public QObject {
+class glwrapper_framebuffer: public QObject
+{
     Q_OBJECT
 public:
     glwrapper_framebuffer( QObject * parent);
@@ -106,15 +96,18 @@ private:
     int w,h;
 };
 
+
+class glwrapper;
+using glwrapper_ptr = std::shared_ptr<glwrapper>;
+
 class glwrapper: public QObject
 {
     Q_OBJECT
     Q_ENUMS(glconst)
 
     friend class glwrapper_shader;
-
 public:
-    glwrapper( QObject * parent, QString name = "gl");
+    glwrapper( QObject * parent, const QString& name = "gl");
     virtual ~glwrapper() override = default;
 
     enum glconst {
@@ -307,24 +300,24 @@ public:
 
     void cleartrasher();
 public slots:
-    void Clear(int mode);
+    void Clear(GLenum mode);
 
-    void Enable(int v);
-    void Disable(int v);
-    void CullFace(int v);
+    void Enable(GLenum v);
+    void Disable(GLenum v);
+    void CullFace(GLenum v);
 
-    void AlphaFunc(int func, double ref);
-    void BlendFunc (int a, int b);
-    void StencilOp (int a, int b, int c);
-    void StencilFunc(int func, int ref, int mask);
-    void DepthFunc(int func);
+    void AlphaFunc(GLenum func, double ref);
+    void BlendFunc (GLenum a, GLenum b);
+    void StencilOp (GLenum a, GLenum b, GLenum c);
+    void StencilFunc(GLenum func, int ref, GLuint mask);
+    void DepthFunc(GLenum func);
     void DepthMask(bool b);
     void PolygonOffset(float factor, float units);
 
 
-    void Begin(int mode);
+    void Begin(GLenum mode);
     void End();
-    void Vertex (double x=0, double y=0, double z=0, double w=1);
+    void Vertex (GLfloat x=0, GLfloat y=0, GLfloat z=0, GLfloat w=1);
     void TexCoord (double s=0, double t=0, double p=0, double q=0);
     void Normal (double x=0, double y=0, double z=1);
     void Color (double r=0, double g=0, double b=0, double a=1);
@@ -337,9 +330,9 @@ public slots:
     void PopMatrix();
     void LoadIdentity();
     void Flush();
-    void DrawArrays(int mode, int first, int count);
-    void Light(int l, int n, float x = 0, float y = 0, float z = 0, float w = 0);
-    void Light(int l, int n, const QColor & col);
+    void DrawArrays(GLenum mode, int first, int count);
+    void Light(GLenum l, GLenum n, float x = 0, float y = 0, float z = 0, float w = 0);
+    void Light(GLenum l, GLenum n, const QColor & col);
     void PointParameter(int mode, float x, float y = 0.0, float z = 0.0);
 
     QObject* Shader(QObject* inVertex, QObject* inFragment);

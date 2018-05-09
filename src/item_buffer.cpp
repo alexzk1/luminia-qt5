@@ -28,27 +28,14 @@
 #include <QComboBox>
 #include <QCheckBox>
 #include <QPushButton>
-#include <QDebug>
-
-#define GL_CHECK_ERROR()                         \
-    do                                              \
-{                                               \
-    GLenum error = glGetError();                \
-    if (error != GL_NO_ERROR)                   \
-    fprintf(stderr, "E: %s(%d): %s 0x%X\n", \
-    __FILE__, __LINE__,             \
-    __PRETTY_FUNCTION__, error);    \
-    } while(0)
-
+#include "globals.h"
 
 QList<int> Item_buffer::boundedAttributeLocations = QList<int>();
 QList<Item_buffer*> Item_buffer::boundedTransformFeedback = QList<Item_buffer*>();
 
 
-Item_buffer::Item_buffer(Item *parent, const QString& name, unsigned _dim, unsigned _size, unsigned _keyframes, int _format, bool _normalized_int) : Item( parent, name){
-
-    qDebug() << "_normalized_int" << _normalized_int;
-
+Item_buffer::Item_buffer(Item *parent, const QString& name, unsigned _dim, unsigned _size, unsigned _keyframes, int _format, bool _normalized_int) : Item( parent, name)
+{
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled);
     setIcon( 0, QIcon(":/images/xpm/buffer.xpm") );
 
@@ -62,8 +49,9 @@ Item_buffer::Item_buffer(Item *parent, const QString& name, unsigned _dim, unsig
     transformFeedbackKeyFrame = 0;
 }
 
-Item_buffer::~Item_buffer(){
-    glDeleteBuffers(1,(GLuint*) &glbuf);
+Item_buffer::~Item_buffer()
+{
+    glDeleteBuffers(1, &glbuf);
 }
 
 void Item_buffer::addMenu(QMenu *menu)
@@ -75,7 +63,8 @@ void Item_buffer::addMenu(QMenu *menu)
 void setDim(number dimension, number size, number keyframes, enum format, bool normalized)\n
 Set the uniform buffer to dimension with size keyframes and format;
 */
-void Item_buffer::setDim(int _dim, int _size, int _keyframes, int _format, bool _normalized_int){
+void Item_buffer::setDim(unsigned _dim, unsigned _size, unsigned _keyframes, unsigned _format, bool _normalized_int)
+{
     GL_CHECK_ERROR();
     unsigned tmp_size = _size < 1 ? 1 : _size ;
     unsigned tmp_keyframes = _keyframes < 1 ? 1 : _keyframes;
@@ -85,8 +74,7 @@ void Item_buffer::setDim(int _dim, int _size, int _keyframes, int _format, bool 
         qDebug() << "Item_buffer::setDim() dim is limited to 4 !";
     }
 
-    int max_elements = tmp_dim * tmp_keyframes * tmp_size;
-    qDebug() << " Item_buffer::setDim" << tmp_dim << tmp_size << tmp_keyframes << max_elements;
+    //auto max_elements = tmp_dim * tmp_keyframes * tmp_size;
 
     glBindBuffer( GL_ARRAY_BUFFER, glbuf);
 
@@ -120,7 +108,7 @@ void Item_buffer::setDim(int _dim, int _size, int _keyframes, int _format, bool 
 }										\
 }
 
-    tmp_buf.b = NULL;
+    tmp_buf.b = nullptr;
 
     double tmp_normalized_scalefactor = 1.0;
     if((size * dim * keyframes)!=0){
@@ -183,17 +171,17 @@ void Item_buffer::setDim(int _dim, int _size, int _keyframes, int _format, bool 
                 format =  GL_FLOAT;
         }
 
-        qDebug()<< " Item_buffer::setDim tmp_buf"  << tmp_buf.f;
+
         glBufferData(GL_ARRAY_BUFFER, elements * bytes , tmp_buf.b , GL_DYNAMIC_COPY );
-        if(tmp_buf.b){
+        if(tmp_buf.b)
+        {
             delete[]tmp_buf.b;
         }
-        else qDebug() << "Panic: delete[]tmp_buf.b;";
 
     }
     else{
         //zero buffer for initialization
-        glBufferData(GL_ARRAY_BUFFER, elements * bytes, NULL, GL_DYNAMIC_COPY );
+        glBufferData(GL_ARRAY_BUFFER, elements * bytes, nullptr, GL_DYNAMIC_COPY );
     }
     GL_CHECK_ERROR();
     bound_by_GPU = false;
@@ -208,6 +196,7 @@ void Item_buffer::setDim(int _dim, int _size, int _keyframes, int _format, bool 
 
     ref_pos = -1;
     ref_buf_old = 0.0; ref_buf = 0.0;
+#undef COPY_DATA
 }
 
 /*!
@@ -247,14 +236,16 @@ QString Item_buffer::statusText() const{
 /*!
 Operator to acces the content with a up to 3 dimensional index.
 */
-double& Item_buffer::operator()( int _dim, int _index, int _keyframe){
+double& Item_buffer::operator()( unsigned _dim, unsigned _index, unsigned _keyframe)
+{
     /*if(bound_by_GPU){
         qDebug() << "Item_buffer::operator(): VBO is bound to GPU, can't read/write!";
         //return ref_buf;
         }*/
     GL_CHECK_ERROR();
-    if(!is_mapped){
-        buf.v = NULL;
+    if(!is_mapped)
+    {
+        buf.v = nullptr;
         glBindBuffer( GL_ARRAY_BUFFER, glbuf);
         GL_CHECK_ERROR();
         buf.v = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
@@ -262,7 +253,8 @@ double& Item_buffer::operator()( int _dim, int _index, int _keyframe){
         is_mapped = true;
     }
     GL_CHECK_ERROR();
-    if(!buf.v){
+    if(!buf.v)
+    {
         qDebug() << "Item_buffer::operator()" << buf.v << is_mapped << "buf.v == NULL !";
         qDebug() << glIsBuffer(glbuf);
 
@@ -283,31 +275,38 @@ double& Item_buffer::operator()( int _dim, int _index, int _keyframe){
     //write value from ref_buf back, ad replace it
     switch (format){
         case GL_BYTE:
-            if(ref_pos>=0)buf.b[ref_pos] = ref_buf / normalized_scalefactor;
+            if(ref_pos>=0)
+                buf.b[ref_pos] = ref_buf / normalized_scalefactor;
             ref_buf = buf.b[element] * normalized_scalefactor;
             break;
         case GL_UNSIGNED_BYTE:
-            if(ref_pos>=0)buf.ub[ref_pos] = ref_buf / normalized_scalefactor;
+            if(ref_pos>=0)
+                buf.ub[ref_pos] = ref_buf / normalized_scalefactor;
             ref_buf = buf.ub[element] * normalized_scalefactor;
             break;
         case GL_SHORT:
-            if(ref_pos>=0)buf.s[ref_pos] = ref_buf / normalized_scalefactor;
+            if(ref_pos>=0)
+                buf.s[ref_pos] = ref_buf / normalized_scalefactor;
             ref_buf = buf.s[element] * normalized_scalefactor;
             break;
         case GL_UNSIGNED_SHORT:
-            if(ref_pos>=0)buf.us[ref_pos] = ref_buf / normalized_scalefactor;
+            if(ref_pos>=0)
+                buf.us[ref_pos] = ref_buf / normalized_scalefactor;
             ref_buf = buf.us[element] * normalized_scalefactor;
             break;
         case GL_INT:
-            if(ref_pos>=0)buf.i[ref_pos] = ref_buf / normalized_scalefactor;
+            if(ref_pos>=0)
+                buf.i[ref_pos] = ref_buf / normalized_scalefactor;
             ref_buf = buf.i[element] * normalized_scalefactor;
             break;
         case GL_UNSIGNED_INT:
-            if(ref_pos>=0)buf.ui[ref_pos] = ref_buf / normalized_scalefactor;
+            if(ref_pos>=0)
+                buf.ui[ref_pos] = ref_buf / normalized_scalefactor;
             ref_buf = buf.ui[element] * normalized_scalefactor;
             break;
         case GL_HALF_FLOAT_ARB:
-            if(ref_pos>=0)buf.h[ref_pos] = ref_buf;
+            if(ref_pos>=0)
+                buf.h[ref_pos] = ref_buf;
             ref_buf = buf.h[element] * normalized_scalefactor;
             break;
         default:
@@ -328,7 +327,7 @@ void Item_buffer::refresh(){
 
     GL_CHECK_ERROR();
     if(!is_mapped){
-        buf.v = NULL;
+        buf.v = nullptr;
         glBindBuffer( GL_ARRAY_BUFFER, glbuf);
         buf.v = glMapBuffer(GL_ARRAY_BUFFER, GL_READ_WRITE);
         qDebug() << "Item_buffer::refresh()" << buf.v;
@@ -353,8 +352,10 @@ void Item_buffer::refresh(){
         return;
     }
 
-    if(need_refresh && (ref_pos>=0)){
-        switch (format){
+    if(need_refresh && (ref_pos>=0))
+    {
+        switch (format)
+        {
             case GL_BYTE:
                 buf.b[ref_pos] = ref_buf / normalized_scalefactor;	break;
             case GL_UNSIGNED_BYTE:
@@ -390,7 +391,8 @@ void Item_buffer::set(int index, double x, double y, double z, double w){
 
 
 void Item_buffer::setInKeyFrame(int key, int index, double x, double y, double z, double w){
-    switch (dim){
+    switch (dim)
+    {
         case 4:  (*this)(3, index, key) = w;
             [[clang::fallthrough]]; case 3:  (*this)(2, index, key) = z;
             [[clang::fallthrough]]; case 2:  (*this)(1, index, key) = y;
@@ -478,7 +480,8 @@ QString Item_buffer::getData(){
 internal function \n
 returns the dimension i.E. 1,2,3,4,9,16
 */
-int Item_buffer::getDim(){
+unsigned Item_buffer::getDim()
+{
     return dim;
 }
 
@@ -486,7 +489,8 @@ int Item_buffer::getDim(){
 internal function \n
 returns the size (number of vertices)
 */
-int Item_buffer::getSize(){
+unsigned Item_buffer::getSize()
+{
     return size;
 }
 
@@ -494,7 +498,8 @@ int Item_buffer::getSize(){
 internal function \n
 returns the number of keyframes
 */
-int Item_buffer::getKeyFrames(){
+unsigned Item_buffer::getKeyFrames()
+{
     return keyframes;
 }
 
@@ -502,7 +507,8 @@ int Item_buffer::getKeyFrames(){
 internal function \n
 returns the Opengl format. i.E. GL_FLOAT, GL_BYTE
 */
-int Item_buffer::getFormat(){
+unsigned Item_buffer::getFormat()
+{
     return format;
 }
 
@@ -514,8 +520,6 @@ bool Item_buffer::isNormalizedInt(){
     return normalized_int;
 }
 
-
-
 #include "glwrapper.h"
 
 
@@ -525,12 +529,13 @@ bool Item_buffer::isNormalizedInt(){
 TextureBind(int tmu) \n
 experimentel non tested function to bind the buffer content as "Buffer Texture"
 */
-void Item_buffer::TextureBind(int tmu){
+void Item_buffer::TextureBind(unsigned tmu)
+{
     glActiveTexture(tmu);
     glBindBuffer(GL_TEXTURE_BUFFER_EXT, glbuf);
     bool tmp_refresh = need_refresh;
     refresh(); //
-    int bytes;
+    unsigned bytes;
     if(tmp_refresh){
         switch (format){
             case GL_BYTE:
@@ -560,11 +565,14 @@ void Item_buffer::TextureBind(int tmu){
 }
 
 
-void Item_buffer::Bind(int location){
+void Item_buffer::Bind(int location)
+{
     BindKeyFrame(0, location);
 }
 
-void Item_buffer::BindKeyFrame(int key, int location){
+#define NULL_CHAR static_cast<char*>(nullptr)
+void Item_buffer::BindKeyFrame(unsigned key, int location)
+{
     if (location == -1 ) return;
     refresh();
 
@@ -576,8 +584,9 @@ void Item_buffer::BindKeyFrame(int key, int location){
         is_mapped = false;
     }
 
-    int bytes;
-    switch (format){
+    unsigned bytes;
+    switch (format)
+    {
         case GL_BYTE:
         case GL_UNSIGNED_BYTE:
             bytes = 1;
@@ -593,36 +602,38 @@ void Item_buffer::BindKeyFrame(int key, int location){
             bytes = 4;
     }
 
-    int ofs = bytes * size * dim * ((unsigned)key > keyframes ? (keyframes-1):(unsigned)key);
+    size_t ofs = bytes * size * dim * (key > keyframes ? (keyframes-1):key);
 
-    switch (location){
+    switch (location)
+    {
         case -2:
             glEnableClientState(GL_VERTEX_ARRAY);
-            glVertexPointer(dim, format, 0, (char*)NULL + ofs);
+            glVertexPointer(dim, format, 0, NULL_CHAR + ofs);
             break;
         case -3:
             if (dim != 3) break;
             glEnableClientState(GL_NORMAL_ARRAY);
-            glNormalPointer( format, 0, (char*)NULL + ofs);
+            glNormalPointer( format, 0, NULL_CHAR + ofs);
             break;
         case -4:
             glEnableClientState(GL_COLOR_ARRAY);
-            glColorPointer(dim, format,0, (char*)NULL + ofs);
+            glColorPointer(dim, format,0, NULL_CHAR + ofs);
             break;
         case -5:
             glEnableClientState(GL_TEXTURE_COORD_ARRAY );
-            glTexCoordPointer(dim, format, 0, (char*)NULL + ofs);
+            glTexCoordPointer(dim, format, 0, NULL_CHAR + ofs);
             break;
         default:
             glEnableVertexAttribArray(location);
             unsigned norm = GL_FALSE;
             if(normalized_int) norm = GL_TRUE;
 
-            glVertexAttribPointer(location, dim, format, norm, 0, (char*)NULL + ofs);
+            glVertexAttribPointer(location, dim, format, norm, 0, NULL_CHAR + ofs);
     }
     boundedAttributeLocations << location;
     bound_by_GPU = true;
 }
+#undef NULL_CHAR
 
 /*!
 void UnbindAll()\n
@@ -793,7 +804,7 @@ void Item_buffer::transformFeedbackBindPrivate(unsigned n){
 /*!
 internal function for bindable uniforms. Called only by void glwrapper_shader::Uniform (QString var, QObject *obj)
 */
-void Item_buffer::bindableUniformBindPrivate(int shader, int location){
+void Item_buffer::bindableUniformBindPrivate(GLhandleARB shader, int location){
     bound_by_GPU = true;
     GL_CHECK_ERROR();
     glBindBuffer(GL_UNIFORM_BUFFER_EXT, glbuf);

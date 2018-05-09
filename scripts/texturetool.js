@@ -1,4 +1,5 @@
 /*
+2018_REVISED
 <FILTER>Texture</FILTER>
 <FUNCTION>textureTool()</FUNCTION>
 
@@ -64,10 +65,9 @@ Shader.Uniform("lum", 1.0);
 Shader.Uniform("alpha", 0.0);
 
 function close(){
-	print("close called");
 	dock.deleteLater(); // delete the dialog and widgets
 	dock = 0;
-	}
+}
 
 
 
@@ -109,13 +109,11 @@ function changed() {
 	Shader.Uniform("lum", Math.pow(Math.sqrt(2), lumslider.value/2));
 
 	glw.update();
-	}
+}
 
 
 function paintGL(){
 	//gl.Clear();
-	print("paintGL event");
-
 	obj.Bind(0);
 	Shader.Bind();
 	gl.Begin(gl.QUADS);
@@ -125,17 +123,13 @@ function paintGL(){
 		gl.Vertex(0,1);
 	gl.End();
 	Shader.Unbind();
+}
 
-	}
-
-function resizeGL(){
-	print ("resizeGL event");
-	}
+function resizeGL(){	
+}
 
 
-function textureTool(){
-	print ("context menu starts script function, dock = ", dock);
-
+function textureTool(){	
 	if (dock == 0){
 		dock = new Dock();
 		dock.title = obj.objectName;
@@ -191,7 +185,7 @@ function textureTool(){
 		dock.add(alphacheck);				
 		}
 	    dock.show();
-	}
+}
 
 
 

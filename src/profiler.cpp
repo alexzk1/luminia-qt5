@@ -20,25 +20,13 @@
 *********************************************************************************/
 
 #include "profiler.h"
-
-
 #include "incgl.h"
-
 #include <QTextEdit>
 #include <QGLWidget>
 #include <QDockWidget>
 #include <QMainWindow>
 #include <QApplication>
 
-#define GL_CHECK_ERROR()                         \
-    do                                              \
-{                                               \
-    GLenum error = glGetError();                \
-    if (error != GL_NO_ERROR)                   \
-    fprintf(stderr, "E: %s(%d): %s 0x%X\n", \
-    __FILE__, __LINE__,             \
-    __PRETTY_FUNCTION__, error);    \
-    } while(0)
 
 extern const Qt::DockWidgetAreas DOCK_AREAS;
 Profiler::Profiler(): QObject()

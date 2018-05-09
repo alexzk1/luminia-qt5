@@ -62,18 +62,10 @@ constexpr auto static lastTexture = GL_TEXTURE31;
 #define DDS_DXT3 ('D'|('X'<<8)|('T'<<16)|('3'<<24))
 #define DDS_DXT5 ('D'|('X'<<8)|('T'<<16)|('5'<<24))
 
-
-#define GL_CHECK_ERROR()                         \
-    do                                              \
-{                                               \
-    GLenum error = glGetError();                \
-    if (error != GL_NO_ERROR)                   \
-    fprintf(stderr, "E: %s(%d): %s 0x%X\n", \
-    __FILE__, __LINE__,             \
-    __PRETTY_FUNCTION__, error);    \
-    } while(0)
-
 #include <math.h>
+
+//missing here 8 bytes, magic (int32) and size (int32)
+//i did that, so can read size 1st and compare with this structure size before loading all
 
 struct __attribute__ (( packed )) DDS_Header_t
 {

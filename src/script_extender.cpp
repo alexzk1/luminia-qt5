@@ -81,12 +81,11 @@ void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item
                         if (itm && ptr)
                         {
                             (*ppEng) = new SEngine(itm);
-                            (*ppEng)->useDefaultError();
                             //bug fix for old samples code, guess currently it had to use "obj"
                             (*ppEng)->run(QString("World.getContext = function() { return %1; };").arg(itm->getFullScriptName()));
                             (*ppEng)->run(ptr->getFileText());
                         }
-                    });
+                    }, Qt::QueuedConnection);
                 }
                 else
                 {
@@ -101,13 +100,12 @@ void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item
                             if (checked)
                             {
                                 (*ppEng) = new SEngine(itm);
-                                (*ppEng)->useDefaultError();
                                 //bug fix for old samples code, guess currently it had to use "obj"
                                 (*ppEng)->run(QString("World.getContext = function() { return %1; };").arg(itm->getFullScriptName()));
                                 (*ppEng)->run(ptr->getFileText());
                             }
                         }
-                    });
+                    }, Qt::QueuedConnection);
                 }
             }
         }
@@ -122,8 +120,6 @@ void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item
                     //damn...for each action will have own engine...need that, because ...some actions open dialogs for long
                     QAction *a = menu->addAction(ac.icon, ac.text);
                     eptr_t engine = new SEngine(itm);
-                    engine->useDefaultError();
-
                     //bug fix for old samples code, guess currently it had to use "obj"
                     engine->run(QString("World.getContext = function() { return %1; };").arg(itm->getFullScriptName()));
 
@@ -134,7 +130,7 @@ void ScriptExtender::addActionsForItem(QPointer<QMenu> menu, const QPointer<Item
                         {
                             engine->execJsFunc(ac.slot.funcNameOnly, {});
                         }
-                    });
+                    }, Qt::QueuedConnection);
                 }
             }
         }
@@ -184,10 +180,9 @@ void ScriptExtender::buildToolbar(const QPointer<QToolBar> &toolBar)
                         if (ptr)
                         {
                             (*ppEng) = new SEngine(toolBar);
-                            (*ppEng)->useDefaultError();
                             (*ppEng)->run(ptr->getFileText());
                         }
-                    });
+                    }, Qt::QueuedConnection);
                 }
                 else
                 {
@@ -203,11 +198,10 @@ void ScriptExtender::buildToolbar(const QPointer<QToolBar> &toolBar)
                             if (checked)
                             {
                                 (*ppEng) = new SEngine(toolBar);
-                                (*ppEng)->useDefaultError();
                                 (*ppEng)->run(ptr->getFileText());
                             }
                         }
-                    });
+                    }, Qt::QueuedConnection);
                 }
             }
         }

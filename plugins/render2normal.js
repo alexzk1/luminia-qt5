@@ -1,4 +1,5 @@
 /*
+2018_REVISED
 <NAME>Render2Normalmap</NAME>
 <FILTER>Index</FILTER>
 <DESCRIPTION>Renders the objectspaces normals into a texture</DESCRIPTION>
@@ -49,21 +50,25 @@ spin.label = "Resolution: 2 power";
 spin.minimum = 4;
 spin.maximum = 12;
 spin.value = 10;
+
+label = new Label;
+label.text="Cancel file selection to put to clipboard."
+d.add(label);
 d.add(spin);
 
 if (d.exec()){
-	fn = FileDialog.getSaveFileName( "*.png" );
-	print("Filename " +fn + typeof fn);
+	fn = FileDialog.getSaveFileName( "*.png" );	
 	Con = World.getContext();
 	Mesh = Con.getParent();
 	Node = Mesh.getParent();
 
-	World.addNode("Temp");
-	World.Temp.addScript();
-	gl = World.Temp.Script.gl;
+	var node = World.addNode(World.timedString());	
+	node.addScript();
+	//old mess I guess ?  currently (2018) any engine has global gl object
+    //gl = World.Temp.Script.gl;
 
-	Texture = World.Temp.addTexture();
-	Texture = World.Temp.Texture ;
+	Texture = node.addTexture();
+	Texture = node.Texture ;
 	res = Math.pow(2,spin.value);
 	Texture.Image2d(res,res,gl.RGB);
 
@@ -84,13 +89,14 @@ if (d.exec()){
 	Mesh.Vertex.Unbind();
 
 	Shader.Unbind();
-
+    if (typeof (fn) === "undefined"){ //user canceled dialog
+        fn = ""
+    }
 	gl.Screenshot(fn + "");
-	//gl.Screenshot("n.png");
 	Texture.UnbindFBO();
 
-	World.Temp.deleteLater();
-	}
+	node.deleteLater();
+}
 
 
 

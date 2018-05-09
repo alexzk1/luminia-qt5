@@ -51,9 +51,9 @@ public:
     Q_INVOKABLE QObject* addComponent(int type ,const QString& label1, int dimension, int keyframes= 1, int format=GL_FLOAT);
 public slots:
 
-    int getNumOfVertices();
+    unsigned getNumOfVertices();
 
-    void setNumOfVertices(int num);
+    void setNumOfVertices(unsigned num);
 
     void Draw(int mode );
     void DrawInstanced(int  num_of_instances, int mode);
@@ -65,7 +65,7 @@ public slots:
 
     virtual QString getType() const {return QString("Mesh");}
 protected:
-    int num_of_vertices;
+    unsigned num_of_vertices;
     virtual void addMenu(QMenu *menu);
 };
 

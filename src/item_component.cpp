@@ -94,7 +94,7 @@ Format: gl.BYTES, gl.FLOAT
 Normalized_int: true = use a range from -1.0 (signed) or 0.0 (unsigned) to 1.0 for byte ,short or int formats.
 */
 
-void Item_component::setDim( int dimension, int, int keyframes, int format, bool normalized){
+void Item_component::setDim(unsigned dimension, unsigned, unsigned keyframes, unsigned format, bool normalized){
     Item_buffer::setDim(dimension, parent->getNumOfVertices(), keyframes, format,normalized);
 }
 

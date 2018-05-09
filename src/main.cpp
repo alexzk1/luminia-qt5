@@ -30,12 +30,12 @@
 
 Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
 
+
 //u can use this constant to reconfigure dockers globally (allowed areas)
 extern const Qt::DockWidgetAreas DOCK_AREAS(Qt::DockWidgetArea::AllDockWidgetAreas);
 
 int main(int argc, char **argv)
 {
-    qDebug() << "main()";
     QApplication app(argc, argv);
 
     app.setApplicationName("Luminia Modern");
@@ -47,6 +47,13 @@ int main(int argc, char **argv)
 
     Q_INIT_RESOURCE(lumina);
     app.setWindowIcon(QIcon(":/images/lumina.png"));
+
+    qRegisterMetaType<GLenum>("GLenum");
+    qRegisterMetaType<GLint>("GLint");
+    qRegisterMetaType<GLuint>("GLuint");
+    qRegisterMetaType<GLfloat>("GLfloat");
+    qRegisterMetaType<GLdouble>("GLdouble");
+    qRegisterMetaType<GLhandleARB>("GLhandleARB");
 
     ScriptExtender::reloadAll();
     MainWindow mainWin;

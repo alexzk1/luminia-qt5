@@ -47,13 +47,10 @@ public:
     QScriptValue execJsFunc(const QString& function, const QVariantList& args);
 
     void bindItem(QPointer<Item> itm, bool localy = false);
-
-    void useDefaultError();
     QScriptEngine& getEngine();
+    QPointer<glwrapper> getGl() const;
 signals:
-    void scriptError(const QString& err) const;
-private slots:
-    void defaultError(const QString& err) const;
+    void scriptError(const QString& err, const QStringList& trace) const;
 private:
     QScriptEngine eng;
     QPointer<Item> obj; // assigned object

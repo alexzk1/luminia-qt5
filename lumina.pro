@@ -81,7 +81,8 @@ HEADERS	=	src/mainwindow.h \
     src/palgorithm.h \
     src/no_copy.h \
     src/script_header_parser.h \
-    src/filterableitem.h
+    src/filterableitem.h \
+    src/globals.h
 
 SOURCES =	src/main.cpp \
                 src/mainwindow.cpp \

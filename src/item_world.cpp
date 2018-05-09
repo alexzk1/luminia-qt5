@@ -21,7 +21,7 @@
 
 #include "item.h"
 #include "item_virtual.h"
-
+#include <chrono>
 
 Item_world::Item_world():
     Item(nullptr, "World")
@@ -45,6 +45,14 @@ QObject *Item_world::addNode(const QString &name)
 QObject *Item_world::addVirtual(const QString &name)
 {
     return makeNewItem<Item_virtual>(name);
+}
+
+QString Item_world::timedString(const QString &preffix)
+{
+    using namespace std::chrono;
+    //must be system_clock, steady_clock counting not from 1-Jan-1970
+    milliseconds ms = duration_cast< milliseconds >(system_clock::now().time_since_epoch());
+    return QString("%1_%2").arg(preffix).arg(ms.count());
 }
 
 QString Item_world::getType() const

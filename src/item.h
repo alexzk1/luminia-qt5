@@ -22,12 +22,6 @@
 #ifndef ITEM_H
 #define ITEM_H
 
-
-#ifndef __PRETTY_FUNCTION__
-#define __PRETTY_FUNCTION__ "unknown function"
-
-#endif
-
 #define DQMENU(classname,menu)
 #define SCRIPTSLOTS(classname, classtype)
 
@@ -67,7 +61,7 @@ public:
     void bindToEngine(QScriptEngine *eng, bool localNames = false);
     void resetMenu(); //support for reloading plugins maybe ...because menu is built once
 public slots:
-    Item *findChild(const QString& name) const;
+    QObject *findChild(const QString& name) const;
     QList<Item*> findChildrenByType ( const QString &) const;
 
     QObject* getParent(){return parent();}
@@ -75,7 +69,6 @@ public slots:
     virtual QString getType()const;
 
     void destroyAll();//destroys all childs
-
 protected:
     virtual void addMenu(QMenu *menu){Q_UNUSED(menu);}
     QScriptValue getEngineParentObject(QScriptEngine &eng) const;
@@ -142,6 +135,7 @@ public:
     Q_INVOKABLE QObject* addCam(const QString& name = "Cam");
     Q_INVOKABLE QObject* addNode(const QString& name = "Node");
     Q_INVOKABLE QObject* addVirtual(const QString& name = "Virtual");
+    Q_INVOKABLE QString  timedString(const QString& preffix = "Temp");
 };
 
 
@@ -407,37 +401,37 @@ class Item_buffer: public Item
     friend class glwrapper_shader;
 public:
     Item_buffer(Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT, bool normalized_int = true);
-    virtual ~Item_buffer();
-    virtual QString statusText()const;
+    virtual ~Item_buffer() override;
+    virtual QString statusText()const override;
 
-    double& operator()(int dim=1, int index=1, int keyframe=1);
+    double& operator()(unsigned dim=1, unsigned index=1, unsigned keyframe=1);
 
     void setData(const QString&);
     QString getData();
 
 
 public slots:
-    virtual void setDim( int dimension = 1, int size = 1, int keyframes = 1, int format= GL_FLOAT, bool normalized_int = true);
+    virtual void setDim(unsigned dimension = 1, unsigned size = 1, unsigned keyframes = 1, unsigned format= GL_FLOAT, bool normalized_int = true);
     void setInKeyFrame(int keyframe, int index, double x, double y=0.0, double z=0.0, double w=0.0);
     void setInKeyFrame(int keyframe, int index, const QList<double>& l);
     void set(int index, double x, double y=0.0, double z=0.0, double w=0.0);
     void set(int index, const QList<double>& l);
-    void TextureBind(int tmu);
+    void TextureBind(unsigned tmu);
 
     static void Unbind(int location);
     static void UnbindAll();
 
     void Bind(int location);
-    void BindKeyFrame(int key, int location);
+    void BindKeyFrame(unsigned key, int location);
 
     void TransformFeedbackBind(const QString& name, int keyframe=0);
 
     void PropertiesDialog();
 
-    int getDim();
-    int getSize();
-    int getKeyFrames();
-    int getFormat();
+    unsigned getDim();
+    unsigned getSize();
+    unsigned getKeyFrames();
+    unsigned getFormat();
     bool isNormalizedInt();
 
     virtual QString getType() const override{return QString("Buffer");}
@@ -460,7 +454,7 @@ protected:
     void transformFeedbackBindPrivate(unsigned n);
     //bool modifiedByGPU;
 
-    void bindableUniformBindPrivate(int shader, int location);
+    void bindableUniformBindPrivate(GLhandleARB shader, int location);
 
     bool normalized_int;
     double normalized_scalefactor;

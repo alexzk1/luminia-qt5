@@ -21,7 +21,7 @@
 #include "glcam.h"
 #include <QWheelEvent>
 #include <QKeyEvent>
-#include <QDebug>
+#include "globals.h"
 
 QGLWidget* GLCam::shareWidget = nullptr;
 
@@ -91,18 +91,9 @@ void GLCam::paintGL()
 
     glUseProgramObjectARB(0); //disable all active shaders
 
-
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR)qDebug() << "glerror in rendering: " << error;
-
-
+    GL_CHECK_ERROR();
     cam->profiler->render(this);
-
-    error = glGetError();
-    if (error != GL_NO_ERROR){
-        qDebug() << "glerror in rendering profiler text" << error;
-        //exit (1);
-    }
+    GL_CHECK_ERROR();
 }
 
 
@@ -112,35 +103,21 @@ void GLCam::paintGL()
 
 void GLCam::initializeGL(){
     glewInit();
-    if (GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
-        qDebug() << "Ready for GLSL\n";
-    else {
-        qDebug() << "No GLSL support\n";
-        exit(1);
+    if (!GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
+    {
+        FATAL_ERROR("No GLSL support\n");
     }
     if (!GLEW_EXT_framebuffer_object){
-        qDebug() << "No GL_EXT_framebuffer_object support\n";
-        exit(1);
+        FATAL_ERROR("No GL_EXT_framebuffer_object support\n");
     }
-
-    if (GL_EXT_geometry_shader4)
-        qDebug() << "Ready for Geometrieshader\n";
 
     glClearColor(0,0,0,0); 		// Set OpenGL clear to black
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_ARB); //don't know why that state exist....
 
     GLint i;
     glGetIntegerv( GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS_NV, &i);
-    qDebug() << " MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS_NV: " << i;
-
     glGetIntegerv( GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS_NV, &i);
-    qDebug() << "MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS_NV: " << i;
-
     glGetIntegerv( GL_MAX_BINDABLE_UNIFORM_SIZE_EXT, &i);
-    qDebug() << "MAX_BINDABLE_UNIFORM_SIZE_EXT" << i;
-
-
-
     glPixelStorei(GL_PACK_ALIGNMENT,1); //avoid trouble with non power of two textures
     glPixelStorei(GL_UNPACK_ALIGNMENT,1);
 }
@@ -148,7 +125,8 @@ void GLCam::initializeGL(){
 /*!
 mousePressEvent placeholder
 */
-void GLCam::mousePressEvent (QMouseEvent*){
+void GLCam::mousePressEvent (QMouseEvent*)
+{
     /*
     glClear( GL_COLOR_BUFFER_BIT );
     glLoadIdentity();
@@ -176,13 +154,15 @@ void GLCam::mousePressEvent (QMouseEvent*){
 /*!
 mouseMoveEvent placeholder
 */
-void GLCam::mouseMoveEvent (QMouseEvent*){
+void GLCam::mouseMoveEvent (QMouseEvent*)
+{
 }
 
 /*!
 mouseReleaseEvent placeholder
 */
-void GLCam::mouseReleaseEvent (QMouseEvent*){
+void GLCam::mouseReleaseEvent (QMouseEvent*)
+{
     /*glReadPixels(ev->pos().x(),height()- ev->pos().y(),1,1,GL_RGB,GL_FLOAT,&readpixel);
     printf("Color: %d %d %d\n",abs(readpixel[0]*255),abs(readpixel[1]*255),abs(readpixel[2]*255));
     //abs((rgbpixels[p]*255)*/
@@ -191,14 +171,15 @@ void GLCam::mouseReleaseEvent (QMouseEvent*){
 /*!
 wheel event modifies the FOV (zoom) of the projection matrix
 */
-void GLCam::wheelEvent (QWheelEvent *ev){
+void GLCam::wheelEvent (QWheelEvent *ev)
+{
     makeCurrent();
     if (ev->delta()>0.0)	zoom *= 0.75;
     else	zoom *=1.33333333;
     //resizeGL(width(),height());
 
-    GLfloat w = zoom * (float) width() / (float) height();
-    GLfloat h = zoom;
+    GLdouble w = zoom * width() / height();
+    GLdouble h = zoom;
 
     //glViewport( 0, 0, width, height );
     glMatrixMode(GL_PROJECTION);
@@ -217,10 +198,11 @@ void GLCam::wheelEvent (QWheelEvent *ev){
 Set up the OpenGL view port, matrix mode, etc.
 */
 
-void GLCam::resizeGL( int width, int height ){
+void GLCam::resizeGL( int width, int height )
+{
     makeCurrent();
-    GLfloat w = zoom * (float) width / (float) height;
-    GLfloat h = zoom;
+    GLdouble w = zoom * width / height;
+    GLdouble h = zoom;
 
     glViewport( 0, 0, width, height );
     glMatrixMode(GL_PROJECTION);
@@ -231,28 +213,33 @@ void GLCam::resizeGL( int width, int height ){
     glLoadIdentity();
 
     QTreeWidgetItemIterator it(cam->world);
-    while (*it){
+    while (*it)
+    {
         if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))scriptitem->Call(QString("resizeEvent"),QVariantList() << width << height);
         ++it;
     }
 }
 
 
-void GLCam::resizeEvent(QResizeEvent *e ){
+void GLCam::resizeEvent(QResizeEvent *e )
+{
     QGLWidget::resizeEvent(e);
 }
 
 /*!
 keypress event calles the "keypressEvent" function from each running script
 */
-void GLCam::keyPressEvent(QKeyEvent *e){
+void GLCam::keyPressEvent(QKeyEvent *e)
+{
     static QWidget *fullscreen = nullptr;
-    if (e->key() == Qt::Key_F && !fullscreen){
+    if (e->key() == Qt::Key_F && !fullscreen)
+    {
         fullscreen = parentWidget();
         setParent(nullptr);
         showFullScreen();
     }
-    else if (e->key() == Qt::Key_F && fullscreen){
+    else if (e->key() == Qt::Key_F && fullscreen)
+    {
         setParent(fullscreen);
         if (QDockWidget *w = dynamic_cast<QDockWidget*>(fullscreen))w->setWidget(this);
         fullscreen = nullptr;
@@ -274,11 +261,12 @@ void GLCam::keyPressEvent(QKeyEvent *e){
 /*!
 internal function for setting the Near plane
 */
-void GLCam::setNear(double val){
+void GLCam::setNear(double val)
+{
     near_plane = val;
 
-    GLfloat w = zoom * (float) width() / (float) height();
-    GLfloat h = zoom;
+    GLdouble w = zoom * width() / height();
+    GLdouble h = zoom;
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustum( -w, w, -h, h, near_plane, far_plane );
@@ -288,11 +276,13 @@ void GLCam::setNear(double val){
 /*!
 internal function for setting the Far plane
 */
-void GLCam::setFar(double val){
+void GLCam::setFar(double val)
+{
     far_plane = val;
 
-    GLfloat w = zoom * (float) width() / (float) height();
-    GLfloat h = zoom;
+    GLdouble w = zoom * width() / height();
+    GLdouble h = zoom;
+
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     glFrustum( -w, w, -h, h, near_plane, far_plane );

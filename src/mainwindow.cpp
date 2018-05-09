@@ -32,12 +32,14 @@
 #include <QMenuBar>
 #include <QApplication>
 #include <QVBoxLayout>
-
+#include "script_extender_engine.h"
+QPointer<MainWindow> MainWindow::instance;
 MainWindow::MainWindow()
 {
-    setDockNestingEnabled(true);
-
+    instance = this;
     Item::ws = this;
+
+    setDockNestingEnabled(true);
 
     treeview = new TreeView (this);
     setCentralWidget(treeview);
@@ -66,6 +68,19 @@ MainWindow::~MainWindow()
     delete timeToolBar;
     delete console;
     delete treeview;
+}
+
+void MainWindow::setupErrorHandler(SEngine *engine)
+{
+    connect(engine, &SEngine::scriptError, this, [this](const QString& err, const QStringList& trace)
+    {
+        QString msg = QString("%1\n%2").arg(err).arg(trace.join("\n"));
+
+        QTimer::singleShot(150, this, [this, msg]()
+        {
+           QMessageBox::critical(this, tr("Script Error"), msg);
+        });
+    });
 }
 
 void MainWindow::createScriptToolBar()
@@ -344,6 +359,14 @@ void MainWindow::spaceballEvent(int *val){
     if(!time->isPlaying()){
         treeview->world->setTime(treeview->world->getTime()); //trigger screen refresh
     }
+}
+
+void MainWindow::hasErrorText(const QString &error)
+{
+    QTimer::singleShot(150, this, [this, error]()
+    {
+       QMessageBox::critical(this, tr("Error"), error);
+    });
 }
 
 

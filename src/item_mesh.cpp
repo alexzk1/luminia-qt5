@@ -31,7 +31,8 @@ Item_mesh::Item_mesh( Item *parent, const QString& label1, int vertices) : Item(
 
 void Item_mesh::addMenu(QMenu *menu)
 {
-    QMenu *add = menu->addMenu (tr("Add"));
+    //FIXME: can't find what should be under here...possibly plugins
+    //QMenu *add = menu->addMenu (tr("Add"));
     menu->addAction( QIcon(":/images/xpm/normal.xpm"), tr("Create Normal"), this, SLOT( genNormal()) );
     menu->addAction( QIcon(":/images/xpm/normal.xpm"), tr("Create Tangent"), this, SLOT( genTangent()) );
     menu->addAction( QIcon(":/images/xpm/quaternion.xpm"), tr("Create Texspace Quaternion"), this, SLOT( genTexSpaceQuaternion()));
@@ -138,7 +139,8 @@ void Item_mesh::DrawInstanced( int  num_of_i, int mode){
 void setNumOfVertices(Number n)\n
 set the number of vertices to n
 */
-void Item_mesh::setNumOfVertices(int num){
+void Item_mesh::setNumOfVertices(unsigned num)
+{
 
     num_of_vertices = num;
 
@@ -155,6 +157,6 @@ void Item_mesh::setNumOfVertices(int num){
 number getNumOfVertices()\n
 get the number of vertices
 */
-int Item_mesh::getNumOfVertices(){
+unsigned Item_mesh::getNumOfVertices(){
     return num_of_vertices;
 }

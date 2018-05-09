@@ -4,6 +4,7 @@
 #include "mainwindow.h"
 #include "glwrapper.h"
 #include "script_header_parser.h"
+#include "globals.h"
 
 SEngine::SEngine(QObject *itm):
     QObject (itm),
@@ -58,7 +59,7 @@ QScriptValue SEngine::run(QFile &file)
     if (!script.isEmpty())
         return run(script);
 
-    emit scriptError(tr("Could not open source file."));
+    emit scriptError(tr("Could not open source file."), {});
     return QScriptValue();
 }
 
@@ -93,7 +94,7 @@ QScriptValue SEngine::execJsFunc(const QString &function, const QVariantList &ar
         if (!f.isUndefined() && f.isValid())
         {
             if (f.toString().contains("Error:"))
-                emit scriptError(f.toString());
+                emit scriptError(f.toString(), {});
         }
     }
     return f;
@@ -105,14 +106,14 @@ void SEngine::bindItem(QPointer<Item> itm, bool localy)
         itm->bindToEngine(&eng, localy);
 }
 
-void SEngine::useDefaultError()
-{
-    connect(this, &SEngine::scriptError, this, &SEngine::defaultError, Qt::QueuedConnection);
-}
-
 QScriptEngine &SEngine::getEngine()
 {
     return eng;
+}
+
+QPointer<glwrapper> SEngine::getGl() const
+{
+    return ogl;
 }
 
 bool SEngine::testErrors() const
@@ -120,8 +121,8 @@ bool SEngine::testErrors() const
     if (eng.hasUncaughtException())
     {
         QString err = eng.uncaughtException().toString();
-        qDebug() << "TestError: " << err;
-        emit scriptError(err);
+        qDebug() << "Uncought Exception: " << err << "\n" << eng.uncaughtExceptionBacktrace().join("\n");
+        emit scriptError(err, eng.uncaughtExceptionBacktrace());
         return true;
     }
     return false;
@@ -129,11 +130,10 @@ bool SEngine::testErrors() const
 
 void SEngine::setupEngine(QObject *o)
 {
+    Item::ws->setupErrorHandler(this);
     obj = qobject_cast<Item*>(o);
-    qDebug() <<"Binding " << o << obj;
     if (obj)
     {
-        qDebug() <<"Binding " << obj->getType() << " as OBJ to javascr";
         connect(obj, SIGNAL(destroyed()), this, SLOT(deleteLater()));
         eng.globalObject().setProperty("obj" , eng.newQObject(obj));
     }
@@ -148,11 +148,5 @@ void SEngine::setupEngine(QObject *o)
 
     ScriptExtender::loadImported(this);
     bindItem(Item::world.data());
-}
 
-#include <QMessageBox>
-void SEngine::defaultError(const QString &err) const
-{
-    qDebug() << "SEngine: " << err;
-    QMessageBox::critical(Item::ws, QString(tr("Script Error")), QString(tr("Error processing \"%1\":\n%2")).arg(filename).arg(err));
 }

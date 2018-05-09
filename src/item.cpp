@@ -22,6 +22,7 @@
 
 #include "palgorithm.h"
 
+#include "globals.h"
 #include <QPointer>
 #include "mainwindow.h"
 #include <QDockWidget>
@@ -30,8 +31,6 @@
 #include <QDir>
 #include <QFontInfo>
 #include <QFileInfoList>
-#include <QDebug>
-
 #include "loaderpaths.h"
 
 QPointer<Item_world> Item::world = nullptr;
@@ -86,8 +85,7 @@ void Item::setName(const QString& _name)
     QString name = _name;
     Item* p;
     int64_t counter = std::max(0l, renameCounter.at(key));
-
-    while (parent() && (p = parent()->findChild(name)) && p != this)
+    while (parent() && (p = (qobject_cast<QObject*>(parent()))->findChild<Item*>(name)) && p != this)
     {
         name = QString("%1_%2").arg(_name).arg(counter++);
     }
@@ -227,7 +225,6 @@ void Item::bindToEngine(QScriptEngine *eng, bool localNames)
                                    "return r;"
                                    "};")
                            .arg(getFullScriptName()).arg(method.funcNameOnly);
-            qDebug() <<expr;
             eng->evaluate(expr);
         }
     }
@@ -288,9 +285,11 @@ bool Item::isDeletable() const
     return true;
 }
 
-Item* Item::findChild(const QString& name) const
+
+//those 2 are called from scripts...
+QObject* Item::findChild(const QString& name) const
 {
-    return QObject::findChild<Item *>(name);
+    return QObject::findChild<QObject *>(name);
 }
 
 

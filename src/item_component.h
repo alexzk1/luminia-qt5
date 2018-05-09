@@ -42,7 +42,7 @@ public:
     //virtual QString statusText() const;
     int getCompType(){return comptype;}
 public slots:
-    virtual void setDim( int dimension = 1, int dummy = 0, int keyframes = 1, int format= GL_FLOAT, bool normalized_int = true) override; //the parent size will be used
+    virtual void setDim( unsigned dimension = 1, unsigned dummy = 0, unsigned keyframes = 1, unsigned format= GL_FLOAT, bool normalized_int = true) override; //the parent size will be used
     void Bind();
     void BindKeyFrame(int key);
     void Unbind();

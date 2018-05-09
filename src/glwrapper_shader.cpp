@@ -25,7 +25,9 @@
 /*!
 constructor for vertex shader only shader object (useful for transformfeedback)
 */
-glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex): QObject( parent )
+glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex):
+    QObject( parent ),
+    shader(0), v(0), g(0), f(0), errored(false)
 {
     GL_CHECK_ERROR();
 
@@ -63,7 +65,9 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex): QObjec
 /*!
 constructor for shaderobject with vertex and fragmentshader
 */
-glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString inFragment): QObject( parent )
+glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString inFragment):
+    QObject( parent ),
+    shader(0), v(0), g(0), f(0), errored(false)
 {
     GL_CHECK_ERROR();
 
@@ -107,15 +111,17 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
 /*!
 constructor for shaderobject with vertex, geometry and fragmentshader
 */
-glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, QString inFragment, int inPrimitive, int outPrimitive, int out_vertices): QObject( parent ){
-    shader = 0; //protection against buggy implementations
-    if (!GL_EXT_geometry_shader4){
-        qDebug() << "Panic no GL_EXT_geometry_shader4 support";
-        return;
+glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, QString inFragment, int inPrimitive, int outPrimitive, int out_vertices):
+    QObject( parent ),
+    shader(0), v(0), g(0), f(0), errored(false)
+{
+    if (!GL_EXT_geometry_shader4)
+    {
+        FATAL_ERROR("Panic no GL_EXT_geometry_shader4 support");
     }
-    if(!glProgramParameteriEXT){
-        qDebug() << "Panic glProgramParameteriEXT has NULL Pointer";
-        return;
+    if(!glProgramParameteriEXT)
+    {
+        FATAL_ERROR("Panic glProgramParameteriEXT has NULL Pointer");
     }
 
     GLint  temp;
@@ -139,9 +145,9 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
     const char * ff = qf.data ();
     const char * gg = qg.data ();
 
-    glShaderSourceARB(f, 1, &ff,NULL);
-    glShaderSourceARB(v, 1, &vv,NULL);
-    glShaderSourceARB(g, 1, &gg,NULL);
+    glShaderSourceARB(f, 1, &ff, nullptr);
+    glShaderSourceARB(v, 1, &vv, nullptr);
+    glShaderSourceARB(g, 1, &gg, nullptr);
 
     glCompileShaderARB(v);
     glCompileShaderARB(f);
@@ -156,7 +162,8 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
     glProgramParameteriEXT(shader,GL_GEOMETRY_OUTPUT_TYPE_EXT ,outPrimitive);
     glProgramParameteriEXT(shader,GL_GEOMETRY_VERTICES_OUT_EXT,out_vertices);
 
-    if(GLEW_NV_transform_feedback){
+    if(GLEW_NV_transform_feedback)
+    {
         qDebug() << "GLEW_NV_transform_feedback";
         static QRegExp act_var("active\\s*varying\\s+\\w+\\s+(\\w+);");
         int pos = 0;
@@ -174,15 +181,16 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
 /*!
 constructor for shaderobject with vertex and geometry but without fragmentshader. usefully for transform feedback
 */
-glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, int inPrimitive, int outPrimitive, int out_vertices): QObject( parent ){
-    shader = 0; //protection against buggy implementations
-    if (!GL_EXT_geometry_shader4){
-        qDebug() << "Panic no GL_EXT_geometry_shader4 support";
-        return;
+glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, int inPrimitive, int outPrimitive, int out_vertices):
+    QObject( parent ),
+    shader(0), v(0), g(0), f(0), errored(false)
+{
+    if (!GL_EXT_geometry_shader4)
+    {
+        FATAL_ERROR("Panic no GL_EXT_geometry_shader4 support");
     }
     if(!glProgramParameteriEXT){
-        qDebug() << "Panic glProgramParameteriEXT has NULL Pointer";
-        return;
+        FATAL_ERROR("Panic glProgramParameteriEXT has NULL Pointer");
     }
 
     int  temp;
@@ -204,8 +212,8 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
     const char * vv = qv.data ();
     const char * gg = qg.data ();
 
-    glShaderSourceARB(v, 1, &vv,NULL);
-    glShaderSourceARB(g, 1, &gg,NULL);
+    glShaderSourceARB(v, 1, &vv, nullptr);
+    glShaderSourceARB(g, 1, &gg, nullptr);
 
     glCompileShaderARB(v);
     glCompileShaderARB(g);
@@ -280,13 +288,14 @@ void glwrapper_shader::Uniform (QString var, double x, double y, double z){
     glUniform3fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y,z);
 }
 
-void glwrapper_shader::Uniform (QString var, const QColor & col){
+void glwrapper_shader::Uniform (QString var, const QColor & col)
+{
     Bind();
-    float r,g,b;
+    double r,g,b;
     r = col.red()/255.0;
     g = col.green()/255.0;
     b = col.blue()/255.0;
-    glUniform3fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),r,g,b);
+    glUniform3fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()), r, g, b);
 }
 
 void glwrapper_shader::Uniform (QString var, double x, double y, double z, double w){
@@ -294,22 +303,26 @@ void glwrapper_shader::Uniform (QString var, double x, double y, double z, doubl
     glUniform4fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y,z,w);
 }
 
-void glwrapper_shader::Uniformi (QString var, int x){
+void glwrapper_shader::Uniformi (QString var, int x)
+{
     Bind();
     glUniform1iARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x);
 }
 
-void glwrapper_shader::Uniformi (QString var, int x, int y){
+void glwrapper_shader::Uniformi (QString var, int x, int y)
+{
     Bind();
     glUniform2iARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y);
 }
 
-void glwrapper_shader::Uniformi (QString var, int x, int y, int z){
+void glwrapper_shader::Uniformi (QString var, int x, int y, int z)
+{
     Bind();
     glUniform3iARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y,z);
 }
 
-void glwrapper_shader::Uniformi (QString var, int x, int y, int z, int w){
+void glwrapper_shader::Uniformi (QString var, int x, int y, int z, int w)
+{
     Bind();
     glUniform4iARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y,z,w);
 }
@@ -317,7 +330,8 @@ void glwrapper_shader::Uniformi (QString var, int x, int y, int z, int w){
 
 
 
-void glwrapper_shader::Uniform (QString var, QObject *obj){
+void glwrapper_shader::Uniform (QString var, QObject *obj)
+{
     Item_buffer *b = dynamic_cast<Item_buffer*>(obj);
     if(!b){
         qDebug() << obj << " is not a Item_buffer";
@@ -338,9 +352,8 @@ void glwrapper_shader::Uniform (QString var, QObject *obj){
 
 
 
-
-
-void glwrapper_shader::NormalQuaternion(QString var){
+void glwrapper_shader::NormalQuaternion(QString var)
+{
     float mat[16];
     glGetFloatv(GL_MODELVIEW_MATRIX,mat);
     float S;
@@ -364,20 +377,23 @@ void glwrapper_shader::NormalQuaternion(QString var){
         Q[3] = 0.25 * S;
     }
     else{
-        if ( mat[0] > mat[5] && mat[0] > mat[10] )  {
+        if ( mat[0] > mat[5] && mat[0] > mat[10] )
+        {
             S  = sqrt( 1.0 + mat[0] - mat[5] - mat[10] ) * 2;
             Q[0] = 0.25 * S;
             Q[1] = (mat[1] + mat[4] ) / S;
             Q[2] = (mat[8] + mat[2] ) / S;
             Q[3] = (mat[6] - mat[9] ) / S;
         }
-        else if ( mat[5] > mat[10] ) {
+        else if ( mat[5] > mat[10] )
+        {
             S  = sqrt( 1.0 + mat[5] - mat[0] - mat[10] ) * 2;
             Q[0] = (mat[1] + mat[4] ) / S;
             Q[1] = 0.25 * S;
             Q[2] = (mat[6] + mat[9] ) / S;
             Q[3] = (mat[8] - mat[2] ) / S;
-        } else {
+        } else
+        {
             S  = sqrt( 1.0 + mat[10] - mat[0] - mat[5] ) * 2;
             Q[0] = (mat[8] + mat[2] ) / S;
             Q[1] = (mat[6] + mat[9] ) / S;
@@ -390,29 +406,43 @@ void glwrapper_shader::NormalQuaternion(QString var){
     glUniform4fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),Q[0],Q[1],Q[2],-Q[3]);
 }
 
+bool glwrapper_shader::isErrored() const
+{
+    return errored;
+}
+
 /*!
 internal function, returns the opengl shader handle
 */
-int glwrapper_shader::getShaderHandle(){
+GLhandleARB glwrapper_shader::getShaderHandle()
+{
     return shader;
 }
 
 /*!
 internal functio used by constructor, to print out the compiling log. Critical errors are roprted with popups
 */
-void glwrapper_shader::printInfoLog(GLhandleARB obj){
+#include "mainwindow.h"
+void glwrapper_shader::printInfoLog(GLhandleARB obj)
+{
     GLint infologLength = 0;
     GLsizei charsWritten  = 0;
     char *infoLog;
     glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infologLength);
-    if (infologLength > 0){
-        infoLog = (char *)malloc(infologLength);
+    if (infologLength > 0)
+    {
+        size_t sz = static_cast<decltype (sz)>(infologLength + 1);
+        infoLog = new char[sz];
+        memset(infoLog, 0, sz);
         glGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);
-
         QString message(infoLog);
-        if (message.contains("error", Qt::CaseInsensitive))QMessageBox::warning ( 0,QString("GLSL compiler error") , message );
-
-        printf("%s\n",infoLog);
-        free(infoLog);
+        if (message.contains("error", Qt::CaseInsensitive))
+        {
+            errored = true;
+            if (MainWindow::instance)
+                MainWindow::instance->hasErrorText(message);
+            fprintf(stderr, "%s\n", infoLog);
+        }
+        delete []infoLog;
     }
 }

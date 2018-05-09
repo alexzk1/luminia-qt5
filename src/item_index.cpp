@@ -25,17 +25,6 @@
 
 #include "incgl.h"
 
-#define GL_CHECK_ERROR()                         \
-    do                                              \
-{                                               \
-    GLenum error = glGetError();                \
-    if (error != GL_NO_ERROR)                   \
-    fprintf(stderr, "E: %s(%d): %s 0x%X\n", \
-    __FILE__, __LINE__,             \
-    __PRETTY_FUNCTION__, error);    \
-    } while(0)
-
-
 Item_index::Item_index( Item *parent, const QString& name, int ipp, int num) : Item( parent, name)
 {
     num_of_primitives = num;

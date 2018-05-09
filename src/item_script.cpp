@@ -70,7 +70,6 @@ void Item_script::run()
     stop();
     deleteEngine();
     engine = new SEngine(parent());
-    engine->useDefaultError();
     connect(engine, &SEngine::scriptError, this, [this](const QString&)
     {
         stop();
@@ -79,12 +78,9 @@ void Item_script::run()
     });
     //doing kinda local bind, so no need full path from root
     QList<Item*> directs = parent()->findChildren<Item*>(QString(), Qt::FindDirectChildrenOnly);
-    qDebug() << directs.size() << " items to bind local.";
     for (const auto& o : directs)
-    {
-        qDebug() << "Binding local: " << o->getName();
         engine->bindItem(o, true);
-    }
+
 
     switchIcon(true);
     engine->run(edit->getText());

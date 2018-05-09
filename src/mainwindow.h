@@ -32,6 +32,7 @@ class QTextEdit;
 class TreeView;
 class Console;
 class TimeWidget;
+class SEngine;
 
 class MainWindow : public QMainWindow, public utility::SaveableWidget<MainWindow>
 {
@@ -39,8 +40,13 @@ class MainWindow : public QMainWindow, public utility::SaveableWidget<MainWindow
 public:
     MainWindow();
     virtual ~MainWindow() override;
+
+    void setupErrorHandler(SEngine* engine);
+    static QPointer<MainWindow> instance;
+
 public slots:
     void spaceballEvent(int *val);
+    void hasErrorText(const QString &error);
 private slots:
 
     void clear();
