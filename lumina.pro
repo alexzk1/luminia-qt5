@@ -16,7 +16,6 @@ exists($$[QT_INSTALL_HEADERS]/QtScript){
         }
 
 
-debug:QMAKE_CXXFLAGS += -march=native -g -O0
 QMAKE_CXXFLAGS +=  -std=c++14 -Wall -frtti -fexceptions -Werror=return-type
 
 #original code heavy uses overloaded virtuals

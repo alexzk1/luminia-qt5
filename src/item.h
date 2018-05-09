@@ -35,6 +35,7 @@
 #include <QMenu>
 #include <QDebug>
 #include <QPointer>
+#include <set>
 
 class MainWindow;
 class Item_world;
@@ -491,14 +492,17 @@ class Item_bone : public Item
 {
     Q_OBJECT
     friend class Item_armature;
+protected:
+    Item_bone(Item *parent, const QString& label1); //should be used by armature
 public:
-    Item_bone( Item *parent, const QString& label1, Item_armature* armature, int id = -1);
-    virtual ~Item_bone();
-    virtual QString statusText() const;
-    virtual bool dragAccept(Item*);
-    Item_armature* getArmature(){return armature;}
+    using id_t = int64_t;
+    Item_bone(Item *parent, const QString& label1, Item_armature *armature, id_t id = -1);
+    virtual ~Item_bone() override;
+    virtual QString statusText() const override;
+    virtual bool dragAccept(Item*) override;
+    virtual QPointer<Item_armature> getArmature() const;
     float* getJoint(){return initJoint;}
-    int getId();
+    id_t getId() const;
 
 public slots:
     QObject* addBone(QString Name);
@@ -509,22 +513,28 @@ public slots:
 
     void EulerRotate(float,float,float);
     void EulerRotation(float,float,float);
+    virtual void Reset();
 
     virtual QString getType() const override;
 
+private:
+    const Item_armature* armature;
+    const id_t id;
 protected:
-    int id;
     float joint[3];
     float initJoint[3];
 
     float quat[4];
-    Item_armature *armature;
+
 
     virtual float* getParentJoint();
     void qmult(float *qa, float *qb, float *out);
     void qrot(float *v, float *q, float *out);
     void qrotaround(float *v, float *p, float *q, float *out);
     virtual void addMenu(QMenu *menu) override;
+
+
+    virtual id_t requestId(id_t id);
 };
 
 
@@ -539,19 +549,23 @@ class Item_armature : public Item_bone
     friend class Item_bone;
 public:
     Item_armature( Item *parent, const QString& label1);
-    virtual QString statusText() const ;
-
+    virtual QString statusText() const override;
+    virtual QPointer<Item_armature> getArmature() const override;
 public slots:
     void Quaternions(QObject* shader, QString var);		//Quaternion
     void Joints(QObject* shader, QString var);		//Joints
     void Matrices(QObject* _shader, QString var);		//4x4 matrices
 
-    void Reset();
-    virtual QString getType() const {return QString("Armature");}
+    void Reset() override;
+    virtual QString getType() const override;
 
 protected:
-    int max_bone_id;
-    virtual float* getParentJoint();
+    std::vector<Item_bone*> getSortedBones();
+    virtual float* getParentJoint() override;
+    virtual id_t requestId(id_t id) override final;
+private:
+    std::set<id_t> used_ids;
+    id_t           current_max_id;
 };
 
 

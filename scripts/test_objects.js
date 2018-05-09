@@ -102,8 +102,8 @@ function createSphere(res){
 	var valu = Math.pow(2, res);	
 	var valu1 = valu +1 ;
 	
-	print ("Create Sphere" );
-	print ('Valu: ',valu, 'Res: ', res);
+	//print ("Create Sphere" );
+	//print ('Valu: ',valu, 'Res: ', res);
 	
 	var Sphere = obj.addMesh("Sphere");
 	Sphere.addVertex();
