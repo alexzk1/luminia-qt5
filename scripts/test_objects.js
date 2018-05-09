@@ -1,4 +1,5 @@
 /*
+2018_REVISED
 <NAME>Test Objects</NAME>
 <FILTER>Node</FILTER>
 <DESCRIPTION>Creates a Sphere or Torus mesh</DESCRIPTION>
@@ -50,14 +51,12 @@ static char *test[]={
 */
 
 function createTestObjectDialog(){
-
-	d = new Dialog();
-	
+	var d = new Dialog();	
 	d.okButtonText = "Create";
 	d.cancelButtonText = "Cancel";
-	d.caption = "Simple Testobjects";
-	print("test");
-	spin = new SpinBox;
+	d.caption = "Simple Testobjects";	
+	
+	var spin = new SpinBox;
 	spin.label = "Resolution: 2 power";
 	spin.minimum = 2;
 	spin.maximum = 8;
@@ -85,27 +84,28 @@ function createTestObjectDialog(){
 	if (d.exec()){
 		if (sphere.checked){
 			createSphere(spin.value);
-			}
+		}
 		else if	(torus.checked){
 			createTorus(spin.value);
-			}
+		}
 		else if	(quadric.checked){
 			createQuadric(spin.value);
-			}
 		}
 	}
+}
 
 
 function createSphere(res){
 	if(res <2) res = 2;
 	if(res >8) res = 8;
 
-	valu = Math.pow(2,res);
+	var valu = Math.pow(2, res);	
+	var valu1 = valu +1 ;
 	
-	valu1 = valu +1 ;
 	print ("Create Sphere" );
-	print (valu);
-	Sphere = obj.addMesh("Sphere");
+	print ('Valu: ',valu, 'Res: ', res);
+	
+	var Sphere = obj.addMesh("Sphere");
 	Sphere.addVertex();
 	Sphere.addUvCoords();
 	// enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
@@ -114,37 +114,41 @@ function createSphere(res){
 	Sphere.addComponent(2,"Tangent",3);
 	Sphere.setNumOfVertices(valu1 * (valu + 2 )/2);
 
-	v = 0; i = 1;
-	with ( Math )for (y = 0;y <= valu ; y += 2)for (x = 0;x <= valu ; x++){
+	var v = 0; 
+	var i = 1;
+	with ( Math )for (var y = 0;y <= valu ; y += 2) for (var x = 0;x <= valu ; x++){
 		i=  2 * PI * (x / valu) ;
-		j=   PI *  (y / valu)  - PI/2 ;
-		si = sin (i); ci=cos(i); sj = sin(j); cj = cos(j);
+		var j=   PI *  (y / valu)  - PI/2 ;
+		var si = sin (i); 
+		var ci=cos(i); 
+		var sj = sin(j); 
+		var cj = cos(j);
 
 		Sphere.Vertex.set(v, -cj * ci, sj, cj * si);
 		Sphere.Normal.set(v, -cj * ci, sj, cj * si);
 		Sphere.Tangent.set(v, -si, 0, -ci);
 		Sphere.UvCoords.set(v, ( x / valu), ( y / valu));
 		v ++;
-		}
+	}
 
 	Sphere.addIndex("Index",4);
 	with ( Math )for(y = 0;y < valu /2 ; y ++) for(x = 0;x < valu ; x++){
-		tmp  = x +      valu1 * y;
-		tmp2 = x + 1 +  valu1 * y ;
+		var tmp  = x +      valu1 * y;
+		var tmp2 = x + 1 +  valu1 * y ;
 		Sphere.Index.add (tmp ,tmp2 ,tmp2 + valu1, tmp + valu1 );
-		}
-	return Sphere;
 	}
+	return Sphere;
+}
 
 function createTorus(res){
 	if(res <2) res = 2;
 	if(res >8) res = 8;
 
-	valu = Math.pow(2,res);
+	var valu = Math.pow(2,res);
 	
-	valu1 = valu +1 ;
+	var valu1 = valu +1 ;
 
-	Torus = obj.addMesh("Torus");
+	var Torus = obj.addMesh("Torus");
 	Torus.addVertex();
 	Torus.addUvCoords();
 	// enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
@@ -154,54 +158,54 @@ function createTorus(res){
 
 	Torus.setNumOfVertices(valu1 * valu1);
 
-	v = 0;
-	r = 1; R = 2; i = 1;
-	with ( Math )for (y = 0;y <= valu ; y ++)for (x = 0;x <= valu ; x++){
+	var v = 0;
+	var r = 1; var R = 2; var i = 1;
+	with ( Math )for (var y = 0;y <= valu ; y ++) for (var x = 0;x <= valu ; x++){
 		i=  2 * PI * (x / valu) ;
-		j=  2 * PI * (y / valu) ;
-		si = sin (i); ci=cos(i); sj = sin(j); cj = cos(j);
+		var j=  2 * PI * (y / valu) ;
+		var si = sin (i); var ci=cos(i); var sj = sin(j); var cj = cos(j);
 		Torus.Vertex.set(v,(R + r * cj ) * ci,(R + r * cj ) * si ,r * sj); 
 		Torus.Normal.set(v, cj * ci, cj * si , sj); 
 		Torus.Tangent.set(v, -si,  ci,0); 
 		Torus.UvCoords.set(v, ( x / valu ), ( y / valu ));
 		v ++;
-		}
+	}
 	Torus.addIndex("Index",4);
 	with ( Math )for(y = 0;y < valu ; y ++) for(x = 0;x < valu ; x++){
 
-		tmp  = x +      valu1 * y;
-		tmp2 = x + 1 +  valu1 * y ;
+		var tmp  = x +      valu1 * y;
+		var tmp2 = x + 1 +  valu1 * y ;
 		Torus.Index.add (tmp ,tmp2 ,tmp2 + valu1, tmp + valu1 );
-		}
-	return Torus;
 	}
+	return Torus;
+}
 
 function createQuadric(res){
 	if(res <2) res = 2;
 	if(res >8) res = 8;
 
-	valu = Math.pow(2,res);
-	valu1 = valu +1 ;
+	var valu = Math.pow(2,res);
+	var valu1 = valu +1 ;
 
-	Quadric = obj.addMesh("Quadric");
+	var Quadric = obj.addMesh("Quadric");
 	Quadric.setNumOfVertices(valu1 * valu1);
 	Quadric.addVertex(); // Only position required
-	v = 0;
-	with ( Math )for (y = 0;y <= valu ; y ++)for (x = 0;x <= valu ; x++){
-		nx = x / valu;
-		ny = y / valu;
+	var v = 0;
+	with ( Math )for (var y = 0;y <= valu ; y ++)for (var x = 0;x <= valu ; x++){
+		var nx = x / valu;
+		var ny = y / valu;
 		Quadric.Vertex.set(v,nx, ny, 0);
 		v++;
-		}
+	}
 
 	Quadric.addIndex("Index",4);
 	with ( Math )for(y = 0;y < valu ; y ++) for(x = 0;x < valu ; x++){
 		
-		tmp  = x +      valu1 * y;
-		tmp2 = x + 1 +  valu1 * y ;
+		var tmp  = x +      valu1 * y;
+		var tmp2 = x + 1 +  valu1 * y ;
 		Quadric.Index.add (tmp ,tmp2 ,tmp2 + valu1, tmp + valu1 );
-		}
+	}
 
 	return Quadric;
-	}
+}
 

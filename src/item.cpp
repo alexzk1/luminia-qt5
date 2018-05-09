@@ -220,7 +220,7 @@ void Item::bindToEngine(QScriptEngine *eng, bool localNames)
             QString expr = QString("%1.%2 = function() {"
                                    "var tmp = obj;"
                                    "obj = %1;"
-                                   "var r = %2(arguments);"
+                                   "var r = %2.apply(null, arguments);"
                                    "obj = tmp;"
                                    "return r;"
                                    "};")
