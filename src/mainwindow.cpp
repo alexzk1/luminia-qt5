@@ -34,6 +34,8 @@
 #include <QVBoxLayout>
 #include "script_extender_engine.h"
 QPointer<MainWindow> MainWindow::instance;
+extern const Qt::DockWidgetAreas DOCK_AREAS;
+
 MainWindow::MainWindow()
 {
     instance = this;
@@ -41,8 +43,17 @@ MainWindow::MainWindow()
 
     setDockNestingEnabled(true);
 
-    treeview = new TreeView (this);
-    setCentralWidget(treeview);
+    auto dock = new QDockWidget("World Tree", this);
+    dock->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea); //yeh, dont want possible top/bottom for the tree
+
+    treeview = new TreeView (dock);
+    dock->setWidget(treeview);
+    addDockWidget(Qt::LeftDockWidgetArea, dock);
+
+    auto dumb = new QLabel(this);
+    setCentralWidget(dumb);
+    dumb->setVisible(false);
+
 
     treeview->world->profiler = new Profiler();
     console = new Console (treeview->world);

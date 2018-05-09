@@ -386,12 +386,22 @@ void SourceEdit::setHelpString(const QString &hs){
 
 }
 
-void SourceEdit::appendActionToBar(QAction *act)
+void SourceEdit::appendActionToBar(QAction *act, QAction *before)
 {
-    if (act)
-        buttonsBar->addAction(act);
+    if (before == nullptr)
+    {
+        if (act)
+            buttonsBar->addAction(act);
+        else
+            buttonsBar->addSeparator();
+    }
     else
-        buttonsBar->addSeparator();
+    {
+        if (act)
+            buttonsBar->insertAction(before, act);
+        else
+            buttonsBar->insertSeparator(before);
+    }
 }
 
 void SourceEdit::emitRequestCompletationList(const QString &s){

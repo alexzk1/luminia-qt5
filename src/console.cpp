@@ -106,7 +106,7 @@ void ConsoleLine ::keyPressEvent(QKeyEvent *e){
         //append child objects
         if(obj.isQObject()){
             QObject *qobj = obj.toQObject();
-            if (qobj == NULL)return; //Fix for deleted objects
+            if (qobj == nullptr)return; //Fix for deleted objects
             for (int i = 0; i < qobj->children().size(); i++){
                 comp << qobj->children().at(i)->objectName();
             }
@@ -139,7 +139,8 @@ void ConsoleLine::helpHandler(const QString& _string){
     QString string = _string;
     string.replace(QRegExp("\\(.*\\)"),"");
 
-    if (meta == NULL){
+    if (meta == nullptr)
+    {
         emit setHelpString("");
         return;
     }

@@ -135,7 +135,7 @@ public:
     QString getText()const;
     void setCompleatationList(const QStringList&, int offset = 0);
     void setHelpString(const QString&);
-    void appendActionToBar(QAction *act);
+    void appendActionToBar(QAction *act, QAction *before = nullptr);
 protected:
     void emitRequestCompletationList(const QString&);
     TextEdit *edit;
@@ -144,7 +144,6 @@ protected:
     Highlighter *highlighter;
     QStringList completationList;
     int completationOffset;
-
 public slots:
     void emitRequestHelpString(const QString&);
 

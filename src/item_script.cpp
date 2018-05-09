@@ -45,9 +45,9 @@ Item_script::Item_script( Item *parent, const QString& name) :
     addAction ( QIcon(":/images/xpm/stop.xpm"),tr( "Disable Script") ,&Item_script::stop);
     addAction ( QIcon(":/images/xpm/run.xpm"),tr( "Enable Script") ,  &Item_script::run);
 
-    edit->appendActionToBar(nullptr);
-    edit->appendActionToBar(commonActions.at(0));
-    edit->appendActionToBar(commonActions.at(1));
+    edit->appendActionToBar(commonActions.at(0), commonActions.at(2));
+    edit->appendActionToBar(commonActions.at(1), commonActions.at(2));
+    edit->appendActionToBar(nullptr, commonActions.at(2));
 }
 
 void Item_script::deleteEngine()

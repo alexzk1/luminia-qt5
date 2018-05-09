@@ -129,9 +129,9 @@ Can't be called recursive!
 // same code as Item_node::Call();
 void Item_world::Call(const QString& function, const QVariantList& args)
 {
-    static int rec = 0;
-    if(rec > 8)return;
-    rec++;
+    //    static int rec = 0;
+    //    if(rec > 8)return;
+    //    rec++;
 
     QTreeWidgetItemIterator it(this);
     while (*it)
@@ -147,10 +147,7 @@ void Item_world::Call(const QString& function, const QVariantList& args)
             std::stack<float*> matrixlist;
             for (Item_matrix* m = dynamic_cast<Item_matrix*>(scriptitem->parent()); m ;
                  m = dynamic_cast<Item_matrix*>(m->parent()))
-            {
-                float *mat =  m->getMatrix();
-                matrixlist.push(mat);
-            }
+                matrixlist.push(m->getMatrix());
 
             for (;matrixlist.size(); matrixlist.pop())
                 glMultMatrixf(matrixlist.top());
@@ -163,5 +160,5 @@ void Item_world::Call(const QString& function, const QVariantList& args)
         }
         ++it;
     }
-    rec--;
+    //rec--;
 }

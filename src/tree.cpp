@@ -24,11 +24,11 @@
 #include <QHeaderView>
 #include <QContextMenuEvent>
 #include <QMouseEvent>
-#include <QMainWindow>
 #include <QDragEnterEvent>
 #include <QDropEvent>
 #include <QDragMoveEvent>
 #include <QStatusBar>
+#include "mainwindow.h"
 
 TreeView::TreeView ( QWidget * parent) : QTreeWidget (parent)
 {
@@ -76,9 +76,10 @@ void TreeView::mouseMoveEvent ( QMouseEvent * event )
     static Item* i;
     // hack ... in future drag source should  fetched from QMimeData
     Item* item = static_cast<Item*>(itemFromIndex(indexAt (event->pos ())));
-    if (item != i && item != nullptr){
+    if (item != i && item != nullptr)
+    {
         i = item;
-        static_cast<QMainWindow*>(parent())->statusBar()->showMessage(item->statusText(), 10000);
+        MainWindow::instance->statusBar()->showMessage(item->statusText(), 10000);
         //qDebug() << item->statusText();
     }
 
