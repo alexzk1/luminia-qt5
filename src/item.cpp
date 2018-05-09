@@ -48,7 +48,6 @@ Item::Item(Item *parent, const QString& name ):
     setName(name);
     setExpanded(true);
     setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDropEnabled);
-    setName ( name );
 }
 
 Item::~Item()
@@ -86,7 +85,7 @@ void Item::setName(const QString& _name)
     Item* p;
     int64_t counter = std::max(0l, renameCounter.at(key));
 
-    while ((p = parent()->findChild(name)) && p != this)
+    while (parent() && (p = parent()->findChild(name)) && p != this)
     {
         name = QString("%1_%2").arg(_name).arg(counter++);
     }

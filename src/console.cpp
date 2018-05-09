@@ -28,7 +28,8 @@
 
 //***********************ConsoleCompletionBox*****************************
 
-ConsoleCompletionBox::ConsoleCompletionBox(ConsoleLine *_line, const QStringList& _completions, const QString& _searchString) :	AbstractCompletionBox( _line, _completions, _searchString){
+ConsoleCompletionBox::ConsoleCompletionBox(ConsoleLine *_line, const QStringList& _completions, const QString& _searchString) :
+    AbstractCompletionBox( _line, _completions, _searchString){
     line = _line;
     line->completationOpen = true;
 }

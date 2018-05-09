@@ -27,7 +27,10 @@
 
 namespace QS{
 
-    DockPrivate::DockPrivate(QWidget *parent) : QFrame(parent), width(0), lastWidget(0), invisibleButtonGroup(0), tabWidget(0), groupBox(0){
+    DockPrivate::DockPrivate(QWidget *parent) :
+        QFrame(parent),
+        width(0), lastWidget(nullptr), invisibleButtonGroup(nullptr), tabWidget(nullptr), groupBox(nullptr)
+    {
         setFrameStyle(QFrame::Panel | QFrame::Sunken);
         this->parent = this;
 
@@ -42,7 +45,7 @@ namespace QS{
         hbox->addLayout(grid);
         grid->setAlignment(Qt::AlignTop);
 
-        dock = new QDockWidget("Script Dock");
+        dock = new QDockWidget(tr("Script Dock"));
         dock->setAllowedAreas(Qt::RightDockWidgetArea); // lumina specific
         dock->setWidget(this);
 
@@ -106,7 +109,7 @@ namespace QS{
     }
 
     Dock::Dock(QObject*){
-        d = new DockPrivate(NULL);
+        d = new DockPrivate(nullptr);
         widget = d;
     }
 

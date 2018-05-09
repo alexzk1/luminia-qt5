@@ -34,6 +34,19 @@ macx: QMAKE_LFLAGS += -lc++
 macx: QMAKE_CXXFLAGS += -mmacosx-version-min=10.10
 macx: QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10
 
+CONFIG(debug) {
+     message( "Building the DEBUG Version" )
+     #lets optimize for CPU on debug, for release - packager should do
+     QMAKE_CXXFLAGS +=  -march=native -O0 -g
+     DEFINES += _DEBUG
+     unix:!maxc:QMAKE_CXXFLAGS += -fsanitize=undefined -fsanitize=vptr
+     unix:!maxc:LIBS += -lubsan
+}
+else {
+    DEFINES += NDEBUG
+    message( "Building the RELEASE Version" )
+    QMAKE_CXXFLAGS += -O3
+}
 
 
 HEADERS	=	src/mainwindow.h \
