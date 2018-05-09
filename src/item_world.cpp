@@ -22,6 +22,7 @@
 #include "item.h"
 #include "item_virtual.h"
 #include <chrono>
+#include <stack>
 
 Item_world::Item_world():
     Item(nullptr, "World")
@@ -139,20 +140,20 @@ void Item_world::Call(const QString& function, const QVariantList& args)
         if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))
         {
             glPushMatrix();
-            //simple code to apply the nodes matices, a stack based could be better
-            QList<float*> matrixlist;
 
+            //-simple code to apply the nodes matices, a stack based could be better
+            //-hello from 2018, ok, stack as you wanted
+
+            std::stack<float*> matrixlist;
             for (Item_matrix* m = dynamic_cast<Item_matrix*>(scriptitem->parent()); m ;
                  m = dynamic_cast<Item_matrix*>(m->parent()))
             {
                 float *mat =  m->getMatrix();
-                matrixlist.append(mat);
+                matrixlist.push(mat);
             }
 
-            for (int k = matrixlist.size()-1; k >= 0; k--)
-            {
-                glMultMatrixf(matrixlist.at(k));
-            }
+            for (;matrixlist.size(); matrixlist.pop())
+                glMultMatrixf(matrixlist.top());
 
             scriptitem->Call(function,args);
 
