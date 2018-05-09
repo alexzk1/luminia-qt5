@@ -180,7 +180,7 @@ void ConsoleLine::helpHandler(const QString& _string){
 
 //***********************Console*********************************
 
-
+extern const Qt::DockWidgetAreas DOCK_AREAS;
 
 Console::Console(QObject *_world) :
     QObject()
@@ -203,7 +203,7 @@ Console::Console(QObject *_world) :
     widget->setLayout(layout);
 
     dock = new QDockWidget("Console"); //, dynamic_cast<QMainWindow*>(parent));
-    dock->setAllowedAreas(Qt::RightDockWidgetArea);
+    dock->setAllowedAreas(DOCK_AREAS);
     dock->setWidget(widget);
 
     //search MainWindow

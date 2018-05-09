@@ -61,10 +61,12 @@ Item::~Item()
 /*!
 function to add a QWidget or similar to the Workspace area
 */
+
+extern const Qt::DockWidgetAreas DOCK_AREAS;
 void Item::appendToWs(QWidget *w)
 {
     dock = new QDockWidget(objectName(), ws);
-    dock->setAllowedAreas(Qt::RightDockWidgetArea);
+    dock->setAllowedAreas(DOCK_AREAS);
     dock->setWidget(w);
     ws->addDockWidget(Qt::RightDockWidgetArea, dock);
 }

@@ -58,7 +58,6 @@ private:
     void createMenus();
     void createToolBars();
     void createStatusBar();
-    void createDockWindows();
     void createScriptToolBar();
     QString fileName;
     QString lastPath;

@@ -40,7 +40,7 @@
                           __PRETTY_FUNCTION__, error);    \
           } while(0)
 
-
+extern const Qt::DockWidgetAreas DOCK_AREAS;
 Profiler::Profiler() : QObject(){
     active = false;
 
@@ -48,7 +48,7 @@ Profiler::Profiler() : QObject(){
     text->setReadOnly(true);
 
     dock = new QDockWidget("Profiler");
-    dock->setAllowedAreas(Qt::RightDockWidgetArea);
+    dock->setAllowedAreas(DOCK_AREAS);
     dock->setWidget(text);
 
     QWidgetList l = QApplication::topLevelWidgets();

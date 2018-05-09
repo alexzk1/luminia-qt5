@@ -24,7 +24,7 @@
 #include "dialog_factory_private.h"
 #include <QFrame>
 #include <QMainWindow>
-
+extern const Qt::DockWidgetAreas DOCK_AREAS;
 namespace QS{
 
     DockPrivate::DockPrivate(QWidget *parent) :
@@ -46,7 +46,7 @@ namespace QS{
         grid->setAlignment(Qt::AlignTop);
 
         dock = new QDockWidget(tr("Script Dock"));
-        dock->setAllowedAreas(Qt::RightDockWidgetArea); // lumina specific
+        dock->setAllowedAreas(DOCK_AREAS); // lumina specific
         dock->setWidget(this);
 
         //search MainWindow
