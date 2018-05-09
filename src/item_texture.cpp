@@ -411,7 +411,7 @@ void Item_texture::setData(char *data, qint64 len)
     int miplevels = 1;
     if (mipmap) miplevels += int(log2 (width | height | depth));
 
-    for (GLenum cub = 0, cubeloop = (type == GL_TEXTURE_CUBE_MAP )?cubeloop = 6 : 1; cub < cubeloop; ++cub)
+    for (GLenum cub = 0, cubeloop = ((type == GL_TEXTURE_CUBE_MAP )? 6 : 1); cub < cubeloop; ++cub)
     {
         auto w = width;
         auto h = height;

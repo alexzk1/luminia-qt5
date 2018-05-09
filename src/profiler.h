@@ -24,6 +24,7 @@
 
 #include "incgl.h"
 #include <QObject>
+#include <atomic>
 
 class QGLWidget;
 class QDockWidget;
@@ -43,16 +44,16 @@ public:
 public slots:
     void toggle(bool);
 
-
 protected:
-    bool active;
-    int  count;
-    int  registered;
+    std::atomic<bool>     active;
+    std::atomic<int64_t>  count;
+    std::atomic<int64_t>  registered;
 
     GLuint* queries;
 
     QDockWidget *dock;
     QTextEdit *text;
+    void freeQueries();
 };
 
 #endif

@@ -49,7 +49,7 @@ MainWindow::MainWindow()
     createMenus();
     createToolBars();
     createStatusBar();
-    createScriptToolBar();
+    //createScriptToolBar();
 
     timeToolBar = addToolBar(tr("Time"));
     time = new TimeWidget(this);
