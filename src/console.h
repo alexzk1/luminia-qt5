@@ -34,7 +34,7 @@ class QScriptValue;
 class QScriptContext;
 class ConsoleLine;
 
-
+#include "script_extender_engine.h"
 
 class ConsoleLine;
 /*!
@@ -61,9 +61,9 @@ class ConsoleLine : public QLineEdit
     Q_OBJECT
     friend class ConsoleCompletionBox;
 public:
-    ConsoleLine(Console *parent):QLineEdit()
+    ConsoleLine(Console *parent): QLineEdit()
     {
-        completationOpen=false;
+        completationOpen = false;
         console = parent;
         meta = nullptr;
     }
@@ -88,14 +88,12 @@ protected:
 class Console : public QObject
 {
     Q_OBJECT
-    friend class ConsoleLine;
 public:
-    Console(QObject *root);
+    Console(QObject *parent);
     virtual ~Console() override;
-
+    QPointer<SEngine> getEngine();
 public slots:
     void toggle(bool);
-
 private slots:
     void returnPressed();
 
@@ -108,12 +106,9 @@ protected:
     QObject *root;
     QDockWidget *dock;
 
-    QScriptEngine *eng;
-    //QScriptValue *global;
-    QObject *world;
-
     QString code;
     bool active;
+    QPointer<SEngine> eng;
 };
 
 #endif

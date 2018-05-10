@@ -23,13 +23,14 @@
 #include "item_virtual.h"
 #include <chrono>
 #include <stack>
+#include "mainwindow.h"
 
 Item_world::Item_world():
     Item(nullptr, "World")
 {
     Item::world = this;
     setIcon(0, QIcon(":/images/xpm/world.xpm"));
-    setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsDropEnabled);
+    setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsDropEnabled);
     new Item_cam(this, "Cam");
 }
 
@@ -61,6 +62,11 @@ QString Item_world::getType() const
     return QString("World");
 }
 
+void Item_world::deleteLater()
+{
+    //do nothing
+}
+
 bool Item_world::isDeletable() const
 {
     return false;
@@ -68,11 +74,12 @@ bool Item_world::isDeletable() const
 
 void Item_world::addMenu(QMenu *menu)
 {
-    menu->addAction ( QIcon(),tr("Add Virtual"),this, SLOT( addVirtual()));
-    menu->addAction ( QIcon(":/images/xpm/node.xpm"),tr("Add Node"),this, SLOT( addNode()));
-    menu->addAction ( QIcon(":/images/xpm/cam.xpm"),tr("Add Cam"),this, SLOT( addCam()));
+    menu->addAction ( QIcon(), tr("Add Virtual"), this, SLOT( addVirtual()));
+    menu->addAction ( QIcon(":/images/xpm/node.xpm"), tr("Add Node"), this, SLOT( addNode()));
+    menu->addAction ( QIcon(":/images/xpm/cam.xpm"), tr("Add Cam"), this, SLOT( addCam()));
     menu->addSeparator();
-    menu->addAction ( QIcon(":/images/new.png"),tr("Clear World"),this, SLOT( destroyAll() ));
+    auto a = menu->addAction ( QIcon(":/images/new.png"), tr("Clear World"));
+    connect(a, &QAction::triggered, MainWindow::instance, &MainWindow::clearWorld);
 }
 /*!
 accept only Node items for dragging
@@ -146,13 +153,13 @@ void Item_world::Call(const QString& function, const QVariantList& args)
 
             std::stack<float*> matrixlist;
             for (Item_matrix* m = dynamic_cast<Item_matrix*>(scriptitem->parent()); m ;
-                 m = dynamic_cast<Item_matrix*>(m->parent()))
+                    m = dynamic_cast<Item_matrix*>(m->parent()))
                 matrixlist.push(m->getMatrix());
 
-            for (;matrixlist.size(); matrixlist.pop())
+            for (; matrixlist.size(); matrixlist.pop())
                 glMultMatrixf(matrixlist.top());
 
-            scriptitem->Call(function,args);
+            scriptitem->Call(function, args);
 
             Item_buffer::UnbindAll(); // clear all client and attribute arrays
 

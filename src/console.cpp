@@ -16,35 +16,45 @@
 **
 ** You should have received a copy of the GNU General Public License
 ** along with this program; if not, write to the Free Software
-** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
+** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301,
+*USA.
 *********************************************************************************/
 
 #include "console.h"
-#include "glwrapper.h"
-#include <QtScript>
 #include "factory/factory.h"
+#include "glwrapper.h"
 #include <QApplication>
 #include <QMainWindow>
+#include <QtScript>
+
+//some methods must not be called ever, or immedial crash
+const static QStringList prohibited_to_use =
+{
+    "destroyed()",
+    "destroyed(QObject*)",
+};
 
 //***********************ConsoleCompletionBox*****************************
 
-ConsoleCompletionBox::ConsoleCompletionBox(ConsoleLine *_line, const QStringList& _completions, const QString& _searchString) :
-    AbstractCompletionBox( _line, _completions, _searchString){
+ConsoleCompletionBox::ConsoleCompletionBox(ConsoleLine *_line, const QStringList &_completions, const QString &_searchString):
+    AbstractCompletionBox(_line, _completions, _searchString)
+{
     line = _line;
     line->completationOpen = true;
 }
 
-
-ConsoleCompletionBox::~ConsoleCompletionBox(){
+ConsoleCompletionBox::~ConsoleCompletionBox()
+{
     line->completationOpen = false;
 }
 
-void ConsoleCompletionBox::finishCompletion(){
+void ConsoleCompletionBox::finishCompletion()
+{
     QListWidgetItem *item = listwidget->currentItem();
     if (!item)
         return;
     QString s = item->data(Qt::UserRole).toString().mid(searchString.length());
-    line->insert(s.replace(QRegExp("\\(.+\\)"),"("));
+    line->insert(s.replace(QRegExp("\\(.+\\)"), "("));
 }
 
 //***********************ConsoleLine*********************************
@@ -52,92 +62,107 @@ void ConsoleCompletionBox::finishCompletion(){
 Keypress Eventhandler for consoles input. Implements history and completionbox
 */
 
-void ConsoleLine ::keyPressEvent(QKeyEvent *e){
-    int size = history.size();
-    if (!completationOpen){
-        switch (e->key()) {
-            case Qt::Key_Down:
-                if (count == 1){
-                    this->setText(temp);
-                }
-                else if (count > 1){
+void ConsoleLine ::keyPressEvent(QKeyEvent *e)
+{
 
-                    setText(history.at(size-count));
-                }
-                count =  count != 0 ? count-1:0;
+    int size = history.size();
+    if (!completationOpen)
+    {
+        switch (e->key())
+        {
+            case Qt::Key_Down:
+                if (count == 1)
+                    this->setText(temp);
+                else
+                    if (count > 1)
+
+                        setText(history.at(size - count));
+                count = count != 0 ? count - 1 : 0;
                 break;
             case Qt::Key_Up:
-                count = count < size ? count+1:size;
-                if (count == 1)temp = text();
-                if (count != 0)setText(history.at(size-count));
+                count = count < size ? count + 1 : size;
+                if (count == 1)
+                    temp = text();
+                if (count != 0)
+                    setText(history.at(size - count));
                 break;
             case Qt::Key_Return:
                 count = 0;
                 history.append(text());
                 break;
-
         }
     }
     QLineEdit::keyPressEvent(e);
 
-    if (completationOpen) return; // don't open a second completationbox
+    if (completationOpen)
+        return; // don't open a second completationbox
 
-    QStringList comp = QStringList() << "World" << "Math";
+    QStringList comp = QStringList() << "World"
+                       << "Math";
 
     QString last = text().split(QRegExp("[^\\w\\.]")).last();
 
-    if (last.length() < 2)return;
-    //qDebug() << last;
+    if (last.length() < 2)
+        return;
+    // qDebug() << last;
 
-    QScriptEngine *eng = console->eng;
+    auto& eng = console->getEngine()->getEngine();
 
     QStringList objnames = last.split(".");
-    //qDebug() << objnames;
+    // qDebug() << objnames;
 
-    QScriptValue obj = eng->globalObject();
+    QScriptValue obj = eng.globalObject();
 
-    for (int i = 0; i < objnames.size() -1 ; i ++){
+    for (int i = 0; i < objnames.size() - 1; i++)
+    {
         qDebug() << obj.isValid() << objnames.at(i);
         obj = obj.property(objnames.at(i));
     }
 
-    if (last.endsWith(".")){
+    if (last.endsWith("."))
+    {
         comp.clear();
-        //append child objects
-        if(obj.isQObject()){
+        // append child objects
+        if (obj.isQObject())
+        {
             QObject *qobj = obj.toQObject();
-            if (qobj == nullptr)return; //Fix for deleted objects
-            for (int i = 0; i < qobj->children().size(); i++){
+            if (qobj == nullptr)
+                return; // Fix for deleted objects
+            for (int i = 0; i < qobj->children().size(); i++)
                 comp << qobj->children().at(i)->objectName();
-            }
             meta = qobj->metaObject();
-
         }
-        //append propertys
+        // append propertys
         QScriptValueIterator it(obj);
-        while (it.hasNext()) {
+        while (it.hasNext())
+        {
             it.next();
-            comp.append(it.name() );//.replace(QRegExp("\\(.*\\)"),"")) ;
+            comp.append(it.name()); //.replace(QRegExp("\\(.*\\)"),"")) ;
         }
     }
 
     QString s = last.split(".").last();
 
+    for (const auto& p : prohibited_to_use)
+        comp.removeAll(p);
+
     QWidget *box = new ConsoleCompletionBox(this, comp, s);
     box->move(mapToGlobal(rect().bottomLeft()));
     box->show();
-    connect(this,SIGNAL(setHelpString(const QString&)),box,SLOT(setHelpString(const QString&)));
-    connect(box,SIGNAL(requestHelpString(const QString&)), this, SLOT(helpHandler(const QString&)));
-
-
+    connect(this, SIGNAL(setHelpString(const QString &)), box,
+            SLOT(setHelpString(const QString &)));
+    connect(box, SIGNAL(requestHelpString(const QString &)), this,
+            SLOT(helpHandler(const QString &)));
 }
 
 /*!
-handler that reads the doxygen XML documentation an pass the help to the consoles complettation box. Similar code like for the script editor,
+handler that reads the doxygen XML documentation an pass the help to the
+consoles complettation box. Similar code like for the script editor,
 */
-void ConsoleLine::helpHandler(const QString& _string){
+void ConsoleLine::helpHandler(const QString &_string)
+{
     QString string = _string;
-    string.replace(QRegExp("\\(.*\\)"),"");
+    string.replace(QRegExp("\\(.*\\)"), "");
 
     if (meta == nullptr)
     {
@@ -147,12 +172,14 @@ void ConsoleLine::helpHandler(const QString& _string){
 
     static QString cacheFilename("");
     static QString lines("");
-    //qDebug() << string << meta->className();
-    QString Filename = QString("doc/doxygen/xml/class") + meta->className() + ".xml";
-    Filename.replace("_","__");
+    // qDebug() << string << meta->className();
+    QString Filename =
+        QString("doc/doxygen/xml/class") + meta->className() + ".xml";
+    Filename.replace("_", "__");
 
-    if (Filename != cacheFilename){
-        //qDebug() << Filename;
+    if (Filename != cacheFilename)
+    {
+        // qDebug() << Filename;
         QFile file(Filename);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
             return;
@@ -163,30 +190,30 @@ void ConsoleLine::helpHandler(const QString& _string){
         cacheFilename = Filename;
     }
 
-    QRegExp parser1(QString("<memberdef.*<name>") + string + "</name>.*</memberdef>");
+    QRegExp parser1(QString("<memberdef.*<name>") + string +
+                    "</name>.*</memberdef>");
     parser1.setMinimal(true);
     parser1.indexIn(lines);
 
-    QString block = parser1.cap(0).right(  parser1.cap(0).size() - parser1.cap(0).lastIndexOf("<memberdef") );
-    //qDebug() << block;
+    QString block = parser1.cap(0).right(
+                        parser1.cap(0).size() - parser1.cap(0).lastIndexOf("<memberdef"));
+    // qDebug() << block;
 
     QRegExp parser2("<para>(.*)</para>");
     parser2.indexIn(block);
 
     QRegExp remove("<.*>");
     remove.setMinimal(true);
-    emit setHelpString(parser2.cap(1).replace(remove,""));
+    emit setHelpString(parser2.cap(1).replace(remove, ""));
 }
-
 
 //***********************Console*********************************
 
 extern const Qt::DockWidgetAreas DOCK_AREAS;
 
-Console::Console(QObject *_world) :
-    QObject()
+Console::Console(QObject *parent) :
+    QObject(parent)
 {
-    world = _world;
     active = false;
 
     out = new QTextEdit();
@@ -207,21 +234,16 @@ Console::Console(QObject *_world) :
     dock->setAllowedAreas(DOCK_AREAS);
     dock->setWidget(widget);
 
-    //search MainWindow
+    // search MainWindow
     QWidgetList l = QApplication::topLevelWidgets();
-    for (int i = 0; i < l.size(); i++){
-        if (QMainWindow* w = dynamic_cast<QMainWindow*>(l.at(i))) w->addDockWidget(Qt::RightDockWidgetArea, dock);
+    for (int i = 0; i < l.size(); i++)
+    {
+        if (QMainWindow *w = dynamic_cast<QMainWindow *>(l.at(i)))
+            w->addDockWidget(Qt::RightDockWidgetArea, dock);
     }
 
     dock->hide();
-
-    connect(in,SIGNAL(returnPressed()),this,SLOT(returnPressed()));
-
-    eng = new QScriptEngine();
-    eng->globalObject().setProperty("World" , eng->newQObject(world, QScriptEngine::ValueOwnership::QtOwnership));
-    Factory::Factory(*eng);
-
-    eng->globalObject().setProperty("gl" , eng->scriptValueFromQMetaObject<glwrapper>());
+    connect(in, SIGNAL(returnPressed()), this, SLOT(returnPressed()));
 }
 
 Console::~Console()
@@ -229,58 +251,76 @@ Console::~Console()
     delete in;
     delete out;
     delete dock;
-    delete eng;
+
+    if (eng)
+        delete eng;
 }
 
+QPointer<SEngine> Console::getEngine()
+{
+    if (!eng)
+        eng = new SEngine(this);
+    return eng;
+}
 
-void Console::toggle(bool b){
+void Console::toggle(bool b)
+{
     active = b;
-    if (active){
+    if (active)
         dock->show();
-    }
-    else{
+    else
         dock->hide();
-    }
 }
 
-void Console::returnPressed(){
-    out->setTextColor (QColor(Qt::blue));
+void Console::returnPressed()
+{
+    out->setTextColor(QColor(Qt::blue));
     out->append(in->text());
 
     QString line = in->text();
-    if (line.isNull())return;
-
-    if (line.startsWith("reset()")){
-        line.clear();
-        delete eng;
-        eng = new QScriptEngine();
-        eng->globalObject().setProperty("World" , eng->newQObject(world));
-        Factory::Factory(*eng);
+    if (line.isNull())
         return;
-    }
 
+    if (line.startsWith("reset()"))
+    {
+        if (eng)
+        {
+            line.clear();
+            delete eng;
+        }
+        if (line.isEmpty())
+            return;
+    }
 
     code += line;
     code += QLatin1Char('\n');
 
-    if (line.trimmed().isEmpty()){
+    if (line.trimmed().isEmpty())
         return;
-    }
-    else if (! eng->canEvaluate(code)){
-        in->setText("   ");
-    }
-    else {
-        QScriptValue result = eng->evaluate(code, QLatin1String("typein"));
-        code.clear();
-        in->clear();
-        if (! result.isUndefined()){
-            out->setTextColor (QColor(Qt::darkGreen));
-            if (result.toString().contains("Error:")){
-                out->setTextColor (QColor(Qt::red));
+    else
+        if (!getEngine()->getEngine().canEvaluate(code))
+            in->setText("   ");
+        else
+        {
+            for (const auto& p : prohibited_to_use)
+                if (code.contains(p))
+                {
+                    out->setTextColor(QColor(Qt::red));
+                    out->append("prohibited command");
+                    code.clear();
+                    in->clear();
+                    return;
+                }
+            QScriptValue result = getEngine()->getEngine().evaluate(code, QLatin1String("typein"));
+            code.clear();
+            in->clear();
+            if (!result.isUndefined())
+            {
+                out->setTextColor(QColor(Qt::darkGreen));
+                if (result.toString().contains("Error:"))
+                    out->setTextColor(QColor(Qt::red));
+                out->append(result.toString());
             }
-            out->append(result.toString());
         }
-    }
-    eng->collectGarbage();
+    getEngine()->getEngine().collectGarbage();
 }
-

@@ -47,6 +47,7 @@ public:
 public slots:
     void spaceballEvent(int *val);
     void hasErrorText(const QString &error);
+    void clearWorld();
 private slots:
 
     void clear();

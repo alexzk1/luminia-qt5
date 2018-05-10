@@ -73,10 +73,8 @@ MainWindow::MainWindow()
         }
     });
 
-
-
-    treeview->world->profiler = new Profiler();
-    console = new Console (treeview->world);
+    treeview->world->profiler = new Profiler(this);
+    console = new Console (this);
 
     createActions();
     createMenus();
@@ -104,7 +102,7 @@ MainWindow::~MainWindow()
 
 void MainWindow::setupErrorHandler(SEngine *engine)
 {
-    connect(engine, &SEngine::scriptError, this, [this](const QString& err, const QStringList& trace)
+    connect(engine, &SEngine::scriptError, this, [this](const QString & err, const QStringList & trace)
     {
         QString msg = QString("%1\n%2").arg(err).arg(trace.join("\n"));
 
@@ -124,7 +122,7 @@ void MainWindow::createScriptToolBar()
 void MainWindow::recurseWrite(QSettings &settings, QObject*)
 {
     settings.setValue("LastPath", lastPath);
-    settings.setValue("DOCK_LOCATIONS",this->saveState(1));
+    settings.setValue("DOCK_LOCATIONS", this->saveState(1));
 }
 
 void MainWindow::recurseRead(QSettings &settings, QObject*)
@@ -144,13 +142,13 @@ void MainWindow::showFileName(const QString &name)
 
 void MainWindow::open(const QString & fn)
 {
-    if(fn == ""){
+    if (fn == "")
+    {
         clear();
         fileName = QFileDialog::getOpenFileName(this, tr("Lumina Open File"), lastPath, tr("Lumina Project Files (*.lum *.xml)"));
     }
-    else{ // append mode....
+    else  // append mode....
         fileName = fn;
-    }
 
     if (fileName.isEmpty())
         return;
@@ -162,11 +160,12 @@ void MainWindow::open(const QString & fn)
     LumHandler handler(treeview->world, lastPath);
     QXmlSimpleReader reader;
     reader.setContentHandler(&handler);
-    //	reader.setErrorHandler(&handler);
+    //  reader.setErrorHandler(&handler);
 
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text)) {
-        QMessageBox::warning(this, tr("Lumina Project Files"),tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
+    if (!file.open(QFile::ReadOnly | QFile::Text))
+    {
+        QMessageBox::warning(this, tr("Lumina Project Files"), tr("Cannot read file %1:\n%2.").arg(fileName).arg(file.errorString()));
         return;
     }
 
@@ -176,92 +175,97 @@ void MainWindow::open(const QString & fn)
     showFileName(fileName);
 }
 
-void MainWindow::append(){
+void MainWindow::append()
+{
     QString fnx = fileName; // save the file name
 
 
     fileName = QFileDialog::getOpenFileName(this, tr("Lumina Append File"), lastPath, tr("Lumina Project Files (*.lum *.xml)"));
-    if(fileName != ""){
+    if (fileName != "")
         open(fileName);
-    }
 
-    if(fnx != ""){
+    if (fnx != "")
+    {
         fileName = fnx; //restore filename
     }
     showFileName(fileName);
 }
 
 
-void MainWindow::saveAs(){
+void MainWindow::saveAs()
+{
     QString fn = QFileDialog::getSaveFileName(this, tr("Save Lumina File"), lastPath, tr("Lumina project Files (*.lum *.xml)"));
-    if (!fn.isEmpty()){
+    if (!fn.isEmpty())
+    {
         fileName = fn;
         save();
         showFileName(fileName);
     }
 }
 
-void MainWindow::save(){
-    if (fileName.isEmpty()){
+void MainWindow::save()
+{
+    if (fileName.isEmpty())
         fileName = QFileDialog::getSaveFileName(this, tr("Save Lumina File"), lastPath, tr("Lumina project Files (*.lum *.xml)"));
-    }
     QFile file(fileName);
-    if (!file.open(QFile::WriteOnly | QFile::Text)) {
+    if (!file.open(QFile::WriteOnly | QFile::Text))
+    {
         QMessageBox::warning(this, tr("Lumina Project Files"), tr("Cannot write file %1:\n%2.").arg(fileName).arg(file.errorString()));
         return;
     }
-    LumGenerator generator((Item*)treeview->world);
-    if (generator.write(&file)) statusBar()->showMessage(tr("File saved"), 2000);
+    LumGenerator generator(treeview->world);
+    if (generator.write(&file))
+        statusBar()->showMessage(tr("File saved"), 2000);
     lastPath = QFileInfo(fileName).absolutePath();
 }
 
-void MainWindow::clear(){
-    int res = QMessageBox::question ( this, "Clear World", "Clear the world may cause data loss... ", QMessageBox::Ok ,QMessageBox::Cancel );
+void MainWindow::clear()
+{
+    int res = QMessageBox::question ( this, "Clear World", "Clear the world may cause data loss... ", QMessageBox::Ok, QMessageBox::Cancel );
+    if (res == QMessageBox::Ok)
+        clearWorld();
+}
 
-    if(res == QMessageBox::Ok)
+void MainWindow::about()
+{
+    QMessageBox::about(this, tr("About Lumina Modern"), tr("Lumina is a flexible plattform independent development envrionment for GLSL shaders. "
+                       "It uses ECMA-script for tools and emulating opengl engines. This code is distibuted under GNU/GPL license and are made by oc2k1."
+                       "<br> Contact: <a href='mailto:oc2k1@users.sourceforge.net'>oc2k1@users.sourceforge.net</a><br>"
+                       "<br>Year 2018 fixes by <a href='https://github.com/alexzk1'>alexzk</a>: <a href = 'mailto:alexzkhr@gmail.com'>email</a><br><br><br>"
+                       "Old Expired Homepage with Tutorials:<br><a href='http://lumina.sourceforge.net'>http://lumina.sourceforge.net</a>"));
+}
+
+
+
+void MainWindow::hide_all_editors()
+{
+    QTreeWidgetItemIterator it(treeview->world);
+    while (*it)
     {
-        fileName = "";
-        showFileName("");
-        treeview->world->destroyAll();
-    }
-}
-
-void MainWindow::about(){
-    QMessageBox::about(this, tr("About Lumina Modern"),tr("Lumina is a flexible plattform independent development envrionment for GLSL shaders. "
-                                                          "It uses ECMA-script for tools and emulating opengl engines. This code is distibuted under GNU/GPL license and are made by oc2k1."
-                                                          "<br> Contact: <a href='mailto:oc2k1@users.sourceforge.net'>oc2k1@users.sourceforge.net</a><br>"
-                                                          "<br>Year 2018 fixes by <a href='https://github.com/alexzk1'>alexzk</a>: <a href = 'mailto:alexzkhr@gmail.com'>email</a><br><br><br>"
-                                                          "Old Expired Homepage with Tutorials:<br><a href='http://lumina.sourceforge.net'>http://lumina.sourceforge.net</a>"));
-}
-
-
-
-void MainWindow::hide_all_editors(){
-    QTreeWidgetItemIterator it(treeview->world);
-    while (*it) {
-        if (Item_edit* edititem = dynamic_cast<Item_edit*>(*it)){
+        if (Item_edit* edititem = dynamic_cast<Item_edit*>(*it))
             edititem->dock->hide();
-        }
         ++it;
     }
 }
 
-void MainWindow::run_all_scripts(){
+void MainWindow::run_all_scripts()
+{
     QTreeWidgetItemIterator it(treeview->world);
-    while (*it) {
-        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it)){
+    while (*it)
+    {
+        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))
             scriptitem->run();
-        }
         ++it;
     }
 }
 
-void MainWindow::stop_all_scripts(){
+void MainWindow::stop_all_scripts()
+{
     QTreeWidgetItemIterator it(treeview->world);
-    while (*it) {
-        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it)){
+    while (*it)
+    {
+        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))
             scriptitem->stop();
-        }
         ++it;
     }
 }
@@ -299,13 +303,13 @@ void MainWindow::createActions()
     profilerToggleAct->setShortcut(QKeySequence("Ctrl+P"));
     profilerToggleAct->setStatusTip(tr("Toggle profiling"));
     profilerToggleAct->setCheckable (true);
-    connect(profilerToggleAct, SIGNAL(toggled(bool)),treeview->world->profiler , SLOT(toggle(bool)));
+    connect(profilerToggleAct, SIGNAL(toggled(bool)), treeview->world->profiler, SLOT(toggle(bool)));
 
     consoleToggleAct = new QAction(QIcon(":/images/console.png"),  tr("&Console"), this);
     consoleToggleAct->setShortcut(QKeySequence("Ctrl+K"));
     consoleToggleAct->setStatusTip(tr("Toggle console"));
     consoleToggleAct->setCheckable (true);
-    connect(consoleToggleAct, SIGNAL(toggled(bool)),console , SLOT(toggle(bool)));
+    connect(consoleToggleAct, SIGNAL(toggled(bool)), console, SLOT(toggle(bool)));
 
     quitAct = new QAction(tr("&Quit"), this);
     quitAct->setShortcut(QKeySequence("alt+X"));
@@ -334,7 +338,8 @@ void MainWindow::createActions()
 
 }
 
-void MainWindow::createMenus(){
+void MainWindow::createMenus()
+{
     fileMenu = menuBar()->addMenu(tr("&File"));
     //fileMenu->addAction(openAct);
     fileMenu->addAction(appendAct);
@@ -381,30 +386,33 @@ void MainWindow::createToolBars()
     fileToolBar->addAction(stop_all_scripts_Act);
 }
 
-void MainWindow::createStatusBar(){
+void MainWindow::createStatusBar()
+{
     statusBar()->showMessage(tr("Ready"));
 }
 
 
 #include <math.h>
-void MainWindow::spaceballEvent(int *val){
+void MainWindow::spaceballEvent(int *val)
+{
 
     Item_matrix *c = dynamic_cast<Item_matrix*>(treeview->selectedItems().at(0));
 
 
-    if(!c) return;
+    if (!c) return;
     //qDebug() << c << val[0] << val[1] << val[2] << val[3] << val[4] << val[5];
 
-    c->Translate(val[0]/100.0, -val[2]/100.0 ,val[1]/100.0);
+    c->Translate(val[0] / 100.0, -val[2] / 100.0, val[1] / 100.0);
 
-    float l = 0.01* sqrt(val[3]*val[3] + val[4]*val[4] + val[5] * val[5]);
-    c->Rotate(l,val[3]/100.0, val[5]/100.0 ,val[4]/100.0);
+    float l = 0.01 * sqrt(val[3] * val[3] + val[4] * val[4] + val[5] * val[5]);
+    c->Rotate(l, val[3] / 100.0, val[5] / 100.0, val[4] / 100.0);
 
 
-    if (val[6]!=0)c->LoadIdenty();
+    if (val[6] != 0)c->LoadIdenty();
     // handle buttons toggle 6dof / translate/ rotate  mode
 
-    if(!time->isPlaying()){
+    if (!time->isPlaying())
+    {
         treeview->world->setTime(treeview->world->getTime()); //trigger screen refresh
     }
 }
@@ -415,6 +423,13 @@ void MainWindow::hasErrorText(const QString &error)
     {
         QMessageBox::critical(this, tr("Error"), error);
     });
+}
+
+void MainWindow::clearWorld()
+{
+    fileName = "";
+    showFileName("");
+    treeview->world->destroyAll();
 }
 
 

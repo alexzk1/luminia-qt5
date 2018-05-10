@@ -35,8 +35,8 @@ public:
     virtual ~Item_virtual() override;
 
 public slots:
-    void registerTexSpaceCallback(QObject*, const QString&){}
-    void analyse(QObject*, QObject*){}
+    void registerTexSpaceCallback(QObject*, const QString&) {}
+    void analyse(QObject*, QObject*) {}
 private:
     static bool exist;
 

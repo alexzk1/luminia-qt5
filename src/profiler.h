@@ -34,7 +34,7 @@ class Profiler : public QObject
 {
     Q_OBJECT
 public:
-    Profiler();
+    Profiler(QObject *parent);
     virtual ~Profiler()override;
     void newFrame();
     void start();

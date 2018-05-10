@@ -50,7 +50,10 @@ public:
     Item(Item *parent, const QString& label1);
     virtual ~Item() override;
     virtual bool dragAccept(Item*);
-    virtual QString statusText() const{return QString();}
+    virtual QString statusText() const
+    {
+        return QString();
+    }
     virtual void setData ( int column, int role,  const QVariant &value ) override;
     void setName (const QString& name);
     QString getName() const;
@@ -65,13 +68,19 @@ public slots:
     QObject *findChild(const QString& name) const;
     QList<Item*> findChildrenByType ( const QString &) const;
 
-    QObject* getParent(){return parent();}
+    QObject* getParent()
+    {
+        return parent();
+    }
     void contextmenu(const QPoint&);
     virtual QString getType()const;
 
     void destroyAll();//destroys all childs
 protected:
-    virtual void addMenu(QMenu *menu){Q_UNUSED(menu);}
+    virtual void addMenu(QMenu *menu)
+    {
+        Q_UNUSED(menu);
+    }
     QScriptValue getEngineParentObject(QScriptEngine &eng) const;
     static QScriptValue getEngineObject(QScriptEngine &eng, const Item *object, bool localName = false);
 
@@ -81,9 +90,7 @@ protected:
         T* ptr = new T(args...);
         QScriptEngine *eng = engine();
         if (eng)
-        {
             ptr->bindToEngine(eng);
-        }
         return ptr;
     }
 
@@ -100,7 +107,7 @@ public:
     QPointer<QDockWidget> dock;
     static QPointer<MainWindow> ws;
     static QPointer<Item_world> world;
-    static Profiler *profiler;
+    static QPointer<Profiler> profiler;
 };
 
 /*!
@@ -124,10 +131,10 @@ public slots:
     int getCamHeight();
     void Call(const QString& function, const QVariantList& args = QVariantList());
     virtual QString getType()const override;
-
+    virtual void deleteLater() override;
 protected:
     double timev;
-    int CamWidth,CamHeight;
+    int CamWidth, CamHeight;
     virtual bool isDeletable() const override;
     virtual void addMenu(QMenu *menu) override;
 signals:
@@ -187,18 +194,18 @@ public slots:
     //Model importer section: Source in importer/
     void importModel(const QString& filename = "");
 public:
-    Q_INVOKABLE QObject *addBuffer(const QString& label1 = "Buffer", unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT, bool normalized_int = true);
+    Q_INVOKABLE QObject *addBuffer(const QString& label1 = "Buffer", unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT, bool normalized_int = true);
     Q_INVOKABLE QObject *addMesh(const QString& name = "Mesh", int numOfVertices = 0);
     Q_INVOKABLE QObject *addText(const QString& name = "Text");
     Q_INVOKABLE QObject *addImage(const QString& name = "Image");
     Q_INVOKABLE QObject *addArmature(const QString& name = "Armature");
     Q_INVOKABLE QObject *addNode(const QString& name = "Node");
     Q_INVOKABLE QObject *addScript(const QString& name = "Script");
-    Q_INVOKABLE QObject *addVertexshader(const QString& name="Vertexshader");
-    Q_INVOKABLE QObject *addGeometryshader(const QString& name="Geometryshader");
-    Q_INVOKABLE QObject *addFragmentshader(const QString& name="Fragmentshader");
-    Q_INVOKABLE QObject *addTexture(const QString& name="Texture");
-    Q_INVOKABLE QObject *addUniform(const QString &name = "Uniform", unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT);
+    Q_INVOKABLE QObject *addVertexshader(const QString& name = "Vertexshader");
+    Q_INVOKABLE QObject *addGeometryshader(const QString& name = "Geometryshader");
+    Q_INVOKABLE QObject *addFragmentshader(const QString& name = "Fragmentshader");
+    Q_INVOKABLE QObject *addTexture(const QString& name = "Texture");
+    Q_INVOKABLE QObject *addUniform(const QString &name = "Uniform", unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT);
 protected:
     void importMD2(const QString& filename);
     void importMD3(const QString& filename);
@@ -283,10 +290,13 @@ class Item_shader : public Item_edit
 public:
     Item_shader( Item *parent, const QString& label1, int shadertype);
     virtual ~Item_shader() override = default;
-    enum shadertype{Vertexshader,Geometryshader,Fragmentshader};
+    enum shadertype {Vertexshader, Geometryshader, Fragmentshader};
     int getShaderType();
 public slots:
-    virtual QString getType()const override {return QString("Shader");}
+    virtual QString getType()const override
+    {
+        return QString("Shader");
+    }
 private slots:
     void completationHandler(const QString&);
     void helpHandler(const QString&);
@@ -338,21 +348,21 @@ class Item_uniform: public Item
     friend class glwrapper;
     friend class glwrapper_shader;
 public:
-    Item_uniform( Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT);
+    Item_uniform( Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT);
     virtual ~Item_uniform() override;
     virtual QString statusText()const override;
 
-    double& operator()(unsigned dim=0, unsigned index=0, unsigned keyframe=0);
+    double& operator()(unsigned dim = 0, unsigned index = 0, unsigned keyframe = 0);
 
     void setData(const QString&);
     QString getData();
 
 
 public slots:
-    virtual void setDim( int dimension = 1, int size = 1, int keyframes = 1, int format= GL_FLOAT);
-    void setInKeyFrame(int keyframe, int index, double x, double y=0.0, double z=0.0, double w=0.0);
+    virtual void setDim( int dimension = 1, int size = 1, int keyframes = 1, int format = GL_FLOAT);
+    void setInKeyFrame(int keyframe, int index, double x, double y = 0.0, double z = 0.0, double w = 0.0);
     void setInKeyFrame(int keyframe, int index, const QList<double>& l);
-    void set(int index, double x, double y=0.0, double z=0.0, double w=0.0);
+    void set(int index, double x, double y = 0.0, double z = 0.0, double w = 0.0);
     void set(int index, const QList<double>& l);
 
     void Uniform(QObject* _shader, QString var);
@@ -379,10 +389,11 @@ protected:
     unsigned format;
 
     double normalized_scalefactor;
-    union Buf{
+    union Buf
+    {
         int *i;
         float *f;
-    }buf,tmp_buf;
+    } buf, tmp_buf;
     virtual void addMenu(QMenu *menu) override;
 private:
     double ref_buf; //doublebuffering for reference
@@ -401,21 +412,21 @@ class Item_buffer: public Item
     friend class glwrapper;
     friend class glwrapper_shader;
 public:
-    Item_buffer(Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type= GL_FLOAT, bool normalized_int = true);
+    Item_buffer(Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT, bool normalized_int = true);
     virtual ~Item_buffer() override;
     virtual QString statusText()const override;
 
-    double& operator()(unsigned dim=1, unsigned index=1, unsigned keyframe=1);
+    double& operator()(unsigned dim = 1, unsigned index = 1, unsigned keyframe = 1);
 
     void setData(const QString&);
     QString getData();
 
 
 public slots:
-    virtual void setDim(unsigned dimension = 1, unsigned size = 1, unsigned keyframes = 1, unsigned format= GL_FLOAT, bool normalized_int = true);
-    void setInKeyFrame(int keyframe, int index, double x, double y=0.0, double z=0.0, double w=0.0);
+    virtual void setDim(unsigned dimension = 1, unsigned size = 1, unsigned keyframes = 1, unsigned format = GL_FLOAT, bool normalized_int = true);
+    void setInKeyFrame(int keyframe, int index, double x, double y = 0.0, double z = 0.0, double w = 0.0);
     void setInKeyFrame(int keyframe, int index, const QList<double>& l);
-    void set(int index, double x, double y=0.0, double z=0.0, double w=0.0);
+    void set(int index, double x, double y = 0.0, double z = 0.0, double w = 0.0);
     void set(int index, const QList<double>& l);
     void TextureBind(unsigned tmu);
 
@@ -425,7 +436,7 @@ public slots:
     void Bind(int location);
     void BindKeyFrame(unsigned key, int location);
 
-    void TransformFeedbackBind(const QString& name, int keyframe=0);
+    void TransformFeedbackBind(const QString& name, int keyframe = 0);
 
     void PropertiesDialog();
 
@@ -435,7 +446,10 @@ public slots:
     unsigned getFormat();
     bool isNormalizedInt();
 
-    virtual QString getType() const override{return QString("Buffer");}
+    virtual QString getType() const override
+    {
+        return QString("Buffer");
+    }
 
 
 
@@ -459,7 +473,8 @@ protected:
 
     bool normalized_int;
     double normalized_scalefactor;
-    union Buf{
+    union Buf
+    {
         char *b;
         unsigned char *ub;
         short *s;
@@ -469,16 +484,16 @@ protected:
         float *f;
         half *h;
         GLvoid *v;
-    }buf,tmp_buf;
+    } buf, tmp_buf;
 
-    unsigned glbuf,gltexture;
+    unsigned glbuf, gltexture;
     bool need_refresh;
     bool bound_by_GPU; // bound by GPU
     bool is_mapped;
 
     virtual void addMenu(QMenu *menu) override;
 private:
-    double ref_buf,ref_buf_old; //doublebuffering for reference, old to detect writing.
+    double ref_buf, ref_buf_old; //doublebuffering for reference, old to detect writing.
     int ref_pos; //position in double buffer
 };
 
@@ -501,18 +516,24 @@ public:
     virtual QString statusText() const override;
     virtual bool dragAccept(Item*) override;
     virtual QPointer<Item_armature> getArmature() const;
-    float* getJoint(){return initJoint;}
+    float* getJoint()
+    {
+        return initJoint;
+    }
     id_t getId() const;
 
 public slots:
     QObject* addBone(QString Name);
-    void addBone(){addBone(QString("Bone"));}
-    void setJoint(float x,float y, float z);
-    void Rotate(float a, float b , float c, float d); // relative rotation
-    void Rotation(float a, float b , float c, float d); //absolute rotation
+    void addBone()
+    {
+        addBone(QString("Bone"));
+    }
+    void setJoint(float x, float y, float z);
+    void Rotate(float a, float b, float c, float d);  // relative rotation
+    void Rotation(float a, float b, float c, float d);  //absolute rotation
 
-    void EulerRotate(float,float,float);
-    void EulerRotation(float,float,float);
+    void EulerRotate(float, float, float);
+    void EulerRotation(float, float, float);
     virtual void Reset();
 
     virtual QString getType() const override;
@@ -552,9 +573,9 @@ public:
     virtual QString statusText() const override;
     virtual QPointer<Item_armature> getArmature() const override;
 public slots:
-    void Quaternions(QObject* shader, QString var);		//Quaternion
-    void Joints(QObject* shader, QString var);		//Joints
-    void Matrices(QObject* _shader, QString var);		//4x4 matrices
+    void Quaternions(QObject* shader, QString var);     //Quaternion
+    void Joints(QObject* shader, QString var);      //Joints
+    void Matrices(QObject* _shader, QString var);       //4x4 matrices
 
     void Reset() override;
     virtual QString getType() const override;

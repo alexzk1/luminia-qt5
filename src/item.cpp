@@ -36,7 +36,7 @@
 
 QPointer<Item_world> Item::world = nullptr;
 QPointer<MainWindow> Item::ws = nullptr;
-Profiler * Item::profiler = nullptr;
+QPointer<Profiler>   Item::profiler = nullptr;
 
 Item::Item(Item *parent, const QString& name ):
     QObject(parent),
@@ -47,7 +47,7 @@ Item::Item(Item *parent, const QString& name ):
     setIcon(0, QIcon(":/images/xmp/world.xpm"));
     setName(name);
     setExpanded(true);
-    setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDropEnabled);
+    setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDropEnabled);
 }
 
 Item::~Item()
@@ -87,9 +87,7 @@ void Item::setName(const QString& _name)
     Item* p;
     int64_t counter = std::max(0l, renameCounter.at(key));
     while (parent() && (p = (qobject_cast<QObject*>(parent()))->findChild<Item*>(name)) && p != this)
-    {
         name = QString("%1_%2").arg(_name).arg(counter++);
-    }
     renameCounter[key] = counter - 1;
 
     setObjectName(name);
@@ -149,12 +147,10 @@ QString Item::getType() const
 void Item::destroyAll()
 {
     QList<Item*> allItems = findChildren<Item*>();
-    std::for_each(allItems.begin(), allItems.end(), [](auto& p)
+    std::for_each(allItems.begin(), allItems.end(), [](auto & p)
     {
         if (p)
-        {
             p->deleteLater();
-        }
     });
 }
 
@@ -163,7 +159,7 @@ void Item::deleteLater()
     QList<Item*> allItems = findChildren<Item*>(QString(), Qt::FindDirectChildrenOnly);
     if (parent())
     {
-        std::for_each(allItems.begin(), allItems.end(), [this](auto& p)
+        std::for_each(allItems.begin(), allItems.end(), [this](auto & p)
         {
             if (p)
             {
@@ -194,7 +190,7 @@ void Item::bindToEngine(QScriptEngine *eng, bool localNames)
     if (eng)
     {
         std::function<void(QScriptValue val, Item* itm)> recursive;
-        recursive = [&eng, &recursive](QScriptValue val, Item* itm)
+        recursive = [&eng, &recursive](QScriptValue val, Item * itm)
         {
             auto nobj = eng->newQObject(itm);
             val.setProperty(itm->getName(), nobj);
@@ -209,7 +205,7 @@ void Item::bindToEngine(QScriptEngine *eng, bool localNames)
         QScriptValue val = getEngineObject(*eng, this, localNames);
         if (!val.isValid() || val.isUndefined() || val.isNull())
         {
-            recursive((localNames)?eng->globalObject():getEngineParentObject(*eng), this);
+            recursive((localNames) ? eng->globalObject() : getEngineParentObject(*eng), this);
             val = getEngineObject(*eng, this, localNames);
         }
 
@@ -248,12 +244,10 @@ void Item::buildMenu(QMenu *menu)
         {
             if (menu->actions().size() != b1)
                 menu->addSeparator();
-            auto a = menu->addAction(QIcon(":/images/xpm/edit.xpm"), QString(tr("Show...")) , this, [this]()
+            auto a = menu->addAction(QIcon(":/images/xpm/edit.xpm"), QString(tr("Show...")), this, [this]()
             {
                 if (dock)
-                {
                     dock->show();
-                }
             });
             menu->setDefaultAction(a);
         }
@@ -261,7 +255,7 @@ void Item::buildMenu(QMenu *menu)
         {
             if (menu->actions().size() != b1)
                 menu->addSeparator();
-            menu->addAction( QIcon(":/images/xpm/del.xpm"), QString(tr("Delete")) , this, SLOT( deleteLater()));
+            menu->addAction( QIcon(":/images/xpm/del.xpm"), QString(tr("Delete")), this, SLOT( deleteLater()));
         }
     }
 }
@@ -275,7 +269,7 @@ QScriptValue Item::getEngineObject(QScriptEngine &eng, const Item* obj, bool loc
 {
     if (obj)
     {
-        QString name = (localName)? obj->getName() : obj->getFullScriptName();
+        QString name = (localName) ? obj->getName() : obj->getFullScriptName();
         return eng.globalObject().property(name);
     }
     return eng.globalObject();
@@ -301,11 +295,11 @@ returns a list of child objects
 QList<Item *> Item::findChildrenByType( const QString & typen) const
 {
     auto l = findChildren<Item*>();
-    for (int i = l.size() -1; i >= 0; i--)
+    for (int i = l.size() - 1; i >= 0; i--)
     {
-        if(Item* it = dynamic_cast<Item*>( l[i] ) )
+        if (Item* it = dynamic_cast<Item*>( l[i] ) )
         {
-            if(it->getType()!= typen) l.removeAt(i);
+            if (it->getType() != typen) l.removeAt(i);
         }
         else l.removeAt(i);
     }

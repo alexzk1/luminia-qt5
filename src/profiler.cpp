@@ -24,12 +24,12 @@
 #include <QTextEdit>
 #include <QGLWidget>
 #include <QDockWidget>
-#include <QMainWindow>
-#include <QApplication>
+#include "mainwindow.h"
 
 
 extern const Qt::DockWidgetAreas DOCK_AREAS;
-Profiler::Profiler(): QObject()
+Profiler::Profiler(QObject *parent):
+    QObject(parent)
 {
     active = false;
 
@@ -40,14 +40,10 @@ Profiler::Profiler(): QObject()
     dock->setAllowedAreas(DOCK_AREAS);
     dock->setWidget(text);
 
-    QWidgetList l = QApplication::topLevelWidgets();
-    for (int i = 0; i < l.size(); i++){
-        if (QMainWindow* w = dynamic_cast<QMainWindow*>(l.at(i))) w->addDockWidget(Qt::RightDockWidgetArea, dock);
-    }
-
+    MainWindow::instance->addDockWidget(Qt::RightDockWidgetArea, dock);
     dock->hide();
 
-    registered =0;
+    registered = 0;
     count = 0;
     queries = nullptr;
 
@@ -98,13 +94,13 @@ void Profiler::stop()
 void Profiler::toggle(bool b)
 {
     active = b;
-    if (active){
+    if (active)
+    {
         //w->renderText ( 10, 20, QString ("test") ); //overlay
         dock->show();
     }
-    else{
+    else
         dock->hide();
-    }
 }
 
 void Profiler::freeQueries()
@@ -128,10 +124,10 @@ void Profiler::render(QGLWidget* /* w*/)
         GLuint time, fragments;
         GL_CHECK_ERROR();
 
-        for (GLint available=0; !available && active; )
+        for (GLint available = 0; !available && active; )
             glGetQueryObjectiv(queries[count * 2  - 1 ], GL_QUERY_RESULT_AVAILABLE, &available);
 
-        for(int64_t i = 0; i < count && active; ++i)
+        for (int64_t i = 0; i < count && active; ++i)
         {
 
             glGetQueryObjectuivARB (queries[i * 2], GL_QUERY_RESULT, &fragments);//GL_CHECK_ERROR();
@@ -139,7 +135,7 @@ void Profiler::render(QGLWidget* /* w*/)
 
             //qDebug() << fragments << "  " << time;
 
-            t += QString("Frames: %1\t%2ns/pixel\tFPS: %3\tPixels:%4\n").arg(i+1).arg(double(time)/double(fragments)).arg(time/1000.0).arg(fragments);
+            t += QString("Frames: %1\t%2ns/pixel\tFPS: %3\tPixels:%4\n").arg(i + 1).arg(double(time) / double(fragments)).arg(time / 1000.0).arg(fragments);
         }
 
         text->setText(t);
