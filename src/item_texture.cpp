@@ -741,6 +741,7 @@ void Item_texture::Image2d(int w, int h, int _format, bool _mipmap)
     width = w;
     height = h;
     depth = 1;
+    test_w_h_d_limit();
 
     if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
@@ -794,6 +795,7 @@ void Item_texture::ImageRect(int w, int h, int _format, bool _mipmap)
     width = w;
     height = h;
     depth = 1;
+    test_w_h_d_limit();
 
     if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
@@ -864,6 +866,7 @@ void Item_texture::Image2dArray(int w, int h, int d, int _format, bool _mipmap)
     width = w;
     height = h;
     depth = d;
+    test_w_h_d_limit();
 
     glBindTexture(type, texture);
 
@@ -921,6 +924,7 @@ void Item_texture::Image3d(int w, int h, int d, int _format, bool _mipmap)
     width = w;
     height = h;
     depth = d;
+    test_w_h_d_limit();
 
     glBindTexture(type, texture);
 
@@ -969,6 +973,8 @@ void Item_texture::ImageCube(int w, int _format, bool _mipmap)
     width = w;
     height = w;
     depth = 1;
+    test_w_h_d_limit();
+
     if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
     else
@@ -1123,6 +1129,14 @@ QString Item_texture::getType() const
 void Item_texture::addMenu(QMenu *menu)
 {
     menu->addAction ( QIcon(":/images/xpm/load.xpm"), tr("Load File..."), this, SLOT(load()) );
+}
+
+void Item_texture::test_w_h_d_limit()
+{
+    //dunno, this does not seem as working, but let it be for now.
+    //will add custom base64 & zip maybe
+    if (context() && static_cast<double>(width) * height * depth > std::numeric_limits<int64_t>::max())
+        context()->throwError("Texture's width * height * depth are overflowing.");
 }
 
 /*!

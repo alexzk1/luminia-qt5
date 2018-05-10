@@ -45,8 +45,7 @@ class Item_texture : public Item
     Q_PROPERTY(int Anisotropic READ getAnisotropic WRITE Anisotropic)
 
 public:
-    //using  data_t = std::vector<char>;
-    using  data_t = QByteArray;
+    using  data_t = std::vector<char>;
     Item_texture( Item *parent, const QString& label1);
     virtual ~Item_texture() override;
 
@@ -158,7 +157,7 @@ protected:
     int boundto;
     virtual void addMenu(QMenu* menu) override;
 private:
-
+    void test_w_h_d_limit();
     //property functions
     void CompareMode(bool);
     void Anisotropic(int);

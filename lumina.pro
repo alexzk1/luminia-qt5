@@ -47,6 +47,8 @@ else {
     QMAKE_CXXFLAGS += -O3
 }
 
+include($$PWD/src/base64/base64.pri)
+PRE_TARGETDEPS += base64
 
 HEADERS	=	src/mainwindow.h \
                 src/glcam.h src/tree.h \
@@ -82,7 +84,9 @@ HEADERS	=	src/mainwindow.h \
     src/script_header_parser.h \
     src/filterableitem.h \
     src/globals.h \
-    src/dock_prep.h
+    src/dock_prep.h \
+    src/prohibited_filter.h \
+    src/texture2lum.h
 
 SOURCES =	src/main.cpp \
                 src/mainwindow.cpp \

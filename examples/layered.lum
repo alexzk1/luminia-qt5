@@ -91,7 +91,7 @@ void main()
             <shader name="Fragmentshader" type="fragment">#version 120
 
 #extension EXT_gpu_shader4 : require
-sampler2DArray samp;
+uniform sampler2DArray samp;
 
 void main(){
 	vec3 coord = vec3(0.0);

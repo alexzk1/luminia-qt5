@@ -33,6 +33,7 @@
 #include <QFileInfo>
 #include <QDir>
 #include <QDebug>
+#include "texture2lum.h"
 
 LumHandler::LumHandler(Item *root, const QString & _path): QXmlDefaultHandler ()
 {
@@ -471,15 +472,13 @@ void LumGenerator::processItem(Item *item, int depth)
                                 out << ">\n";
 
 
-                                qDebug() << T->Width() << T->Height() << T->Depth();
-                                auto tmp = T->getData();
-
-                                qDebug() << "QByteArray tmp.length ()" <<  tmp.length ();
-
-
-                                QByteArray b64 = tmp.toBase64();
-                                for (int pos = 0; pos < b64.size(); pos += 100)
-                                    out << indent(depth + 1) << b64.mid(pos, 100) << "\n";
+                                qDebug() << "Saving texture WxHxD: " << T->Width() << T->Height() << T->Depth();
+                                const auto tmp(base64::encode_base64(T->getData()));
+                                for (size_t pos = 0, sz = tmp.size(); pos < sz; pos += 100)
+                                {
+                                    std::string str(tmp.data() + pos, std::min<size_t>(100, sz - pos));
+                                    out << indent(depth + 1) << str.c_str() << "\n";
+                                }
                                 // */
                             }
 
