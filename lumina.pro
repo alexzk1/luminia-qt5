@@ -4,7 +4,7 @@ TEMPLATE = app
 
 RESOURCES = lumina.qrc
 DEFINES += QTSCRIPT
-LIBS += -lGLEW
+LIBS += -lGLEW -llz4
 
 MOC_DIR = .build/moc
 UI_DIR = .build/uic
@@ -50,7 +50,7 @@ else {
 include($$PWD/src/base64/base64.pri)
 PRE_TARGETDEPS += base64
 
-HEADERS	=	src/mainwindow.h \
+HEADERS	+=	src/mainwindow.h \
                 src/glcam.h src/tree.h \
                 src/item.h \
                 src/item_image.h \
@@ -88,7 +88,7 @@ HEADERS	=	src/mainwindow.h \
     src/prohibited_filter.h \
     src/texture2lum.h
 
-SOURCES =	src/main.cpp \
+SOURCES +=	src/main.cpp \
                 src/mainwindow.cpp \
                 src/glcam.cpp \
                 src/tree.cpp \
@@ -140,3 +140,5 @@ SOURCES =	src/main.cpp \
     src/script_header_parser.cpp \
     src/filterableitem.cpp
 
+
+debug: SOURCES +=     src/tests.cpp

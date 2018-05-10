@@ -16,15 +16,12 @@ namespace utility
         buf.resize(sizeLimit);
         qint64 r = file.read(buf.data(), static_cast<decltype (r)>(buf.size()));
         if (r == static_cast<decltype (r)>(buf.size()))
-        {
             memcpy(&out, buf.data(), buf.size());
-        }
         return r;
     }
 
     template  <class T>
-    typename std::enable_if<std::is_integral<T>::value, T>::type
-    readIntegralFromFile(QFile& file)
+    typename std::enable_if<std::is_integral<T>::value, T>::type readIntegralFromFile(QFile& file)
     {
         T out;
         readFromFile<T>(file, out);
@@ -35,21 +32,20 @@ namespace utility
     T swapBytes(T src);
 
     template<>
-    uint32_t swapBytes(uint32_t src)
+    uint32_t inline swapBytes(uint32_t src)
     {
         return __builtin_bswap32 (src);
     }
 
     template<>
-    uint64_t swapBytes(uint64_t src)
+    uint64_t inline swapBytes(uint64_t src)
     {
         return __builtin_bswap64(src);
     }
 
     //need for DDS, microsoft always assume little-endian, butt program may be compiled on big-endian...
     template <class T>
-    typename std::enable_if<std::is_integral<T>::value, T>::type
-    le2cpu(T val)
+    typename std::enable_if<std::is_integral<T>::value, T>::type le2cpu(T val)
     {
         constexpr static bool is_little_endian  = Q_BYTE_ORDER == Q_LITTLE_ENDIAN;
         if (is_little_endian)

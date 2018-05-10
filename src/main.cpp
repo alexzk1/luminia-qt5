@@ -28,6 +28,11 @@
 #include "item.h"
 #include "glwrapper.h"
 
+#ifdef _DEBUG
+    extern void execTests();
+#endif
+
+
 Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
 
 
@@ -36,6 +41,11 @@ extern const Qt::DockWidgetAreas DOCK_AREAS(Qt::DockWidgetArea::AllDockWidgetAre
 
 int main(int argc, char **argv)
 {
+
+    //#ifdef _DEBUG
+    //    execTests();
+    //#endif
+
     QApplication app(argc, argv);
 
     app.setApplicationName("Luminia Modern");

@@ -286,10 +286,9 @@ bool LumHandler::endElement(const QString & /* namespaceURI */,
             else
                 if (qName == "texture")
                 {
-                    QByteArray d = QByteArray::fromBase64(content.toUtf8());
-                    if (!d.isEmpty())
+                    auto d(utility::tex_decode(content.toStdString()));
+                    if (d.size())
                         static_cast<Item_texture*>(item)->setData(d.data(), d.size());
-
                     item = item->parent();
                 }
                 else
@@ -473,10 +472,11 @@ void LumGenerator::processItem(Item *item, int depth)
 
 
                                 qDebug() << "Saving texture WxHxD: " << T->Width() << T->Height() << T->Depth();
-                                const auto tmp(base64::encode_base64(T->getData()));
-                                for (size_t pos = 0, sz = tmp.size(); pos < sz; pos += 100)
+                                const auto tmp(utility::tex_lz4_encode_base64(T->getData()));
+                                const static size_t step = 8192;
+                                for (size_t pos = 0, sz = tmp.size(); pos < sz; pos += step)
                                 {
-                                    std::string str(tmp.data() + pos, std::min<size_t>(100, sz - pos));
+                                    std::string str(tmp.data() + pos, std::min<size_t>(step, sz - pos));
                                     out << indent(depth + 1) << str.c_str() << "\n";
                                 }
                                 // */
