@@ -472,7 +472,7 @@ void LumGenerator::processItem(Item *item, int depth)
 
 
                                 qDebug() << T->Width() << T->Height() << T->Depth();
-                                QByteArray tmp = T->getData();
+                                auto tmp = T->getData();
 
                                 qDebug() << "QByteArray tmp.length ()" <<  tmp.length ();
 

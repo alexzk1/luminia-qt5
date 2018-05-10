@@ -26,6 +26,7 @@
 #include <qscriptengine.h>
 
 #include "factory/factory.h"
+#include "prohibited_filter.h"
 
 Item_script::Item_script( Item *parent, const QString& name) :
     Item_edit( parent, name),
@@ -42,8 +43,8 @@ Item_script::Item_script( Item *parent, const QString& name) :
         connect(act, &QAction::triggered, this, c);
         commonActions.push_front(act);
     };
-    addAction ( QIcon(":/images/xpm/stop.xpm"),tr( "Disable Script") ,&Item_script::stop);
-    addAction ( QIcon(":/images/xpm/run.xpm"),tr( "Enable Script") ,  &Item_script::run);
+    addAction ( QIcon(":/images/xpm/stop.xpm"), tr( "Disable Script"), &Item_script::stop);
+    addAction ( QIcon(":/images/xpm/run.xpm"), tr( "Enable Script"),  &Item_script::run);
 
     edit->appendActionToBar(commonActions.at(0), commonActions.at(2));
     edit->appendActionToBar(commonActions.at(1), commonActions.at(2));
@@ -126,44 +127,39 @@ void Item_script::completationHandler(const QString& line)
     glwrapper ogl(nullptr);
     meta = nullptr;
     QStringList complettations;
-    edit->setCompleatationList(complettations,0); //default no completation box
+    edit->setCompleatationList(complettations, 0); //default no completation box
 
     QString last = line.split(QRegExp("[^\\w\\.]")).last();
 
     if (last.length() < 2)return;
 
-    if ( last.right(1)==".") {
+    if ( last.right(1) == ".")
+    {
         QObject *obj = nullptr;
 
 
         QStringList parts = last.split(".");
         if (parts[0] == "World")
-        {
             obj = Item::world;
-        }
         else
             if (parts[0] == "gl")
-            {
                 obj = &ogl;
-            }
             else
             {
                 //Factory prototypes
-                QRegExp searchProto(parts[0]+"\\s*=\\s*new\\s*(\\w+)[\\(|;]");
+                QRegExp searchProto(parts[0] + "\\s*=\\s*new\\s*(\\w+)[\\(|;]");
                 searchProto.indexIn(text());
                 meta = Factory::metaObjectFrom(searchProto.cap(1));
                 if (meta != nullptr)
-                {
                     goto META_OBJ_KNOWN;
-                }
 
                 //Object from treeview
                 QObjectList QObjectList = parent()->findChildren<QObject *>();
-                for ( int i = 0; i < QObjectList.count();i++)
+                for ( int i = 0; i < QObjectList.count(); i++)
                 {
-                    if (QObjectList[i]->parent() == (QObject*)parent())
+                    if (QObjectList[i]->parent() == parent())
                     {
-                        if (parts[0] ==QObjectList[i]->objectName())obj = QObjectList[i];
+                        if (parts[0] == QObjectList[i]->objectName())obj = QObjectList[i];
                     }
                 }
             }
@@ -173,11 +169,14 @@ void Item_script::completationHandler(const QString& line)
         {
             bool found = true;
             //find the correct child object
-            for(int depth = 1; depth < parts.count() -1; depth++){
+            for (int depth = 1; depth < parts.count() - 1; depth++)
+            {
                 found = false;
                 QObjectList QObjectList = obj->findChildren<QObject*>(parts.last());
-                for ( int i = 0; i < QObjectList.count();i++){
-                    if (QObjectList[i]->parent() == obj && QObjectList[i]->objectName() == parts[depth]){
+                for ( int i = 0; i < QObjectList.count(); i++)
+                {
+                    if (QObjectList[i]->parent() == obj && QObjectList[i]->objectName() == parts[depth])
+                    {
                         obj = QObjectList[i];
                         found = true;
                     }
@@ -188,10 +187,10 @@ void Item_script::completationHandler(const QString& line)
 
             //append childobjects
             QObjectList QObjectList = obj->findChildren<QObject*>();
-            for ( int i = 0; i < QObjectList.count();i++){
-                if (QObjectList[i]->parent() == obj){
+            for ( int i = 0; i < QObjectList.count(); i++)
+            {
+                if (QObjectList[i]->parent() == obj)
                     complettations << QObjectList[i]->objectName();
-                }
             }
         }
         meta = obj->metaObject();
@@ -200,48 +199,41 @@ META_OBJ_KNOWN:
         QStringList Slots;
         for ( int i = 0; i < meta->methodCount(); ++i)
         {
-            QString slot = QString(meta->method(i).methodSignature()).replace(QRegExp("\\(.*"),"");
+            QString slot = QString(meta->method(i).methodSignature()).replace(QRegExp("\\(.*"), "");
             if (slot.isEmpty())continue;
             if (slot == "deleteLater")continue;
             if (slot.startsWith("_"))continue;
             Slots << slot;
         }
         Slots.sort();
-        for (int i = Slots.count()-1; i > 1; --i)
-        {
-            if (Slots[i]==Slots[i-1])Slots.removeAt(i);
-        }
-
+        Slots.removeDuplicates();
         complettations << Slots;
 
 
         QStringList Enums;
         for ( int i = 0; i < meta->enumeratorCount(); ++i)
         {
-            for (int k = 0; k < meta->enumerator(i).keyCount();--k)
-            {
+            for (int k = 0; k < meta->enumerator(i).keyCount(); --k)
                 Enums << QString(meta->enumerator(i).key(k));
-            }
         }
         Enums.sort();
+        Enums.removeDuplicates();
         complettations << Enums;
 
-        edit->setCompleatationList(complettations,0);
+        edit->setCompleatationList(complettations, 0);
         return;
     }
 
     complettations << "World" << "Math";
 
     QObjectList QObjectList = parent()->findChildren<QObject *>();
-    for (int i = 0; i < QObjectList.count();++i)
+    for (int i = 0; i < QObjectList.count(); ++i)
     {
         if (QObjectList[i]->parent() == parent())
-        {
             complettations << QObjectList[i]->objectName();
-        }
     }
-
-    edit->setCompleatationList(complettations.filter(QRegExp(QString("^") + last)),last.length());
+    filterProhibitedCompletion(complettations);
+    edit->setCompleatationList(complettations.filter(QRegExp(QString("^") + last)), last.length());
 }
 
 /*!
@@ -259,9 +251,10 @@ void Item_script::helpHandler(const QString& string)
     static QString lines("");
     //qDebug() << string << meta->className();
     QString Filename = QString("doc/doxygen/xml/class") + meta->className() + ".xml";
-    Filename.replace("_","__");
+    Filename.replace("_", "__");
 
-    if (Filename != cacheFilename){
+    if (Filename != cacheFilename)
+    {
         //qDebug() << Filename;
         QFile file(Filename);
         if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
@@ -285,13 +278,13 @@ void Item_script::helpHandler(const QString& string)
 
     QRegExp remove("<.*>");
     remove.setMinimal(true);
-    edit->setHelpString(parser2.cap(1).replace(remove,""));
+    edit->setHelpString(parser2.cap(1).replace(remove, ""));
 }
 
 void Item_script::switchIcon(bool isRunning)
 {
     const static QIcon norm(":/images/xpm/script.xpm");
     const static QIcon run (":/images/xpm/script_run.xpm");
-    setIcon(0, (isRunning)?run:norm);
+    setIcon(0, (isRunning) ? run : norm);
     running = isRunning;
 }

@@ -32,7 +32,7 @@ Texture class for the tree, supports DDS and QT suported image formats
 */
 
 #ifndef GL_TEXTURE_RECTANGLE
-#define GL_TEXTURE_RECTANGLE GL_TEXTURE_RECTANGLE_EXT
+    #define GL_TEXTURE_RECTANGLE GL_TEXTURE_RECTANGLE_EXT
 #endif
 class Item_texture : public Item
 {
@@ -45,22 +45,46 @@ class Item_texture : public Item
     Q_PROPERTY(int Anisotropic READ getAnisotropic WRITE Anisotropic)
 
 public:
-    Item_texture( Item *parent , const QString& label1);
+    //using  data_t = std::vector<char>;
+    using  data_t = QByteArray;
+    Item_texture( Item *parent, const QString& label1);
     virtual ~Item_texture() override;
-    QString getFilename() const {return fn;}
+
+    QString getFilename() const
+    {
+        return fn;
+    }
 
     GLuint getTextureID();
 
     bool isDepth();
 
-    bool is3d() const {return (type==GL_TEXTURE_3D);} // really needed ?
-    bool isCube() const {return (type==GL_TEXTURE_CUBE_MAP_EXT);}
-    bool isRect() const {return (type==GL_TEXTURE_RECTANGLE);}
-    bool is2d() const {return (type==GL_TEXTURE_2D);}
-    bool is2dArray() const {return (type==GL_TEXTURE_2D_ARRAY_EXT);}
+    bool is3d() const
+    {
+        return (type == GL_TEXTURE_3D);   // really needed ?
+    }
+    bool isCube() const
+    {
+        return (type == GL_TEXTURE_CUBE_MAP_EXT);
+    }
+    bool isRect() const
+    {
+        return (type == GL_TEXTURE_RECTANGLE);
+    }
+    bool is2d() const
+    {
+        return (type == GL_TEXTURE_2D);
+    }
+    bool is2dArray() const
+    {
+        return (type == GL_TEXTURE_2D_ARRAY_EXT);
+    }
 
 
-    int getTextureType() const {return type;} //used by framebuffer
+    GLenum getTextureType() const
+    {
+        return type;   //used by framebuffer
+    }
 
 
 
@@ -72,7 +96,7 @@ public:
     virtual QString statusText() const override;
 
     void setData(char *data, qint64 datalen);
-    QByteArray getData() const;
+    data_t getData() const;
 
 public slots:
     int formatFromString(const QString&);
@@ -95,17 +119,26 @@ public slots:
     void UnbindFBO();
 
     //init a cleared texture
-    void ImageCube(int,int format = -1, bool mipmap = false);
-    void Image2d(int,int,int format = -1, bool mipmap = false);
-    void Image2dArray(int,int,int,int format = -1, bool mipmap = false);
-    void Image3d(int,int,int,int format = -1, bool mipmap = false);
-    void ImageRect(int,int,int format = -1, bool mipmap = false);
+    void ImageCube(int, int format = -1, bool mipmap = false);
+    void Image2d     (int, int, int format = -1, bool mipmap = false);
+    void Image2dArray(int, int, int, int format = -1, bool mipmap = false);
+    void Image3d     (int, int, int, int format = -1, bool mipmap = false);
+    void ImageRect(int, int, int format = -1, bool mipmap = false);
 
-    void ViewPort(float,float,float,float);
+    void ViewPort(float, float, float, float);
 
-    double Width(){return width;}
-    double Height(){return height;}
-    double Depth(){return depth;}
+    double Width()
+    {
+        return width;
+    }
+    double Height()
+    {
+        return height;
+    }
+    double Depth()
+    {
+        return depth;
+    }
 
     //void EnableCompareMode();
     //void DisableCompareMode();
@@ -130,17 +163,38 @@ private:
     void CompareMode(bool);
     void Anisotropic(int);
 
-    int getMagFilter(){return magFilter;}
-    int getMinFilter(){return minFilter;}
-    int getWrapS(){return wrapS;}
-    int getWrapT(){return wrapT;}
-    int getWrapR(){return wrapR;}
+    int getMagFilter()
+    {
+        return magFilter;
+    }
+    int getMinFilter()
+    {
+        return minFilter;
+    }
+    int getWrapS()
+    {
+        return wrapS;
+    }
+    int getWrapT()
+    {
+        return wrapT;
+    }
+    int getWrapR()
+    {
+        return wrapR;
+    }
 
-    int getAnisotropic(){return anisotropic;}
-    bool getCompareMode(){return compareMode;}
+    int getAnisotropic()
+    {
+        return anisotropic;
+    }
+    bool getCompareMode()
+    {
+        return compareMode;
+    }
 
-    int minFilter,magFilter, anisotropic;
-    int wrapS,wrapT,wrapR;
+    int minFilter, magFilter, anisotropic;
+    int wrapS, wrapT, wrapR;
 
     bool compareMode;
 

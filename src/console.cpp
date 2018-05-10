@@ -27,12 +27,7 @@
 #include <QMainWindow>
 #include <QtScript>
 
-//some methods must not be called ever, or immedial crash
-const static QStringList prohibited_to_use =
-{
-    "destroyed()",
-    "destroyed(QObject*)",
-};
+#include "prohibited_filter.h"
 
 //***********************ConsoleCompletionBox*****************************
 
@@ -143,8 +138,7 @@ void ConsoleLine ::keyPressEvent(QKeyEvent *e)
 
     QString s = last.split(".").last();
 
-    for (const auto& p : prohibited_to_use)
-        comp.removeAll(p);
+    filterProhibitedCompletion(comp);
 
     QWidget *box = new ConsoleCompletionBox(this, comp, s);
     box->move(mapToGlobal(rect().bottomLeft()));
@@ -302,7 +296,7 @@ void Console::returnPressed()
             in->setText("   ");
         else
         {
-            for (const auto& p : prohibited_to_use)
+            for (const auto& p : getProhibitedMethods())
                 if (code.contains(p))
                 {
                     out->setTextColor(QColor(Qt::red));

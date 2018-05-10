@@ -26,12 +26,14 @@
 #include <QScrollBar>
 #include <QPainter>
 
-TextEdit::TextEdit(QWidget *_parent):QTextEdit(_parent){
+TextEdit::TextEdit(QWidget *_parent): QTextEdit(_parent)
+{
     parent = static_cast<SourceEdit*>(_parent);
     completationOpen = false;
 }
 
-void TextEdit::keyPressEvent(QKeyEvent *e){
+void TextEdit::keyPressEvent(QKeyEvent *e)
+{
 
     QTextEdit::keyPressEvent(e);
     if (completationOpen) return; // don't open a second completationbox
@@ -39,19 +41,22 @@ void TextEdit::keyPressEvent(QKeyEvent *e){
     QTextCursor cursor = textCursor();
 
     QChar rchar = cursor.block().text()[cursor.position() - cursor.block().position()];
-    if (!rchar.isLetterOrNumber()){
+    if (!rchar.isLetterOrNumber())
+    {
 
         //request a new completation list
         QString lstring = cursor.block().text().left(cursor.position() - cursor.block().position());
         parent->requestCompletationList(lstring);
         QString last = lstring.split(QRegExp("\\W")).last();
         //open the completationbox if the list has more than one entry
-        if(parent->completationList.count() != 0 && !rchar.isLetterOrNumber() ){;
-            QWidget *box = new CompletionBox(this, parent->completationList, last.left(last.length() - parent->completationOffset -1));
+        if (parent->completationList.count() != 0 && !rchar.isLetterOrNumber() )
+        {
+            ;
+            QWidget *box = new CompletionBox(this, parent->completationList, last.left(last.length() - parent->completationOffset - 1));
             box->move(mapToGlobal(cursorRect().bottomLeft()));
             box->show();
-            connect(parent,SIGNAL(HelpStringSignal(const QString&)),box,SLOT(setHelpString(const QString&)));
-            connect(box,SIGNAL(requestHelpString(const QString&)), parent, SLOT(emitRequestHelpString(const QString&)));
+            connect(parent, SIGNAL(HelpStringSignal(const QString&)), box, SLOT(setHelpString(const QString&)));
+            connect(box, SIGNAL(requestHelpString(const QString&)), parent, SLOT(emitRequestHelpString(const QString&)));
 
         }
     }
@@ -59,8 +64,9 @@ void TextEdit::keyPressEvent(QKeyEvent *e){
 
 /******************** compleationbox *******************************************/
 
-
-AbstractCompletionBox::AbstractCompletionBox( QWidget *_parent, const QStringList& _completions, const QString& _searchString):QFrame(NULL, Qt::Popup){
+AbstractCompletionBox::AbstractCompletionBox( QWidget *_parent, const QStringList& _completions, const QString& _searchString):
+    QFrame(nullptr, Qt::Popup)
+{
     parent = _parent;
 
     completions = _completions;
@@ -95,15 +101,18 @@ AbstractCompletionBox::~AbstractCompletionBox()
 }
 
 
-void AbstractCompletionBox::keyPressEvent(QKeyEvent *e){
+void AbstractCompletionBox::keyPressEvent(QKeyEvent *e)
+{
     static bool r = true; //protection against recrusion
-    switch (e->key()) {
+    switch (e->key())
+    {
         case Qt::Key_Down:
         case Qt::Key_Up:
         case Qt::Key_PageUp:
         case Qt::Key_PageDown:
         case Qt::Key_Tab:
-            if(r){
+            if (r)
+            {
                 r = false;
                 QApplication::sendEvent(listwidget, e);
                 r = true;
@@ -121,14 +130,14 @@ void AbstractCompletionBox::keyPressEvent(QKeyEvent *e){
             window()->close();
             break;
         default:
-            if (e->key() == Qt::Key_Backspace) {
+            if (e->key() == Qt::Key_Backspace)
+            {
                 if (searchString.isEmpty())
                     window()->close();
                 searchString.chop(1);
             }
-            else {
+            else
                 searchString.append(e->text());
-            }
 
 
             QApplication::sendEvent(parent, e);
@@ -139,47 +148,55 @@ void AbstractCompletionBox::keyPressEvent(QKeyEvent *e){
     }
 }
 
-void AbstractCompletionBox::setHelpString(const QString& txt){
+void AbstractCompletionBox::setHelpString(const QString& txt)
+{
     label->setText(txt);
-    if(txt.length() == 0)
+    if (txt.length() == 0)
         label->hide();
-    else{
+    else
+    {
         label->show();
         //setHeight (180 + label->height());
     }
 }
 
 
-void AbstractCompletionBox::populate(){
+void AbstractCompletionBox::populate()
+{
     //qDebug() << "populate" << searchString;
 
     listwidget->clear();
-    foreach (QString str, completions) {
-        if (!searchString.isEmpty() && !str.startsWith(searchString))continue;
+    for (const auto &str : completions)
+    {
+        if (!searchString.isEmpty() && !str.startsWith(searchString))
+            continue;
         QListWidgetItem *item = new QListWidgetItem(str);
         item->setData(Qt::UserRole, str);
         listwidget->addItem(item);
     }
 
-    if (listwidget->count() == 0 || (listwidget->count() == 1 && listwidget->item(0)->data(Qt::UserRole).toString() == searchString)){
+    if (listwidget->count() == 0 || (listwidget->count() == 1 && listwidget->item(0)->data(Qt::UserRole).toString() == searchString))
         window()->close();
-    }
 }
 
 
 /******************** compleationbox *******************************************/
 
-CompletionBox::CompletionBox(TextEdit *_editor, const QStringList& _completions, const QString& _searchString) :	AbstractCompletionBox( _editor, _completions, _searchString){
+CompletionBox::CompletionBox(TextEdit *_editor, const QStringList& _completions, const QString& _searchString):
+    AbstractCompletionBox( _editor, _completions, _searchString)
+{
     editor = _editor;
     editor->completationOpen = true;
 }
 
 
-CompletionBox::~CompletionBox(){
+CompletionBox::~CompletionBox()
+{
     editor->completationOpen = false;
 }
 
-void CompletionBox::finishCompletion(){
+void CompletionBox::finishCompletion()
+{
     QListWidgetItem *item = listwidget->currentItem();
     if (!item)
         return;
@@ -193,8 +210,14 @@ LineNumberWidget::LineNumberWidget(QTextEdit *_editor, QWidget *parent) : QWidge
 {
     editor = _editor;
     setFixedWidth(fontMetrics().width(QLatin1String("000")));
-    connect(editor->document()->documentLayout(), &QAbstractTextDocumentLayout::update, this, [this](){update();});
-    connect(editor->verticalScrollBar(), &QScrollBar::valueChanged, this, [this](int){update();});
+    connect(editor->document()->documentLayout(), &QAbstractTextDocumentLayout::update, this, [this]()
+    {
+        update();
+    });
+    connect(editor->verticalScrollBar(), &QScrollBar::valueChanged, this, [this](int)
+    {
+        update();
+    });
 }
 
 void LineNumberWidget::paintEvent(QPaintEvent *)
@@ -207,7 +230,8 @@ void LineNumberWidget::paintEvent(QPaintEvent *)
 
     QPainter p(this);
 
-    for (QTextBlock block = editor->document()->begin();block.isValid();block = block.next(), ++lineNumber) {
+    for (QTextBlock block = editor->document()->begin(); block.isValid(); block = block.next(), ++lineNumber)
+    {
         QTextLayout *layout = block.layout();
 
         const QRectF boundingRect = layout->boundingRect();
@@ -222,30 +246,35 @@ void LineNumberWidget::paintEvent(QPaintEvent *)
     }
 }
 
-Highlighter::Highlighter(QTextEdit *parent) : QSyntaxHighlighter(parent){
+Highlighter::Highlighter(QTextEdit *parent) : QSyntaxHighlighter(parent)
+{
 }
 
-Highlighter::~Highlighter(){
+Highlighter::~Highlighter()
+{
 }
 
-void Highlighter::highlightBlock( const QString &text){
+void Highlighter::highlightBlock( const QString &text)
+{
 
     QTextCharFormat myClassFormat;
-    int index,length;
+    int index, length;
 
     static QRegExp floats("([0-9]+\\.[0-9]+)");
     myClassFormat.setForeground(Qt::darkMagenta);
     index = text.indexOf(floats);
-    while (index >= 0) {
+    while (index >= 0)
+    {
         length = floats.matchedLength();
-        setFormat(index, length , myClassFormat);
+        setFormat(index, length, myClassFormat);
         index = text.indexOf(floats, index + length);
     }
 
     static QRegExp function("([A-Za-z0-9]+)\\s*\\(");
     myClassFormat.setForeground(Qt::blue);
     index = text.indexOf(function);
-    while (index >= 0) {
+    while (index >= 0)
+    {
         length = function.matchedLength();
         setFormat(index, length - 1, myClassFormat);
         index = text.indexOf(function, index + length);
@@ -256,7 +285,8 @@ void Highlighter::highlightBlock( const QString &text){
     //   myClassFormat.setFontWeight(QFont::Bold);
     myClassFormat.setForeground(Qt::darkRed);
     index = text.indexOf(glsltypes);
-    while (index >= 0) {
+    while (index >= 0)
+    {
         length = glsltypes.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(glsltypes, index + length);
@@ -264,7 +294,8 @@ void Highlighter::highlightBlock( const QString &text){
 
     static QRegExp string("\"[.\n]*\"");
     index = text.indexOf(string);
-    while (index >= 0) {
+    while (index >= 0)
+    {
         length = string.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(string, index + length);
@@ -276,7 +307,8 @@ void Highlighter::highlightBlock( const QString &text){
 
     index = text.indexOf(buildin);
     myClassFormat.setForeground(Qt::blue);
-    while (index >= 0) {
+    while (index >= 0)
+    {
         length = buildin.matchedLength();
         setFormat(index, length - 1, myClassFormat);
         index = text.indexOf(buildin, index + length);
@@ -288,7 +320,8 @@ void Highlighter::highlightBlock( const QString &text){
     myClassFormat.setForeground(Qt::black);
 
     index = text.indexOf(glslkeywords);
-    while (index >= 0) {
+    while (index >= 0)
+    {
         length = glslkeywords.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(glslkeywords, index + length);
@@ -300,7 +333,8 @@ void Highlighter::highlightBlock( const QString &text){
     myClassFormat.setForeground(Qt::gray);
 
     index = text.indexOf(comment);
-    while (index >= 0) {
+    while (index >= 0)
+    {
         length = comment.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(comment, index + length);
@@ -311,7 +345,8 @@ void Highlighter::highlightBlock( const QString &text){
     myClassFormat.setForeground(Qt::darkGreen);
 
     index = text.indexOf(comment);
-    while (index >= 0) {
+    while (index >= 0)
+    {
         length = pre.matchedLength();
         setFormat(index, length, myClassFormat);
         index = text.indexOf(pre, index + length);
@@ -323,7 +358,8 @@ void Highlighter::highlightBlock( const QString &text){
 SourceEdit::SourceEdit(QWidget *parent):
     QWidget(parent)
 {
-    const static QStringList prefFontsFamilies = {
+    const static QStringList prefFontsFamilies =
+    {
         "Source Code Pro",
         "Ubuntu Mono",
         "Courier",
@@ -364,23 +400,28 @@ SourceEdit::SourceEdit(QWidget *parent):
 }
 
 
-SourceEdit::~SourceEdit(){
+SourceEdit::~SourceEdit()
+{
 }
 
-void SourceEdit::setText(const QString& t){
+void SourceEdit::setText(const QString& t)
+{
     edit->setText(t);
 }
 
-QString SourceEdit::getText()const{
+QString SourceEdit::getText()const
+{
     return edit->toPlainText();
 }
 
-void SourceEdit::setCompleatationList( const QStringList &c, int _offset){
+void SourceEdit::setCompleatationList( const QStringList &c, int _offset)
+{
     completationList = c;
     completationOffset = _offset;
 }
 
-void SourceEdit::setHelpString(const QString &hs){
+void SourceEdit::setHelpString(const QString &hs)
+{
     //HelpString = hs;
     emit HelpStringSignal(hs);
 
@@ -404,10 +445,12 @@ void SourceEdit::appendActionToBar(QAction *act, QAction *before)
     }
 }
 
-void SourceEdit::emitRequestCompletationList(const QString &s){
+void SourceEdit::emitRequestCompletationList(const QString &s)
+{
     emit requestCompletationList(s);
 }
 
-void SourceEdit::emitRequestHelpString(const QString &s){
+void SourceEdit::emitRequestHelpString(const QString &s)
+{
     emit requestHelpString(s);
 }

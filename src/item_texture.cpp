@@ -33,22 +33,22 @@
 
 constexpr auto static lastTexture = GL_TEXTURE31;
 
-#define  DDS_CAPS		0x00000001
-#define  DDS_HEIGHT		0x00000002
-#define  DDS_WIDTH		0x00000004
-#define  DDS_PITCH		0x00000008
-#define  DDS_PIXELFORMAT	0x00001000
-#define  DDS_MIPMAPCOUNT	0x00020000
-#define  DDS_LINEARSIZE		0x00080000
-#define  DDS_DEPTH		0x00800000
+#define  DDS_CAPS       0x00000001
+#define  DDS_HEIGHT     0x00000002
+#define  DDS_WIDTH      0x00000004
+#define  DDS_PITCH      0x00000008
+#define  DDS_PIXELFORMAT    0x00001000
+#define  DDS_MIPMAPCOUNT    0x00020000
+#define  DDS_LINEARSIZE     0x00080000
+#define  DDS_DEPTH      0x00800000
 
-#define DDS_FOURCC		0x00000004
-#define DDS_RGB			0x00000040
-#define DDS_RGBA 		0x00000041
-#define DDS_ALPHA 		0x00000001
+#define DDS_FOURCC      0x00000004
+#define DDS_RGB         0x00000040
+#define DDS_RGBA        0x00000041
+#define DDS_ALPHA       0x00000001
 
-#define DDS_VOLUME		0x00200000
-#define DDS_CUBEMAP		0x00000200
+#define DDS_VOLUME      0x00200000
+#define DDS_CUBEMAP     0x00000200
 
 #define DDS_CUBEMAP_POSITIVEX   0x00000400
 #define DDS_CUBEMAP_NEGATIVEX   0x00000800
@@ -92,7 +92,7 @@ struct __attribute__ (( packed )) DDS_Header_t
 Item_texture::Item_texture( Item *parent, const QString& name ) : Item( parent, name)
 {
     //if (fbo == 0)
-    setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled);
+    setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled);
 
     glGenFramebuffersEXT (1,  &fbo);
     //fileNormal = new QPixmap( pix_file );
@@ -146,7 +146,7 @@ returns true if it's a depth component
 */
 bool Item_texture::isDepth()
 {
-    return (texturetype[formatindex].format==GL_DEPTH_COMPONENT);
+    return (texturetype[formatindex].format == GL_DEPTH_COMPONENT);
 }
 
 /*!
@@ -175,10 +175,11 @@ void Item_texture::Bind(int tmu)
 void Unbind()\n
 Unbind a texture. Unbinding textures isn't needed.
 */
-void Item_texture::Unbind(){
+void Item_texture::Unbind()
+{
     if (boundto < 0) return;
     glActiveTexture(GL_TEXTURE0 + boundto);
-    glBindTexture(type,0);
+    glBindTexture(type, 0);
     boundto = -1;
 }
 
@@ -186,15 +187,17 @@ void Item_texture::Unbind(){
 void load([String filename])\n
 Load a texture from a file. JPG, BMP, PNG and DDS(flipped in Y direction) are supported. If no file name is set, a filedialog will open.
 */
-void Item_texture::load(const QString& filename){
+void Item_texture::load(const QString& filename)
+{
 
     fn = LoaderPaths::findObject(filename);
     reload();
 }
 
 
-void Item_texture::load(){
-    fn =QFileDialog::getOpenFileName(nullptr, tr("Open File"), "" , tr("All Files (*.jpg *.png *.dds)"));
+void Item_texture::load()
+{
+    fn = QFileDialog::getOpenFileName(nullptr, tr("Open File"), "", tr("All Files (*.jpg *.png *.dds)"));
     reload();
 }
 
@@ -207,7 +210,7 @@ reload function will reload the texture from the file
 #include <QGLWidget>
 void Item_texture::reload()
 {
-    const static auto ends = [](const QString& fn, const QStringList& list)->bool
+    const static auto ends = [](const QString & fn, const QStringList & list)->bool
     {
         for (const auto& e : list)
             if (fn.endsWith(e, Qt::CaseInsensitive))
@@ -215,12 +218,14 @@ void Item_texture::reload()
         return false;
     };
 
-    const static QStringList compressed = {
+    const static QStringList compressed =
+    {
         ".jpg", ".png", ".jpeg",
 
     };
 
-    const static QStringList dds = {
+    const static QStringList dds =
+    {
         ".dds",
     };
 
@@ -240,7 +245,8 @@ void Item_texture::reload()
         //qWarning( "Load jpg/png" );
         QImage buf;
         if ( !buf.load(fn))
-        {	// Load first image from file
+        {
+            // Load first image from file
             //qWarning( "Could not read image file, using single-color instead." );
             QImage dummy( 128, 128, QImage::Format_ARGB32 );
             dummy.fill( Qt::green );
@@ -253,7 +259,7 @@ void Item_texture::reload()
         glTexParameterf( GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR );
         type = GL_TEXTURE_2D;
 
-        for(int i = 0; texturetype[i].intformat != 0; i++)
+        for (int i = 0; texturetype[i].intformat != 0; i++)
         {
             if (QString("RGBA8") == texturetype[i].name)
             {
@@ -279,8 +285,9 @@ void Item_texture::reload()
             const auto dds_magic = le2cpu(readIntegralFromFile<uint32_t>(file));
             const auto dds_size  = le2cpu(readIntegralFromFile<uint32_t>(file));
             const auto trueSize  = std::min(static_cast<size_t>(dds_size) - sizeof (dds_size), sizeof(DDS_Header_t));
-           // qDebug() << "Loading DDS, magic: " << dds_magic <<", size: " << dds_size <<", effectiveSize = " << trueSize;
-            DDS_Header_t DDS_Header;memset(&DDS_Header, 0, sizeof (DDS_Header));
+            // qDebug() << "Loading DDS, magic: " << dds_magic <<", size: " << dds_size <<", effectiveSize = " << trueSize;
+            DDS_Header_t DDS_Header;
+            memset(&DDS_Header, 0, sizeof (DDS_Header));
             readFromFile(file, DDS_Header, trueSize);
 
             const qint64 delta = static_cast<qint64>(dds_size) - static_cast<qint64>(trueSize) - static_cast<qint64>(sizeof (dds_size));
@@ -291,7 +298,7 @@ void Item_texture::reload()
             }
             int format = 0;
             DDS_Header.pfFlags = le2cpu(DDS_Header.pfFlags);
-            DDS_Header.pfFourCC= le2cpu(DDS_Header.pfFourCC);
+            DDS_Header.pfFourCC = le2cpu(DDS_Header.pfFourCC);
             DDS_Header.pfRGBBitCount = le2cpu(DDS_Header.pfRGBBitCount);
             DDS_Header.Caps2 = le2cpu(DDS_Header.Caps2);
             DDS_Header.Width = le2cpu(DDS_Header.Width);
@@ -299,10 +306,10 @@ void Item_texture::reload()
             DDS_Header.Depth = le2cpu(DDS_Header.Depth);
             DDS_Header.MipMapCount = le2cpu(DDS_Header.MipMapCount);
 
-            if(DDS_Header.pfFlags & DDS_FOURCC)
+            if (DDS_Header.pfFlags & DDS_FOURCC)
             {
 
-                switch(DDS_Header.pfFourCC)
+                switch (DDS_Header.pfFourCC)
                 {
                     case DDS_DXT1:
                         format = GL_COMPRESSED_RGBA_S3TC_DXT1_EXT;
@@ -317,25 +324,26 @@ void Item_texture::reload()
                 }
             }
 
-            else if (DDS_Header.pfRGBBitCount == 32 && (DDS_Header.pfFlags & DDS_RGB)){
-                format = GL_RGBA8;
-            }
-            else if (DDS_Header.pfRGBBitCount == 24 && (DDS_Header.pfFlags & DDS_RGB)){
-                format = GL_RGB8;
-            }
-            else if (DDS_Header.pfRGBBitCount == 8 && (DDS_Header.pfFlags & DDS_ALPHA)){
-                format = GL_ALPHA8;
-            }
-            else if (DDS_Header.pfRGBBitCount == 8){
-                format = GL_LUMINANCE8;
-            }
-            else {
-                qDebug() << "Not a valid Texture format in DDS file";
-                return;
-            }
+            else
+                if (DDS_Header.pfRGBBitCount == 32 && (DDS_Header.pfFlags & DDS_RGB))
+                    format = GL_RGBA8;
+                else
+                    if (DDS_Header.pfRGBBitCount == 24 && (DDS_Header.pfFlags & DDS_RGB))
+                        format = GL_RGB8;
+                    else
+                        if (DDS_Header.pfRGBBitCount == 8 && (DDS_Header.pfFlags & DDS_ALPHA))
+                            format = GL_ALPHA8;
+                        else
+                            if (DDS_Header.pfRGBBitCount == 8)
+                                format = GL_LUMINANCE8;
+                            else
+                            {
+                                qDebug() << "Not a valid Texture format in DDS file";
+                                return;
+                            }
 
             bool m = false;
-            if(DDS_Header.Flags & DDS_MIPMAPCOUNT)
+            if (DDS_Header.Flags & DDS_MIPMAPCOUNT)
             {
                 qDebug() << "DDS File: Mipmap found" << DDS_Header.MipMapCount;
                 m = true;
@@ -347,26 +355,29 @@ void Item_texture::reload()
                 Image3d (DDS_Header.Width, DDS_Header.Height, DDS_Header.Depth, format, m);
                 type = GL_TEXTURE_3D;
             }
-            else if((DDS_Header.Caps2 & 0x0000FE00)==0x0000FE00){ //Cubemap with all faces
+            else
+                if ((DDS_Header.Caps2 & 0x0000FE00) == 0x0000FE00) //Cubemap with all faces
+                {
 
-                qDebug() << "DDS File: Cubemap\n" ;
-                GL_CHECK_ERROR();
-                ImageCube (DDS_Header.Width, format, m);
-                GL_CHECK_ERROR();
-                type = GL_TEXTURE_CUBE_MAP;
-            }
-            else{
-                qDebug() << "DDS File: 2D texture\n";
-                Image2d (DDS_Header.Width, DDS_Header.Height, format, m);
-                type = GL_TEXTURE_2D;
-            }
+                    qDebug() << "DDS File: Cubemap\n" ;
+                    GL_CHECK_ERROR();
+                    ImageCube (DDS_Header.Width, format, m);
+                    GL_CHECK_ERROR();
+                    type = GL_TEXTURE_CUBE_MAP;
+                }
+                else
+                {
+                    qDebug() << "DDS File: 2D texture\n";
+                    Image2d (DDS_Header.Width, DDS_Header.Height, format, m);
+                    type = GL_TEXTURE_2D;
+                }
 
             qint64 datalen =  file.size() - (delta + static_cast<qint64>((sizeof (dds_magic) + sizeof (dds_size) + trueSize)));
-            qDebug() << "DDS data len: " <<datalen;
+            qDebug() << "DDS data len: " << datalen;
 
             char *buffer = new char[datalen];
 
-            file.read (buffer,datalen);
+            file.read (buffer, datalen);
             qDebug() << "setData for texture named: " << getName();
             setData(buffer, datalen);
             qDebug() << "setData complete";
@@ -374,7 +385,7 @@ void Item_texture::reload()
         }
     }
     GL_CHECK_ERROR();
- //   qDebug() << "Texture type: " <<type;
+    //   qDebug() << "Texture type: " <<type;
 }
 
 /*!
@@ -387,10 +398,9 @@ void Item_texture::setData(char *data, qint64 len)
 
 
     if (boundto > -1)
-    {
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
         qDebug() << "Texture was not bound" ;
         glBindTexture(type, texture);
@@ -403,70 +413,71 @@ void Item_texture::setData(char *data, qint64 len)
     int miplevels = 1;
     if (mipmap) miplevels += int(log2 (width | height | depth));
 
-    for (GLenum cub = 0, cubeloop = ((type == GL_TEXTURE_CUBE_MAP )? 6 : 1); cub < cubeloop; ++cub)
+    for (GLenum cub = 0, cubeloop = ((type == GL_TEXTURE_CUBE_MAP ) ? 6 : 1); cub < cubeloop; ++cub)
     {
-        auto w = width;
-        auto h = height;
-        auto d = depth;
+        int64_t w = width;
+        int64_t h = height;
+        int64_t d = depth;
 
-        for (int mip = 0;mip < miplevels; mip++)
+        for (int mip = 0; mip < miplevels; mip++)
         {
             auto  num_of_bytes = d * h * w;
             if (texturetype[formatindex].bits >= 8)
-            {
                 num_of_bytes *= texturetype[formatindex].bits / 8;
-            }
             else
-            {
                 num_of_bytes /= 8 / texturetype[formatindex].bits;
-            }
 
             if (num_of_bytes < texturetype[formatindex].blocksize / 8)
-            {
-                num_of_bytes =texturetype[formatindex].blocksize / 8;
-            }
-            qDebug() << "Texture Miplevel "<< mip << " bytes: " << num_of_bytes << w << h << d ;
+                num_of_bytes = texturetype[formatindex].blocksize / 8;
+            qDebug() << "Texture Miplevel " << mip << " bytes: " << num_of_bytes << w << h << d ;
 
             if ((buffer - data  + num_of_bytes) > static_cast<decltype(num_of_bytes)>(len))
             {
-                qDebug() << "Texture: Not enough data, canceled loading of \"" << getName() <<"\"";
+                qDebug() << "Texture: Not enough data, canceled loading of \"" << getName() << "\"";
                 return;
             }
 
-            if (texturetype[formatindex].compressed){
-                switch(type){
+            if (texturetype[formatindex].compressed)
+            {
+                switch (type)
+                {
                     case GL_TEXTURE_2D:
                         //glCompressedTexImage2D(GL_TEXTURE_2D, mip, texturetype[formatindex].intformat,w, h, 0, num_of_bytes, buffer);
-                        glCompressedTexSubImage2D(GL_TEXTURE_2D, mip, 0,0 ,w, h,texturetype[formatindex].intformat, num_of_bytes, buffer);
+                        glCompressedTexSubImage2D(GL_TEXTURE_2D, mip, 0, 0, w, h, texturetype[formatindex].intformat, num_of_bytes, buffer);
                         break;
                     case GL_TEXTURE_3D:
                         //glCompressedTexImage3D(GL_TEXTURE_3D, mip, texturetype[formatindex].intformat,w, h, d, 0, num_of_bytes, buffer);
-                        glCompressedTexSubImage3D(GL_TEXTURE_3D, mip, 0,0,0 ,w, h,d, texturetype[formatindex].intformat, num_of_bytes, buffer);
+                        glCompressedTexSubImage3D(GL_TEXTURE_3D, mip, 0, 0, 0, w, h, d, texturetype[formatindex].intformat, num_of_bytes, buffer);
                         break;
                     case GL_TEXTURE_CUBE_MAP:
                         //glCompressedTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cub, mip, texturetype[formatindex].intformat,w, h, 0 ,num_of_bytes , buffer);
-                        glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cub, mip, 0,0 ,w, h,texturetype[formatindex].intformat, num_of_bytes, buffer);
+                        glCompressedTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cub, mip, 0, 0, w, h, texturetype[formatindex].intformat, num_of_bytes, buffer);
                         break;
                 }
             }
-            else{
-                switch(type){
+            else
+            {
+                switch (type)
+                {
                     case GL_TEXTURE_2D:
-                        glTexSubImage2D( GL_TEXTURE_2D, mip, 0,0 , w, h, texturetype[formatindex].format,  texturetype[formatindex].datatype, buffer);
+                        glTexSubImage2D( GL_TEXTURE_2D, mip, 0, 0, w, h, texturetype[formatindex].format,  texturetype[formatindex].datatype, buffer);
                         break;
                     case GL_TEXTURE_3D:
                         GL_CHECK_ERROR();
-                        glTexSubImage3D( GL_TEXTURE_3D, mip,0,0,0, w, h, d, texturetype[formatindex].format, texturetype[formatindex].datatype, buffer);
+                        glTexSubImage3D( GL_TEXTURE_3D, mip, 0, 0, 0, w, h, d, texturetype[formatindex].format, texturetype[formatindex].datatype, buffer);
                         break;
                     case GL_TEXTURE_CUBE_MAP:
-                        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cub, mip, 0,0 , w, h, texturetype[formatindex].format,  texturetype[formatindex].datatype, buffer);
+                        glTexSubImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + cub, mip, 0, 0, w, h, texturetype[formatindex].format,  texturetype[formatindex].datatype, buffer);
                         break;
                 }
             }
 
-            w /= 2; if (w==0) w=1;
-            h /= 2; if (h==0) h=1;
-            d /= 2; if (d==0) d=1;
+            w /= 2;
+            if (w == 0) w = 1;
+            h /= 2;
+            if (h == 0) h = 1;
+            d /= 2;
+            if (d == 0) d = 1;
 
             buffer += num_of_bytes;
         }
@@ -474,62 +485,76 @@ void Item_texture::setData(char *data, qint64 len)
 }
 
 
-QByteArray Item_texture::getData() const{
-    int miplevels = 1;
-    if (mipmap) miplevels += int(log2 (width | height | depth));
+Item_texture::data_t Item_texture::getData() const
+{
+    GLsizei miplevels = 1;
+    if (mipmap)
+        miplevels += static_cast<decltype (miplevels)>(log2 (width | height | depth));
 
-    int len = 0;
-    for (int cub = 0; cub < (type == GL_TEXTURE_CUBE_MAP ? 6:1 ); cub++){
-        int w = width;
-        int h = height;
-        int d = depth;
-        for (int mip = 0;mip < miplevels; mip++){
-            int num_of_bytes = texturetype[formatindex].bits * d * h * w / 8;
-            if (num_of_bytes < texturetype[formatindex].blocksize / 8)num_of_bytes =texturetype[formatindex].blocksize / 8;
-            w /= 2; if (w==0) w=1;
-            h /= 2; if (h==0) h=1;
-            d /= 2; if (d==0) d=1;
+    const unsigned int cublimit = (type == GL_TEXTURE_CUBE_MAP ? 6 : 1 );
+
+    int64_t len = 0;
+    for (unsigned int cub = 0; cub < cublimit; ++cub)
+    {
+        int64_t w = width;
+        int64_t h = height;
+        int64_t d = depth;
+        for (int mip = 0; mip < miplevels; mip++)
+        {
+            int64_t num_of_bytes = texturetype[formatindex].bits * d * h * w / 8;
+            if (num_of_bytes < texturetype[formatindex].blocksize / 8)
+                num_of_bytes = texturetype[formatindex].blocksize / 8;
+            w /= 2;
+            if (w == 0) w = 1;
+            h /= 2;
+            if (h == 0) h = 1;
+            d /= 2;
+            if (d == 0) d = 1;
             len += num_of_bytes;
         }
     }
 
-    qDebug() << "QByteArray Item_texture::getData()" << len << "bytes";
+    //qDebug() << "QByteArray Item_texture::getData()" << len << "bytes";
 
-    QByteArray data(len , '\0' );
+    data_t data(static_cast<size_t>(std::max(0l, len)), 0);
 
     char *buffer = data.data();
 
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
 
-    for (int cub = 0; cub < (type == GL_TEXTURE_CUBE_MAP ? 6:1 ); cub++){
-        int w = width;
-        int h = height;
-        int d = depth;
+    for (unsigned int cub = 0; cub < cublimit; ++cub)
+    {
+        int64_t w = width;
+        int64_t h = height;
+        int64_t d = depth;
 
-        for (int mip = 0;mip < miplevels; mip++){
+        for (int mip = 0; mip < miplevels; mip++)
+        {
 
-            int num_of_bytes = texturetype[formatindex].bits * d * h * w / 8;
+            int64_t num_of_bytes = texturetype[formatindex].bits * d * h * w / 8;
 
-            if (num_of_bytes < texturetype[formatindex].blocksize / 8)num_of_bytes =texturetype[formatindex].blocksize / 8;
+            if (num_of_bytes < texturetype[formatindex].blocksize / 8)
+                num_of_bytes = texturetype[formatindex].blocksize / 8;
 
-            qDebug() << "Texture Miplevel "<< mip << " bytes: " << num_of_bytes;
+            //qDebug() << "Texture Miplevel " << mip << " bytes: " << num_of_bytes;
 
-            if (texturetype[formatindex].compressed){
+            if (texturetype[formatindex].compressed)
                 glGetCompressedTexImage(type + cub, mip, buffer);
-            }
-            else{
+            else
                 glGetTexImage(type + cub, mip, texturetype[formatindex].format, texturetype[formatindex].datatype, buffer);
-            }
 
-            w /= 2; if (w==0) w=1;
-            h /= 2; if (h==0) h=1;
-            d /= 2; if (d==0) d=1;
+            w /= 2;
+            if (w == 0) w = 1;
+            h /= 2;
+            if (h == 0) h = 1;
+            d /= 2;
+            if (d == 0) d = 1;
 
             buffer += num_of_bytes;
         }
@@ -541,7 +566,7 @@ QByteArray Item_texture::getData() const{
     else{
         data.resize(width * height * depth * texturetype[formatindex].bits / 8 * (type == GL_TEXTURE_CUBE_MAP ? 6:1 ));
         }
-*/
+    */
     return data;
 }
 
@@ -552,12 +577,13 @@ void MinFilter(Enum filter) deprecated \n
 MinFilter = filter \n
 Set the minification filter to gl.(NEAREST|LINEAR)[_MIPMAP_(NEAREST|LINEAR)]
 */
-void Item_texture::MinFilter(int f){
+void Item_texture::MinFilter(int f)
+{
     minFilter = f;
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
@@ -568,12 +594,13 @@ void MagFilter(Enum filter) deprecated \n
 MagFilter = filter \n
 Set the textures filter to gl.NEAREST or gl.LINEAR
 */
-void Item_texture::MagFilter(int f){
+void Item_texture::MagFilter(int f)
+{
     magFilter = f;
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
@@ -584,14 +611,15 @@ void Item_texture::MagFilter(int f){
 Anisotropic = number\
 property for setting the anisotropic level. 1 = off
 */
-void Item_texture::Anisotropic(int a){
+void Item_texture::Anisotropic(int a)
+{
     anisotropic = a;
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
-        glBindTexture(type , texture);
+        glBindTexture(type, texture);
     }
     glTexParameteri( type, GL_TEXTURE_MAX_ANISOTROPY_EXT, a );
 
@@ -602,28 +630,33 @@ void Item_texture::Anisotropic(int a){
 void BindFBO([number slice])
 Bind a texture as FrameBufferObject to use it as rendertarget. Slice is optional for 3D textures. The viewport will be backed up.
 */
-void Item_texture::BindFBO(int slice){
+void Item_texture::BindFBO(int slice)
+{
     GL_CHECK_ERROR();
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, fbo);
-    switch (type){
+    switch (type)
+    {
         case GL_TEXTURE_3D:
-            if (slice==-1){
+            if (slice == -1)
+            {
                 qDebug() << "Item_texture::BindFBO() a slice as argument is required";
                 return;
             }
-            glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_3D,texture, 0 ,slice);
+            glFramebufferTexture3DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_3D, texture, 0, slice);
             break;
         case GL_TEXTURE_2D_ARRAY_EXT: //not tested code....
         case GL_TEXTURE_CUBE_MAP:
-            if (slice!=-1){
+            if (slice != -1)
+            {
                 qDebug() << "Item_texture::BindFBO() Binding a slice is currently not supported";
                 return;
             }
-            else{
-                if(texturetype[formatindex].format != GL_DEPTH_COMPONENT){
+            else
+            {
+                if (texturetype[formatindex].format != GL_DEPTH_COMPONENT)
                     glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, texture, 0);
-                }
-                else{
+                else
+                {
                     glFramebufferTextureEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, texture, 0);
                     glDrawBuffer (GL_FALSE);
                     glReadBuffer (GL_FALSE);
@@ -633,18 +666,19 @@ void Item_texture::BindFBO(int slice){
             break;
         case GL_TEXTURE_2D:
         case GL_TEXTURE_RECTANGLE:
-            if(texturetype[formatindex].format != GL_DEPTH_COMPONENT){
-                glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_COLOR_ATTACHMENT0_EXT, type, texture, 0);
-            }
-            else{
-                glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT,GL_DEPTH_ATTACHMENT_EXT, type, texture, 0);
+            if (texturetype[formatindex].format != GL_DEPTH_COMPONENT)
+                glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, type, texture, 0);
+            else
+            {
+                glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, type, texture, 0);
                 glDrawBuffer (GL_FALSE);
                 glReadBuffer (GL_FALSE);
             }
             break;
     }
     GLenum status = glCheckFramebufferStatusEXT (GL_FRAMEBUFFER_EXT);
-    switch (status){
+    switch (status)
+    {
         case GL_FRAMEBUFFER_COMPLETE_EXT:
             //  qDebug() << "FBO OK";
             break;
@@ -658,9 +692,10 @@ void Item_texture::BindFBO(int slice){
 
     }
     //save viewport and replace it;
-    if (viewport[0]== -1){
-        glGetIntegerv(GL_VIEWPORT,(GLint*)viewport);
-        glViewport(0,0,width,height);
+    if (viewport[0] == -1)
+    {
+        glGetIntegerv(GL_VIEWPORT, (GLint*)viewport);
+        glViewport(0, 0, width, height);
     }
     GL_CHECK_ERROR();
 }
@@ -668,44 +703,49 @@ void Item_texture::BindFBO(int slice){
 void UnbindFBO()\n
 Unbind the as FrameBufferObject used texture and restore viewport.
 */
-void Item_texture::UnbindFBO(){
+void Item_texture::UnbindFBO()
+{
     glBindFramebufferEXT (GL_FRAMEBUFFER_EXT, 0);
     //restore vieport
-    glViewport (viewport[0],viewport[1],viewport[2],viewport[3]);
-    viewport[0]= -1;
+    glViewport (viewport[0], viewport[1], viewport[2], viewport[3]);
+    viewport[0] = -1;
 }
 
 /*!
 void ViewPort(number leftX, number upperY, number width, number height)\n
 Set the viewport in FBO mode. all values between 0.0 and 1.0
 */
-void Item_texture::ViewPort(float a,float b,float c,float d){
-    if (viewport[0]== -1) return;
-    glViewport ( int(width * a),int(height * b),int(width * c), int(height * d));
+void Item_texture::ViewPort(float a, float b, float c, float d)
+{
+    if (viewport[0] == -1) return;
+    glViewport ( int(width * a), int(height * b), int(width * c), int(height * d));
 }
 
 /*!
 void Image2d(number width, number height, enum textureformat, bool mipmap)\n
 Format the texture...
 */
-void Item_texture::Image2d(int w,int h, int _format, bool _mipmap){
+void Item_texture::Image2d(int w, int h, int _format, bool _mipmap)
+{
     qDebug() << _format;
-    if (_format==-1)_format = GL_RGBA8;
-    for(int i = 0; texturetype[i].intformat != 0; i++){
-        if ( texturetype[i].intformat == _format){
+    if (_format == -1)_format = GL_RGBA8;
+    for (int i = 0; texturetype[i].intformat != 0; i++)
+    {
+        if ( texturetype[i].intformat == _format)
+        {
             formatindex = i;
             break;
         }
     }
     mipmap = _mipmap;
-    width = w; height = h; depth = 1;
+    width = w;
+    height = h;
+    depth = 1;
 
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
         glActiveTexture(lastTexture);
-    }
 
     if (!texture)glGenTextures(1, (GLuint*)&texture);
 
@@ -721,10 +761,13 @@ void Item_texture::Image2d(int w,int h, int _format, bool _mipmap){
 
     qDebug() << "Miplevels" << miplevels;
 
-    for (int mip = 0; mip < miplevels; mip ++){
+    for (int mip = 0; mip < miplevels; mip ++)
+    {
         glTexImage2D (GL_TEXTURE_2D, mip, texturetype[formatindex].intformat, mipw, miph, 0, texturetype[formatindex].format, GL_FLOAT, NULL);
-        mipw = mipw >> 1; if (mipw == 0) mipw =1;
-        miph = miph >> 1; if (miph == 0) miph =1;
+        mipw = mipw >> 1;
+        if (mipw == 0) mipw = 1;
+        miph = miph >> 1;
+        if (miph == 0) miph = 1;
     }
 
     glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -735,24 +778,27 @@ void Item_texture::Image2d(int w,int h, int _format, bool _mipmap){
 void ImageRect(number width, number height, enum textureformat, bool mipmap)\n
 Format the texture as Rectangle texture. Mipmap should be false
 */
-void Item_texture::ImageRect(int w,int h, int _format, bool _mipmap){
+void Item_texture::ImageRect(int w, int h, int _format, bool _mipmap)
+{
     qDebug() << _format;
-    if (_format==-1)_format = GL_RGBA8;
-    for(int i = 0; texturetype[i].intformat != 0; i++){
-        if ( texturetype[i].intformat == _format){
+    if (_format == -1)_format = GL_RGBA8;
+    for (int i = 0; texturetype[i].intformat != 0; i++)
+    {
+        if ( texturetype[i].intformat == _format)
+        {
             formatindex = i;
             break;
         }
     }
     mipmap = _mipmap;
-    width = w; height = h; depth = 1;
+    width = w;
+    height = h;
+    depth = 1;
 
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
         glActiveTexture(lastTexture);
-    }
 
     if (!texture)glGenTextures(1, (GLuint*)&texture);
 
@@ -768,10 +814,13 @@ void Item_texture::ImageRect(int w,int h, int _format, bool _mipmap){
 
     qDebug() << "Miplevels" << miplevels;
 
-    for (int mip = 0; mip < miplevels; mip ++){
+    for (int mip = 0; mip < miplevels; mip ++)
+    {
         glTexImage2D (GL_TEXTURE_RECTANGLE, mip, texturetype[formatindex].intformat, mipw, miph, 0, texturetype[formatindex].format, GL_FLOAT, NULL);
-        mipw = mipw >> 1; if (mipw == 0) mipw =1;
-        miph = miph >> 1; if (miph == 0) miph =1;
+        mipw = mipw >> 1;
+        if (mipw == 0) mipw = 1;
+        miph = miph >> 1;
+        if (miph == 0) miph = 1;
     }
 
     glTexParameteri (GL_TEXTURE_RECTANGLE, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -783,33 +832,38 @@ void Image2dArray(number width, number height, number depth, enum textureformat,
 Format as 2D Array texture...
 */
 
-void Item_texture::Image2dArray(int w, int h, int d, int _format, bool _mipmap){
-    if (!GLEW_EXT_texture_array){
+void Item_texture::Image2dArray(int w, int h, int d, int _format, bool _mipmap)
+{
+    if (!GLEW_EXT_texture_array)
+    {
         qDebug() << "GL_EXT_texture_array not supported";
         return;
     }
 
-    if (_format==-1)_format = GL_RGBA8;
+    if (_format == -1)_format = GL_RGBA8;
 
-    for(int i = 0; texturetype[i].intformat != 0; i++){
-        if ( texturetype[i].intformat == _format){
+    for (int i = 0; texturetype[i].intformat != 0; ++i)
+    {
+        if ( texturetype[i].intformat == _format)
+        {
             formatindex = i;
             break;
         }
     }
     mipmap = _mipmap;
 
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
         glActiveTexture(lastTexture);
-    }
 
-    if (!texture)glGenTextures(1, (GLuint*)&texture);
+    if (!texture)
+        glGenTextures(1, (GLuint*)&texture);
     type = GL_TEXTURE_2D_ARRAY_EXT;
 
-    width = w; height = h; depth = d;
+    width = w;
+    height = h;
+    depth = d;
 
     glBindTexture(type, texture);
 
@@ -819,10 +873,13 @@ void Item_texture::Image2dArray(int w, int h, int d, int _format, bool _mipmap){
     int miplevels = 1;
     if (mipmap) miplevels += int(log2 (width | height | depth));
 
-    for (int mip = 0; mip < miplevels; mip ++){
-        glTexImage3D (type, mip, texturetype[formatindex].intformat, mipw, miph, d, 0, texturetype[formatindex].format, GL_FLOAT, NULL);
-        mipw = mipw >> 1; if (mipw == 0) mipw =1;
-        miph = miph >> 1; if (miph == 0) miph =1;
+    for (int mip = 0; mip < miplevels; mip ++)
+    {
+        glTexImage3D (type, mip, texturetype[formatindex].intformat, mipw, miph, d, 0, texturetype[formatindex].format, GL_FLOAT, nullptr);
+        mipw = mipw >> 1;
+        if (mipw == 0) mipw = 1;
+        miph = miph >> 1;
+        if (miph == 0) miph = 1;
     }
 
     glTexParameteri (type, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -837,11 +894,14 @@ void Image3d(number width, number height, number depth, enum textureformat, bool
 Format as 3D texture...
 */
 
-void Item_texture::Image3d(int w, int h, int d, int _format, bool _mipmap){
-    if (_format==-1)_format = GL_RGBA8;
+void Item_texture::Image3d(int w, int h, int d, int _format, bool _mipmap)
+{
+    if (_format == -1)_format = GL_RGBA8;
 
-    for(int i = 0; texturetype[i].intformat != 0; i++){
-        if ( texturetype[i].intformat == _format){
+    for (int i = 0; texturetype[i].intformat != 0; i++)
+    {
+        if ( texturetype[i].intformat == _format)
+        {
             formatindex = i;
             break;
         }
@@ -849,19 +909,20 @@ void Item_texture::Image3d(int w, int h, int d, int _format, bool _mipmap){
 
     mipmap = _mipmap;
 
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
         glActiveTexture(lastTexture);
-    }
 
-    if (!texture)glGenTextures(1, (GLuint*)&texture);
+    if (!texture)
+        glGenTextures(1, (GLuint*)&texture);
     type = GL_TEXTURE_3D;
 
-    width = w; height = h; depth = d;
+    width = w;
+    height = h;
+    depth = d;
 
-    glBindTexture(GL_TEXTURE_3D, texture);
+    glBindTexture(type, texture);
 
     int mipw = w;
     int miph = h;
@@ -870,11 +931,15 @@ void Item_texture::Image3d(int w, int h, int d, int _format, bool _mipmap){
     int miplevels = 1;
     if (mipmap) miplevels += int(log2 (width | height | depth));
 
-    for (int mip = 0; mip < miplevels; mip ++){
-        glTexImage3D (GL_TEXTURE_3D, mip, texturetype[formatindex].intformat, mipw, miph, mipd, 0, texturetype[formatindex].format, GL_FLOAT, NULL);
-        mipw = mipw >> 1; if (mipw == 0) mipw =1;
-        miph = miph >> 1; if (miph == 0) miph =1;
-        mipd = mipd >> 1; if (mipd == 0) mipd =1;
+    for (int mip = 0; mip < miplevels; mip ++)
+    {
+        glTexImage3D (GL_TEXTURE_3D, mip, texturetype[formatindex].intformat, mipw, miph, mipd, 0, texturetype[formatindex].format, GL_FLOAT, nullptr);
+        mipw = mipw >> 1;
+        if (mipw == 0) mipw = 1;
+        miph = miph >> 1;
+        if (miph == 0) miph = 1;
+        mipd = mipd >> 1;
+        if (mipd == 0) mipd = 1;
     }
 
     glTexParameteri (GL_TEXTURE_3D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
@@ -886,25 +951,28 @@ void Item_texture::Image3d(int w, int h, int d, int _format, bool _mipmap){
 void ImageCube(number width, enum textureformat, bool mipmap)\n
 Format as Cube texture...
 */
-void Item_texture::ImageCube(int w, int _format, bool _mipmap){
+void Item_texture::ImageCube(int w, int _format, bool _mipmap)
+{
     GL_CHECK_ERROR();
-    if (_format==-1)_format = GL_RGBA8;
+    if (_format == -1)_format = GL_RGBA8;
 
-    for(int i = 0; texturetype[i].intformat != 0; i++){
-        if ( texturetype[i].intformat == _format){
+    for (int i = 0; texturetype[i].intformat != 0; i++)
+    {
+        if ( texturetype[i].intformat == _format)
+        {
             formatindex = i;
             break;
         }
     }
 
     mipmap = _mipmap;
-    width = w; height = w; depth = 1;
-    if (boundto > -1){
+    width = w;
+    height = w;
+    depth = 1;
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
         glActiveTexture(lastTexture);
-    }
 
     if (!texture)glGenTextures(1, (GLuint*)&texture);
     GL_CHECK_ERROR();
@@ -916,11 +984,11 @@ void Item_texture::ImageCube(int w, int _format, bool _mipmap){
 
 
     type = GL_TEXTURE_CUBE_MAP;
-    for (int cub = 0 ; cub  < 6 ; cub++){
+    for (int cub = 0 ; cub  < 6 ; cub++)
+    {
         int mipw = w;
-        for (int mip = 0; mip < miplevels; mip ++){
+        for (int mip = 0; mip < miplevels; mip ++)
             glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + cub, mip, texturetype[formatindex].intformat, mipw, mipw, 0, texturetype[formatindex].format, GL_FLOAT, NULL);
-        }
     }
 
     glTexParameterf( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -933,13 +1001,14 @@ void Item_texture::ImageCube(int w, int _format, bool _mipmap){
 /*!
 property funtion to set the compare mode
 */
-void Item_texture::CompareMode(bool _compareMode){
+void Item_texture::CompareMode(bool _compareMode)
+{
     compareMode = _compareMode;
 
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
@@ -952,12 +1021,13 @@ void WrapS(Enum mode) deprecated \n
 WrapS = mode \n
 set the T wrapping mode to gl.REPEAT gl.CLAMP or gl.CLAMP_TO_EDGE
 */
-void Item_texture::WrapS(int m){
+void Item_texture::WrapS(int m)
+{
     wrapS = m;
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
@@ -969,12 +1039,13 @@ void WrawT(Enum mode) deprecated \n
 WrapT = mode \n
 set the T wrapping mode to gl.REPEAT gl.CLAMP or gl.CLAMP_TO_EDGE
 */
-void Item_texture::WrapT(int m){
+void Item_texture::WrapT(int m)
+{
     wrapT = m;
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
@@ -986,12 +1057,13 @@ void WrawR(Enum mode) deprecated \n
 WrapR = mode \n
 set the T wrapping mode to gl.REPEAT gl.CLAMP or gl.CLAMP_TO_EDGE
 */
-void Item_texture::WrapR(int m){
+void Item_texture::WrapR(int m)
+{
     wrapT = m;
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
@@ -1002,13 +1074,14 @@ void Item_texture::WrapR(int m){
 void GenerateMipmap() \n
 Generates mipmaps
 */
-void Item_texture::GenerateMipmap(){
+void Item_texture::GenerateMipmap()
+{
     if (type == GL_TEXTURE_RECTANGLE) return; //no mipmap for rectangle
     mipmap = true;
-    if (boundto > -1){
+    if (boundto > -1)
         glActiveTexture(GL_TEXTURE0 + boundto);
-    }
-    else{
+    else
+    {
         glActiveTexture(lastTexture);
         glBindTexture(type, texture);
     }
@@ -1021,9 +1094,11 @@ void Print(number x, number y, String text)\n
 glTexSubImage2D wrapper to print text into a GL_ALPHA texture. Usefull for a textshader.
 Only 2d and Rectangle textures are supported
 */
-void Item_texture::Print(int x, int y, QString text){
+void Item_texture::Print(int x, int y, QString text)
+{
     if (type != GL_TEXTURE_2D && type !=  GL_TEXTURE_RECTANGLE)return;
-    if (texturetype[formatindex].intformat != GL_ALPHA8 && texturetype[formatindex].intformat != GL_LUMINANCE8 && texturetype[formatindex].intformat != GL_INTENSITY8){
+    if (texturetype[formatindex].intformat != GL_ALPHA8 && texturetype[formatindex].intformat != GL_LUMINANCE8 && texturetype[formatindex].intformat != GL_INTENSITY8)
+    {
         qDebug() << "Wrong internal format for printing to texture";
         return;
     }
@@ -1054,17 +1129,20 @@ void Item_texture::addMenu(QMenu *menu)
 void getFormat()\n
 Returns the OpenGL Texture format enum.
 */
-int Item_texture::getFormat(){
+int Item_texture::getFormat()
+{
     return texturetype[formatindex].intformat;
 }
 
-QString Item_texture::getFormatString() const{
+QString Item_texture::getFormatString() const
+{
     return QString(texturetype[formatindex].name);
 }
 /*!
 Returns if the texture has mipmaps
 */
-bool Item_texture::hasMipMap(){
+bool Item_texture::hasMipMap()
+{
     return mipmap;
 }
 
@@ -1072,8 +1150,9 @@ bool Item_texture::hasMipMap(){
 search the textureformat enum by string
 */
 
-int Item_texture::formatFromString(const QString& n){
-    for(int i = 0; texturetype[i].intformat != 0; i++)
+int Item_texture::formatFromString(const QString& n)
+{
+    for (int i = 0; texturetype[i].intformat != 0; i++)
         if (n == texturetype[i].name)
             return texturetype[i].intformat;
     return 0;
