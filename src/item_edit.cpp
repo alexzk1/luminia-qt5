@@ -37,17 +37,17 @@ Item_edit::Item_edit( Item *parent, const QString& name) :
     edit =  new SourceEdit(nullptr);
     appendToWs(edit);
     setIcon(0, QIcon(":/images/xpm/edit.xpm"));
-    setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled);
+    setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled);
 
     const auto addAction = [this](auto a, auto b, auto c)
     {
-        QAction *act = new QAction(a, b, this);
+        auto act = new QAction(a, b, this);
         connect(act, &QAction::triggered, this, c);
         commonActions.push_back(act);
     };
     addAction ( QIcon(":/images/xpm/load.xpm"),  tr("Load File"),    std::bind(&Item_edit::load,   this, QString()));
     addAction ( QIcon(":/images/xpm/save.xpm"),  tr("Save as File"), std::bind(&Item_edit::saveas, this, QString()));
-    addAction ( QIcon(":/images/xpm/reload.xpm"),tr("Reload File"),  &Item_edit::reload);
+    addAction ( QIcon(":/images/xpm/reload.xpm"), tr("Reload File"),  &Item_edit::reload);
 
     for (const auto& a : commonActions)
         edit->appendActionToBar(a);
@@ -81,10 +81,8 @@ function for saving the editors content into a file. A filename can be used as f
 void Item_edit::saveas(const QString& filename)
 {
     fn = filename;
-    if (filename=="")
-    {
-        fn = QFileDialog::getSaveFileName(ws, tr("Save File"), "",tr("Text (*.*)"));
-    }
+    if (filename == "")
+        fn = QFileDialog::getSaveFileName(ws, tr("Save File"), "", tr("Text (*.*)"));
     if (fn != "")
     {
         QFile file(fn);
@@ -102,13 +100,9 @@ void Item_edit::load(const QString& filename)
 {
     fn = filename;
     if (filename == "")
-    {
-        fn = QFileDialog::getOpenFileName(ws, tr("Open File"), "",tr("Text (*.*)"));
-    }
+        fn = QFileDialog::getOpenFileName(ws, tr("Open File"), "", tr("Text (*.*)"));
     else
-    {
         fn = LoaderPaths::findObject(filename);
-    }
     reload();
 }
 
@@ -142,28 +136,22 @@ This function returns the text of the editor with proceessed "#include"
 */
 QString Item_edit::text()const
 {
-    static int rec_protection = 0;
-    rec_protection ++;
     QRegExp rx( "(#include .+\n)" );
     rx.setMinimal(true);
     QString txt = edit->getText();
 
     int pos = 0;
 
-    if(rec_protection < 16)while ((pos = rx.indexIn(txt, pos)) != -1)
+    while ((pos = rx.indexIn(txt, pos)) != -1)
     {
         QString path = txt.mid(pos, rx.matchedLength()).split(QRegExp("\\s+")).at(1);
         QStringList p = path.split(".");
         QObject *obj;
 
         if (p.at(0) == "World")
-        {
             obj = world;
-        }
         else
-        {
             obj = QObject::parent();
-        }
 
         for ( int i = 1; i < p.size(); i++)
         {
@@ -171,20 +159,17 @@ QString Item_edit::text()const
             obj = obj->findChild<QObject *>(p.at(i));
         }
 
-        Item_edit* inc = dynamic_cast<Item_edit*>(obj);
-        if(inc)
+        auto inc = dynamic_cast<Item_edit*>(obj);
+        if (inc)
         {
             QString inctxt = inc->text();
-            txt.replace(pos, rx.matchedLength()-1, inctxt); //don't replace the \n
+            txt.replace(pos, rx.matchedLength() - 1, inctxt); //don't replace the \n
             pos += inctxt.length() + 1;
         }
         else
-        {
             pos += rx.matchedLength();
-        }
     }
 
-    rec_protection --;
     return txt;
 }
 

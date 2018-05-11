@@ -34,33 +34,33 @@ class glwrapper_shader: public QObject
 {
     Q_OBJECT
 public:
-    glwrapper_shader( QObject * parent,  QString inVertex);
-    glwrapper_shader( QObject * parent,  QString inVertex, QString inFragment);
+    glwrapper_shader( QObject * parent,  const QString& inVertex);
+    glwrapper_shader( QObject * parent,  const QString& inVertex, const QString& inFragment);
 
-    glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, QString inFragment, int inPrimitive, int outPrimitive, int outVertices);
-    glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, int inPrimitive, int outPrimitive, int outVertices);
+    glwrapper_shader( QObject * parent,  const QString& inVertex, const QString& inGeometric, const QString& inFragment, int inPrimitive, int outPrimitive, int outVertices);
+    glwrapper_shader( QObject * parent,  const QString& inVertex, const QString& inGeometric, int inPrimitive, int outPrimitive, int outVertices);
 
     ~glwrapper_shader() override;
 public slots:
     void Bind();
     void Unbind();
 
-    int Loc(QString var);
+    int Loc(const QString& var);
 
-    void Uniform (QString var, double x);
-    void Uniform (QString var, double x, double y);
-    void Uniform (QString var, double x, double y, double z);
-    void Uniform (QString var, double x, double y, double z, double w);
-    void Uniform (QString var, const QColor& col);
+    void Uniform (const QString& var, double x);
+    void Uniform (const QString& var, double x, double y);
+    void Uniform (const QString& var, double x, double y, double z);
+    void Uniform (const QString& var, double x, double y, double z, double w);
+    void Uniform (const QString& var, const QColor& col);
 
-    void Uniformi (QString var, int x);
-    void Uniformi (QString var, int x, int y);
-    void Uniformi (QString var, int x, int y, int z);
-    void Uniformi (QString var, int x, int y, int z, int w);
+    void Uniformi (const QString& var, int x);
+    void Uniformi (const QString& var, int x, int y);
+    void Uniformi (const QString& var, int x, int y, int z);
+    void Uniformi (const QString& var, int x, int y, int z, int w);
 
-    void Uniform (QString var, QObject *obj); //bindable uniform
+    void Uniform (const QString& var, QObject *obj); //bindable uniform
 
-    void NormalQuaternion(QString var);
+    void NormalQuaternion(const QString& var);
     bool isErrored() const;
 public:
     GLhandleARB getShaderHandle();

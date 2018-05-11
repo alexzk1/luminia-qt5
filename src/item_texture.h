@@ -47,7 +47,7 @@ class Item_texture : public Item
 public:
     using  data_t = std::vector<char>;
     Item_texture( Item *parent, const QString& label1);
-    virtual ~Item_texture() override;
+    ~Item_texture() override;
 
     QString getFilename() const
     {
@@ -92,7 +92,7 @@ public:
 
     bool hasMipMap();
 
-    virtual QString statusText() const override;
+    QString statusText() const override;
 
     void setData(char *data, qint64 datalen);
     data_t getData() const;
@@ -100,8 +100,7 @@ public:
 public slots:
     int formatFromString(const QString&);
 
-    void load();
-    void load(const QString&);
+    void load(const QString& fileName = "");
 
     void reload();
     void Bind(int tmu = 0);
@@ -118,11 +117,11 @@ public slots:
     void UnbindFBO();
 
     //init a cleared texture
-    void ImageCube(int, int format = -1, bool mipmap = false);
-    void Image2d     (int, int, int format = -1, bool mipmap = false);
-    void Image2dArray(int, int, int, int format = -1, bool mipmap = false);
-    void Image3d     (int, int, int, int format = -1, bool mipmap = false);
-    void ImageRect(int, int, int format = -1, bool mipmap = false);
+    void ImageCube(GLsizei, GLint format = -1, bool mipmap = false);
+    void Image2d     (GLsizei, GLsizei, GLint format = -1, bool mipmap = false);
+    void Image2dArray(GLsizei, GLsizei, GLsizei, GLint format = -1, bool mipmap = false);
+    void Image3d     (GLsizei, GLsizei, GLsizei, GLint format = -1, bool mipmap = false);
+    void ImageRect(GLsizei, GLsizei, GLint format = -1, bool mipmap = false);
 
     void ViewPort(float, float, float, float);
 
@@ -144,9 +143,9 @@ public slots:
 
 
     void GenerateMipmap();
-    void Print(int x, int y, QString text); // Print text into a GL_ALPHA8 texture for displaying text wih a shader
+    void Print(int x, int y, const QString& text); // Print text into a GL_ALPHA8 texture for displaying text wih a shader
 
-    virtual QString getType() const override;
+    QString getType() const override;
 protected:
     QString fn;
     GLuint texture, fbo;
@@ -155,7 +154,7 @@ protected:
     GLenum type;
 
     int boundto;
-    virtual void addMenu(QMenu* menu) override;
+    void addMenu(QMenu* menu) override;
 private:
     void test_w_h_d_limit();
     //property functions

@@ -43,7 +43,7 @@ void static testTexCompressor()
 {
     using namespace utility;
     qDebug() << "Testing texture pack/encode";
-    std::vector<char> src(10 * 1024 * 1024, 0);
+    std::vector<char> src(10 * 1024 * 1024 + 37, 0);
     std::generate(src.begin(), src.end(), std::rand);
     qDebug() << "Got " << src.size() << " bytes of randoms.";
 

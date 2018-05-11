@@ -30,6 +30,7 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include "file_loader.h"
+#include "mainwindow.h"
 
 constexpr auto static lastTexture = GL_TEXTURE31;
 
@@ -62,7 +63,7 @@ constexpr auto static lastTexture = GL_TEXTURE31;
 #define DDS_DXT3 ('D'|('X'<<8)|('T'<<16)|('3'<<24))
 #define DDS_DXT5 ('D'|('X'<<8)|('T'<<16)|('5'<<24))
 
-#include <math.h>
+#include <cmath>
 
 //missing here 8 bytes, magic (int32) and size (int32)
 //i did that, so can read size 1st and compare with this structure size before loading all
@@ -105,7 +106,7 @@ Item_texture::Item_texture( Item *parent, const QString& name ) : Item( parent, 
 
     formatindex = 0;
 
-    type = -1;
+    type = 0;
 
     mipmap = false;
     width = 0;
@@ -164,11 +165,17 @@ Tmu is the number of the "Texture mapping unit" on current graphics cards 0-15
 void Item_texture::Bind(int tmu)
 {
     GL_CHECK_ERROR();
-    glActiveTexture(GL_TEXTURE0 + tmu);
-    GL_CHECK_ERROR();
-    glBindTexture(type, texture);
-    GL_CHECK_ERROR();
-    boundto = tmu;
+    if (tmu > -1)
+    {
+        glActiveTexture(GL_TEXTURE0 + tmu);
+        if (GL_CHECK_ERROR() == GL_NO_ERROR)
+        {
+            glBindTexture(type, texture);
+            if (GL_CHECK_ERROR() == GL_NO_ERROR)
+                boundto = tmu;
+        }
+    }
+
 }
 
 /*!
@@ -177,9 +184,11 @@ Unbind a texture. Unbinding textures isn't needed.
 */
 void Item_texture::Unbind()
 {
-    if (boundto < 0) return;
-    glActiveTexture(GL_TEXTURE0 + boundto);
-    glBindTexture(type, 0);
+    if (boundto > -1)
+    {
+        glActiveTexture(GL_TEXTURE0 + boundto);
+        glBindTexture(type, 0);
+    }
     boundto = -1;
 }
 
@@ -189,18 +198,12 @@ Load a texture from a file. JPG, BMP, PNG and DDS(flipped in Y direction) are su
 */
 void Item_texture::load(const QString& filename)
 {
-
-    fn = LoaderPaths::findObject(filename);
+    if (filename.isEmpty())
+        fn = QFileDialog::getOpenFileName(Item::ws, tr("Open File"), "", tr("All Files (*.jpg *.png *.dds)"));
+    else
+        fn = LoaderPaths::findObject(filename);
     reload();
 }
-
-
-void Item_texture::load()
-{
-    fn = QFileDialog::getOpenFileName(nullptr, tr("Open File"), "", tr("All Files (*.jpg *.png *.dds)"));
-    reload();
-}
-
 /*!
 reload function will reload the texture from the file
 */
@@ -375,7 +378,7 @@ void Item_texture::reload()
             qint64 datalen =  file.size() - (delta + static_cast<qint64>((sizeof (dds_magic) + sizeof (dds_size) + trueSize)));
             qDebug() << "DDS data len: " << datalen;
 
-            char *buffer = new char[datalen];
+            auto *buffer = new char[datalen];
 
             file.read (buffer, datalen);
             qDebug() << "setData for texture named: " << getName();
@@ -411,7 +414,8 @@ void Item_texture::setData(char *data, qint64 len)
 
 
     int miplevels = 1;
-    if (mipmap) miplevels += int(log2 (width | height | depth));
+    if (mipmap)
+        miplevels += int(log2 (width | height | depth));
 
     for (GLenum cub = 0, cubeloop = ((type == GL_TEXTURE_CUBE_MAP ) ? 6 : 1); cub < cubeloop; ++cub)
     {
@@ -725,7 +729,7 @@ void Item_texture::ViewPort(float a, float b, float c, float d)
 void Image2d(number width, number height, enum textureformat, bool mipmap)\n
 Format the texture...
 */
-void Item_texture::Image2d(int w, int h, int _format, bool _mipmap)
+void Item_texture::Image2d(GLsizei w, GLsizei h, GLint _format, bool _mipmap)
 {
     qDebug() << _format;
     if (_format == -1)_format = GL_RGBA8;
@@ -764,7 +768,7 @@ void Item_texture::Image2d(int w, int h, int _format, bool _mipmap)
 
     for (int mip = 0; mip < miplevels; mip ++)
     {
-        glTexImage2D (GL_TEXTURE_2D, mip, texturetype[formatindex].intformat, mipw, miph, 0, texturetype[formatindex].format, GL_FLOAT, NULL);
+        glTexImage2D (GL_TEXTURE_2D, mip, texturetype[formatindex].intformat, mipw, miph, 0, texturetype[formatindex].format, GL_FLOAT, nullptr);
         mipw = mipw >> 1;
         if (mipw == 0) mipw = 1;
         miph = miph >> 1;
@@ -779,7 +783,7 @@ void Item_texture::Image2d(int w, int h, int _format, bool _mipmap)
 void ImageRect(number width, number height, enum textureformat, bool mipmap)\n
 Format the texture as Rectangle texture. Mipmap should be false
 */
-void Item_texture::ImageRect(int w, int h, int _format, bool _mipmap)
+void Item_texture::ImageRect(GLsizei w, GLsizei h, GLint _format, bool _mipmap)
 {
     qDebug() << _format;
     if (_format == -1)_format = GL_RGBA8;
@@ -834,7 +838,7 @@ void Image2dArray(number width, number height, number depth, enum textureformat,
 Format as 2D Array texture...
 */
 
-void Item_texture::Image2dArray(int w, int h, int d, int _format, bool _mipmap)
+void Item_texture::Image2dArray(GLsizei w, GLsizei h, GLsizei d, GLint _format, bool _mipmap)
 {
     if (!GLEW_EXT_texture_array)
     {
@@ -897,7 +901,7 @@ void Image3d(number width, number height, number depth, enum textureformat, bool
 Format as 3D texture...
 */
 
-void Item_texture::Image3d(int w, int h, int d, int _format, bool _mipmap)
+void Item_texture::Image3d(GLsizei w, GLsizei h, GLsizei d, GLint _format, bool _mipmap)
 {
     if (_format == -1)_format = GL_RGBA8;
 
@@ -955,7 +959,7 @@ void Item_texture::Image3d(int w, int h, int d, int _format, bool _mipmap)
 void ImageCube(number width, enum textureformat, bool mipmap)\n
 Format as Cube texture...
 */
-void Item_texture::ImageCube(int w, int _format, bool _mipmap)
+void Item_texture::ImageCube(GLsizei w, GLint _format, bool _mipmap)
 {
     GL_CHECK_ERROR();
     if (_format == -1)_format = GL_RGBA8;
@@ -994,7 +998,7 @@ void Item_texture::ImageCube(int w, int _format, bool _mipmap)
     {
         int mipw = w;
         for (int mip = 0; mip < miplevels; mip ++)
-            glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + cub, mip, texturetype[formatindex].intformat, mipw, mipw, 0, texturetype[formatindex].format, GL_FLOAT, NULL);
+            glTexImage2D (GL_TEXTURE_CUBE_MAP_POSITIVE_X + cub, mip, texturetype[formatindex].intformat, mipw, mipw, 0, texturetype[formatindex].format, GL_FLOAT, nullptr);
     }
 
     glTexParameterf( GL_TEXTURE_CUBE_MAP, GL_TEXTURE_MAG_FILTER, GL_LINEAR );
@@ -1100,7 +1104,7 @@ void Print(number x, number y, String text)\n
 glTexSubImage2D wrapper to print text into a GL_ALPHA texture. Usefull for a textshader.
 Only 2d and Rectangle textures are supported
 */
-void Item_texture::Print(int x, int y, QString text)
+void Item_texture::Print(int x, int y, const QString& text)
 {
     if (type != GL_TEXTURE_2D && type !=  GL_TEXTURE_RECTANGLE)return;
     if (texturetype[formatindex].intformat != GL_ALPHA8 && texturetype[formatindex].intformat != GL_LUMINANCE8 && texturetype[formatindex].intformat != GL_INTENSITY8)

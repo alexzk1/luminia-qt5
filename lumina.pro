@@ -23,6 +23,7 @@ QMAKE_CXXFLAGS +=  -std=c++14 -Wall -frtti -fexceptions -Werror=return-type
 
 QMAKE_CXXFLAGS +=  -Wctor-dtor-privacy -Werror=delete-non-virtual-dtor -fstrict-aliasing
 QMAKE_CXXFLAGS +=  -Werror=strict-aliasing -Wstrict-aliasing=2
+QMAKE_CXXFLAGS +=  -Wno-warning=gnu-statement-expression
 
 CONFIG += c++14
 

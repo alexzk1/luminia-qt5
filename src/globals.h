@@ -3,11 +3,12 @@
 
 #include <stdio.h>
 #define GL_CHECK_ERROR()                        \
-{                                               \
+({                                               \
     GLenum error = glGetError();                \
     if (error != GL_NO_ERROR)                   \
         fprintf(stderr, "GL_ERROR: %s(%d): %s 0x%X\n", __FILE__, __LINE__, __PRETTY_FUNCTION__, error);    \
-}
+    error; \
+})
 
 
 #define FATAL_ERROR(TEXT)                           \

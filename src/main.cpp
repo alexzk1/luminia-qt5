@@ -60,10 +60,13 @@ int main(int argc, char **argv)
 
     qRegisterMetaType<GLenum>("GLenum");
     qRegisterMetaType<GLint>("GLint");
+    qRegisterMetaType<GLhandleARB>("GLsizei");
     qRegisterMetaType<GLuint>("GLuint");
+
     qRegisterMetaType<GLfloat>("GLfloat");
     qRegisterMetaType<GLdouble>("GLdouble");
     qRegisterMetaType<GLhandleARB>("GLhandleARB");
+
 
     ScriptExtender::reloadAll();
     MainWindow mainWin;

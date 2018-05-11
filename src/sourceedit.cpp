@@ -26,7 +26,8 @@
 #include <QScrollBar>
 #include <QPainter>
 
-TextEdit::TextEdit(QWidget *_parent): QTextEdit(_parent)
+TextEdit::TextEdit(QWidget *_parent):
+    QTextEdit(_parent)
 {
     parent = static_cast<SourceEdit*>(_parent);
     completationOpen = false;
@@ -94,12 +95,6 @@ AbstractCompletionBox::AbstractCompletionBox( QWidget *_parent, const QStringLis
 
     populate();
 }
-
-AbstractCompletionBox::~AbstractCompletionBox()
-{
-
-}
-
 
 void AbstractCompletionBox::keyPressEvent(QKeyEvent *e)
 {
@@ -170,7 +165,7 @@ void AbstractCompletionBox::populate()
     {
         if (!searchString.isEmpty() && !str.startsWith(searchString))
             continue;
-        QListWidgetItem *item = new QListWidgetItem(str);
+        auto item = new QListWidgetItem(str);
         item->setData(Qt::UserRole, str);
         listwidget->addItem(item);
     }
@@ -246,11 +241,8 @@ void LineNumberWidget::paintEvent(QPaintEvent *)
     }
 }
 
-Highlighter::Highlighter(QTextEdit *parent) : QSyntaxHighlighter(parent)
-{
-}
-
-Highlighter::~Highlighter()
+Highlighter::Highlighter(QTextEdit *parent):
+    QSyntaxHighlighter(parent)
 {
 }
 
@@ -260,7 +252,7 @@ void Highlighter::highlightBlock( const QString &text)
     QTextCharFormat myClassFormat;
     int index, length;
 
-    static QRegExp floats("([0-9]+\\.[0-9]+)");
+    const  static QRegExp floats("([0-9]+\\.[0-9]+)");
     myClassFormat.setForeground(Qt::darkMagenta);
     index = text.indexOf(floats);
     while (index >= 0)
@@ -270,7 +262,7 @@ void Highlighter::highlightBlock( const QString &text)
         index = text.indexOf(floats, index + length);
     }
 
-    static QRegExp function("([A-Za-z0-9]+)\\s*\\(");
+    const static QRegExp function("([A-Za-z0-9]+)\\s*\\(");
     myClassFormat.setForeground(Qt::blue);
     index = text.indexOf(function);
     while (index >= 0)
@@ -280,7 +272,7 @@ void Highlighter::highlightBlock( const QString &text)
         index = text.indexOf(function, index + length);
     }
 
-    static QRegExp glsltypes("\\b(float|int|void|bool|true|false|mat2|mat3|mat4|mat2x2|mat3x2|mat4x2|mat2x3|mat3x3|mat4x3|mat2x4|mat3x4|mat4x4|vec2|vec3|vec4|bvec2|bvec3|bvec4|ivec2|ivec3|ivec4|sampler1D|sampler2D|sampler3D|samplerCube|sampler1DShadow|sampler2DShadow|attribute|const|uniform|varying|in|out|inout|input|output|hvec2|hvec3|vec4|dvec2|dvec3|dvec4|fvec2|fvec3|fvec4|sampler2DRect|sampler3DRect|sampler2dRectShadow|long|short|double|half|fixed|unsigned|lowp|mediump|highp|precision)\\b");
+    const static QRegExp glsltypes("\\b(float|int|void|bool|true|false|mat2|mat3|mat4|mat2x2|mat3x2|mat4x2|mat2x3|mat3x3|mat4x3|mat2x4|mat3x4|mat4x4|vec2|vec3|vec4|bvec2|bvec3|bvec4|ivec2|ivec3|ivec4|sampler1D|sampler2D|sampler3D|samplerCube|sampler1DShadow|sampler2DShadow|attribute|const|uniform|varying|in|out|inout|input|output|hvec2|hvec3|vec4|dvec2|dvec3|dvec4|fvec2|fvec3|fvec4|sampler2DRect|sampler3DRect|sampler2dRectShadow|long|short|double|half|fixed|unsigned|lowp|mediump|highp|precision)\\b");
 
     //   myClassFormat.setFontWeight(QFont::Bold);
     myClassFormat.setForeground(Qt::darkRed);
@@ -292,7 +284,7 @@ void Highlighter::highlightBlock( const QString &text)
         index = text.indexOf(glsltypes, index + length);
     }
 
-    static QRegExp string("\"[.\n]*\"");
+    const static QRegExp string("\"[.\n]*\"");
     index = text.indexOf(string);
     while (index >= 0)
     {
@@ -303,7 +295,7 @@ void Highlighter::highlightBlock( const QString &text)
 
     myClassFormat.setFontWeight(QFont::Bold);
 
-    static QRegExp buildin("(radians|degrees|sin|cos|tan|asin|acos|atan|pow|exp|log|exp2|log2|sqrt|inversesqrt|abs|sign|floor|ceil|fract|mod|min|max|clamp|mix|step|smoothstep|length|distance|dot|cross|normalize|ftransform|faceforward|reflect|refract|matrixCompMult|outerProduct|transpose|lessThan|lessThanEqual|greaterThan|greaterThanEqual|equal|notEqual|any|all|not|texture1D|texture1DProj|texture1DLod|texture1DProjLod|texture2D|texture2DProj|texture2DLod|texture2DProjLod|texture3D|texture3DProj|texture3DLod|texture3DProjLod|textureCube|textureCubeLod|shadow1D|shadow2D|shadow1DProj|shadow2DProj|shadow1DLod|shadow2DLod|shadow1DProjLod|shadow2DProjLod|dFdx|dFdy|fwidth|noise1|noise2|noise3|noise4)\\s*\\(");
+    const static QRegExp buildin("(radians|degrees|sin|cos|tan|asin|acos|atan|pow|exp|log|exp2|log2|sqrt|inversesqrt|abs|sign|floor|ceil|fract|mod|min|max|clamp|mix|step|smoothstep|length|distance|dot|cross|normalize|ftransform|faceforward|reflect|refract|matrixCompMult|outerProduct|transpose|lessThan|lessThanEqual|greaterThan|greaterThanEqual|equal|notEqual|any|all|not|texture1D|texture1DProj|texture1DLod|texture1DProjLod|texture2D|texture2DProj|texture2DLod|texture2DProjLod|texture3D|texture3DProj|texture3DLod|texture3DProjLod|textureCube|textureCubeLod|shadow1D|shadow2D|shadow1DProj|shadow2DProj|shadow1DLod|shadow2DLod|shadow1DProjLod|shadow2DProjLod|dFdx|dFdy|fwidth|noise1|noise2|noise3|noise4)\\s*\\(");
 
     index = text.indexOf(buildin);
     myClassFormat.setForeground(Qt::blue);
@@ -314,7 +306,7 @@ void Highlighter::highlightBlock( const QString &text)
         index = text.indexOf(buildin, index + length);
     }
 
-    static QRegExp glslkeywords("\\b(break|continue|do|for|while|if|else|discard|return|goto|switch|default|case|struct|asm|class|union|enum|typedef|template|this|packed|centroid)\\b");
+    const static QRegExp glslkeywords("\\b(break|continue|do|for|while|if|else|discard|return|goto|switch|default|case|struct|asm|class|union|enum|typedef|template|this|packed|centroid)\\b");
 
 
     myClassFormat.setForeground(Qt::black);
@@ -328,7 +320,7 @@ void Highlighter::highlightBlock( const QString &text)
     }
 
 
-    static QRegExp comment("//.*");
+    const static QRegExp comment("//.*");
     myClassFormat.setFontWeight(0);
     myClassFormat.setForeground(Qt::gray);
 
@@ -340,7 +332,7 @@ void Highlighter::highlightBlock( const QString &text)
         index = text.indexOf(comment, index + length);
     }
 
-    static QRegExp pre("#.*");
+    const static QRegExp pre("#.*");
     myClassFormat.setFontWeight(0);
     myClassFormat.setForeground(Qt::darkGreen);
 
@@ -397,11 +389,6 @@ SourceEdit::SourceEdit(QWidget *parent):
         }
     }
 
-}
-
-
-SourceEdit::~SourceEdit()
-{
 }
 
 void SourceEdit::setText(const QString& t)

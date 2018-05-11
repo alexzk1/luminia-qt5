@@ -40,7 +40,7 @@ public:
     TextEdit(QWidget *parent);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
     SourceEdit* parent;
 private:
     bool completationOpen;
@@ -55,7 +55,7 @@ class AbstractCompletionBox : public QFrame
     Q_OBJECT
 public:
     AbstractCompletionBox(QWidget* parent, const QStringList& completions, const QString& searchstring);
-    virtual ~AbstractCompletionBox() override;
+    ~AbstractCompletionBox() override = default;
 
 public slots:
     void setHelpString(const QString&);
@@ -64,7 +64,7 @@ signals:
     void requestHelpString(const QString&);
 
 protected:
-    virtual void keyPressEvent(QKeyEvent *e) override;
+    void keyPressEvent(QKeyEvent *e) override;
     virtual void finishCompletion() = 0;
     void populate();
 
@@ -85,7 +85,7 @@ class CompletionBox : public AbstractCompletionBox
     Q_OBJECT
 public:
     CompletionBox(TextEdit *editor, const QStringList& completions, const QString& searchstring);
-    virtual ~CompletionBox() override;
+    ~CompletionBox() override;
 
 protected:
     void finishCompletion() override;
@@ -103,8 +103,8 @@ class Highlighter : public QSyntaxHighlighter
     Q_OBJECT
 public:
     Highlighter(QTextEdit *parent);
-    virtual ~Highlighter() override;
-    virtual void highlightBlock( const QString &text) override;
+    ~Highlighter() override = default;
+    void highlightBlock( const QString &text) override;
 };
 
 
@@ -116,7 +116,7 @@ class LineNumberWidget : public QWidget
 public:
     LineNumberWidget(QTextEdit *editor, QWidget *parent = nullptr);
 protected:
-    virtual void paintEvent(QPaintEvent *) override;
+    void paintEvent(QPaintEvent *) override;
 
 private:
     QTextEdit *editor;
@@ -130,7 +130,7 @@ class SourceEdit : public QWidget
     Q_OBJECT
 public:
     SourceEdit(QWidget *parent = nullptr);
-    ~SourceEdit() override;
+    ~SourceEdit() override = default;
     void setText(const QString&);
     QString getText()const;
     void setCompleatationList(const QStringList&, int offset = 0);

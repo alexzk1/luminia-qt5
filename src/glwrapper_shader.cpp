@@ -25,7 +25,7 @@
 /*!
 constructor for vertex shader only shader object (useful for transformfeedback)
 */
-glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex):
+glwrapper_shader::glwrapper_shader( QObject * parent,  const QString& inVertex):
     QObject( parent ),
     shader(0), v(0), g(0), f(0), errored(false)
 {
@@ -33,25 +33,27 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex):
 
     v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
     f = 0;
-    g = 0;	// no geometry shader
+    g = 0;  // no geometry shader
 
     QByteArray qv = inVertex.toLatin1();
 
     const char * vv = qv.data ();
 
-    glShaderSourceARB(v, 1, &vv,nullptr);
+    glShaderSourceARB(v, 1, &vv, nullptr);
 
     glCompileShaderARB(v);
     printInfoLog(v);
 
     shader = glCreateProgramObjectARB();
-    glAttachObjectARB(shader,v);
+    glAttachObjectARB(shader, v);
 
-    if(GLEW_NV_transform_feedback){
+    if (GLEW_NV_transform_feedback)
+    {
         qDebug() << "GLEW_NV_transform_feedback";
-        static QRegExp act_var("active\\s*varying\\s+\\w+\\s+(\\w+);");
+        const static QRegExp act_var(R"(active\s*varying\s+\w+\s+(\w+);)");
         int pos = 0;
-        while ((pos = act_var.indexIn(inVertex, pos)) != -1) {
+        while ((pos = act_var.indexIn(inVertex, pos)) != -1)
+        {
             qDebug() << "active varying " << act_var.cap(1);
             glActiveVaryingNV(shader, act_var.cap(1).toLatin1());
             pos += act_var.matchedLength();
@@ -65,7 +67,7 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex):
 /*!
 constructor for shaderobject with vertex and fragmentshader
 */
-glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString inFragment):
+glwrapper_shader::glwrapper_shader( QObject * parent,  const QString& inVertex, const QString& inFragment):
     QObject( parent ),
     shader(0), v(0), g(0), f(0), errored(false)
 {
@@ -73,7 +75,7 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
 
     v = glCreateShaderObjectARB(GL_VERTEX_SHADER_ARB);
     f = glCreateShaderObjectARB(GL_FRAGMENT_SHADER_ARB);
-    g = 0;	// no geometry shader
+    g = 0;  // no geometry shader
 
     QByteArray qv = inVertex.toLatin1();
     QByteArray qf = inFragment.toLatin1();
@@ -89,14 +91,16 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
     glCompileShaderARB(f);
     printInfoLog(f);
     shader = glCreateProgramObjectARB();
-    glAttachObjectARB(shader,v);
-    glAttachObjectARB(shader,f);
+    glAttachObjectARB(shader, v);
+    glAttachObjectARB(shader, f);
 
-    if(GLEW_NV_transform_feedback){
+    if (GLEW_NV_transform_feedback)
+    {
         qDebug() << "GLEW_NV_transform_feedback";
-        static QRegExp act_var("active\\s*varying\\s+\\w+\\s+(\\w+);");
+        const static QRegExp act_var(R"(active\s*varying\s+\w+\s+(\w+);)");
         int pos = 0;
-        while ((pos = act_var.indexIn(inVertex, pos)) != -1) {
+        while ((pos = act_var.indexIn(inVertex, pos)) != -1)
+        {
             qDebug() << "active varying " << act_var.cap(1);
             glActiveVaryingNV(shader, act_var.cap(1).toLatin1());
             pos += act_var.matchedLength();
@@ -111,25 +115,23 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
 /*!
 constructor for shaderobject with vertex, geometry and fragmentshader
 */
-glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, QString inFragment, int inPrimitive, int outPrimitive, int out_vertices):
+glwrapper_shader::glwrapper_shader( QObject * parent,  const QString& inVertex, const QString& inGeometric, const QString& inFragment,
+                                    int inPrimitive, int outPrimitive, int out_vertices):
     QObject( parent ),
     shader(0), v(0), g(0), f(0), errored(false)
 {
     if (!GL_EXT_geometry_shader4)
-    {
         FATAL_ERROR("Panic no GL_EXT_geometry_shader4 support");
-    }
-    if(!glProgramParameteriEXT)
-    {
+    if (!glProgramParameteriEXT)
         FATAL_ERROR("Panic glProgramParameteriEXT has NULL Pointer");
-    }
 
     GLint  temp;
-    glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT,&temp);
+    glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp);
     //printf( "GL_MAX_GEOMETRY_OUTPUT_VERTICES = %i\n" ,temp);
 
-    if (out_vertices > temp){
-        qDebug() << "GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT is "<< temp;
+    if (out_vertices > temp)
+    {
+        qDebug() << "GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT is " << temp;
         out_vertices = temp;
     }
 
@@ -154,20 +156,21 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
     glCompileShaderARB(g);
 
     shader = glCreateProgramObjectARB();
-    glAttachObjectARB(shader,v);
-    glAttachObjectARB(shader,g);
-    glAttachObjectARB(shader,f);
+    glAttachObjectARB(shader, v);
+    glAttachObjectARB(shader, g);
+    glAttachObjectARB(shader, f);
 
-    glProgramParameteriEXT(shader,GL_GEOMETRY_INPUT_TYPE_EXT ,inPrimitive);
-    glProgramParameteriEXT(shader,GL_GEOMETRY_OUTPUT_TYPE_EXT ,outPrimitive);
-    glProgramParameteriEXT(shader,GL_GEOMETRY_VERTICES_OUT_EXT,out_vertices);
+    glProgramParameteriEXT(shader, GL_GEOMETRY_INPUT_TYPE_EXT, inPrimitive);
+    glProgramParameteriEXT(shader, GL_GEOMETRY_OUTPUT_TYPE_EXT, outPrimitive);
+    glProgramParameteriEXT(shader, GL_GEOMETRY_VERTICES_OUT_EXT, out_vertices);
 
-    if(GLEW_NV_transform_feedback)
+    if (GLEW_NV_transform_feedback)
     {
         qDebug() << "GLEW_NV_transform_feedback";
-        static QRegExp act_var("active\\s*varying\\s+\\w+\\s+(\\w+);");
+        const static QRegExp act_var(R"(active\s*varying\s+\w+\s+(\w+);)");
         int pos = 0;
-        while ((pos = act_var.indexIn(inVertex, pos)) != -1) {
+        while ((pos = act_var.indexIn(inVertex, pos)) != -1)
+        {
             qDebug() << "active varying " << act_var.cap(1);
             glActiveVaryingNV(shader, act_var.cap(1).toLatin1());
             pos += act_var.matchedLength();
@@ -181,24 +184,23 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
 /*!
 constructor for shaderobject with vertex and geometry but without fragmentshader. usefully for transform feedback
 */
-glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString inGeometric, int inPrimitive, int outPrimitive, int out_vertices):
+glwrapper_shader::glwrapper_shader( QObject * parent,  const QString& inVertex, const QString& inGeometric,
+                                    int inPrimitive, int outPrimitive, int out_vertices):
     QObject( parent ),
     shader(0), v(0), g(0), f(0), errored(false)
 {
     if (!GL_EXT_geometry_shader4)
-    {
         FATAL_ERROR("Panic no GL_EXT_geometry_shader4 support");
-    }
-    if(!glProgramParameteriEXT){
+    if (!glProgramParameteriEXT)
         FATAL_ERROR("Panic glProgramParameteriEXT has NULL Pointer");
-    }
 
     int  temp;
-    glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT,&temp);
+    glGetIntegerv(GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT, &temp);
     //printf( "GL_MAX_GEOMETRY_OUTPUT_VERTICES = %i\n" ,temp);
 
-    if (out_vertices > temp){
-        qDebug() << "GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT is "<< temp;
+    if (out_vertices > temp)
+    {
+        qDebug() << "GL_MAX_GEOMETRY_OUTPUT_VERTICES_EXT is " << temp;
         out_vertices = temp;
     }
 
@@ -219,18 +221,20 @@ glwrapper_shader::glwrapper_shader( QObject * parent,  QString inVertex, QString
     glCompileShaderARB(g);
 
     shader = glCreateProgramObjectARB();
-    glAttachObjectARB(shader,v);
-    glAttachObjectARB(shader,g);
+    glAttachObjectARB(shader, v);
+    glAttachObjectARB(shader, g);
 
-    glProgramParameteriEXT(shader,GL_GEOMETRY_INPUT_TYPE_EXT ,inPrimitive);
-    glProgramParameteriEXT(shader,GL_GEOMETRY_OUTPUT_TYPE_EXT ,outPrimitive);
-    glProgramParameteriEXT(shader,GL_GEOMETRY_VERTICES_OUT_EXT,out_vertices);
+    glProgramParameteriEXT(shader, GL_GEOMETRY_INPUT_TYPE_EXT, inPrimitive);
+    glProgramParameteriEXT(shader, GL_GEOMETRY_OUTPUT_TYPE_EXT, outPrimitive);
+    glProgramParameteriEXT(shader, GL_GEOMETRY_VERTICES_OUT_EXT, out_vertices);
 
-    if(GLEW_NV_transform_feedback){
+    if (GLEW_NV_transform_feedback)
+    {
         qDebug() << "GLEW_NV_transform_feedback";
-        static QRegExp act_var("active\\s*varying\\s+\\w+\\s+(\\w+);");
+        const static QRegExp act_var(R"(active\s*varying\s+\w+\s+(\w+);)");
         int pos = 0;
-        while ((pos = act_var.indexIn(inVertex, pos)) != -1) {
+        while ((pos = act_var.indexIn(inVertex, pos)) != -1)
+        {
             qDebug() << "active varying " << act_var.cap(1);
             glActiveVaryingNV(shader, act_var.cap(1).toLatin1());
             pos += act_var.matchedLength();
@@ -253,14 +257,16 @@ glwrapper_shader::~glwrapper_shader()
 /*!
 Bind the shader
 */
-void glwrapper_shader::Bind(){
+void glwrapper_shader::Bind()
+{
     glUseProgramObjectARB(shader);
     glwrapper::currentShader = this;
 }
 /*!
 Unbind the shader
 */
-void glwrapper_shader::Unbind(){
+void glwrapper_shader::Unbind()
+{
     glUseProgramObjectARB(0);
     glwrapper::currentShader = nullptr;
 }
@@ -269,75 +275,79 @@ void glwrapper_shader::Unbind(){
 number Loc(String name)\n
 returns the names attribute location
 */
-int glwrapper_shader::Loc(QString var){
-    return glGetAttribLocationARB(shader,var.toLatin1().constData());
+int glwrapper_shader::Loc(const QString& var)
+{
+    return glGetAttribLocationARB(shader, var.toLatin1().constData());
 }
 
-void glwrapper_shader::Uniform (QString var, double x){
-    Bind();
-    glUniform1fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x);
-}
-
-void glwrapper_shader::Uniform (QString var, double x, double y){
-    Bind();
-    glUniform2fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y);
-}
-
-void glwrapper_shader::Uniform (QString var, double x, double y, double z){
-    Bind();
-    glUniform3fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y,z);
-}
-
-void glwrapper_shader::Uniform (QString var, const QColor & col)
+void glwrapper_shader::Uniform (const QString& var, double x)
 {
     Bind();
-    double r,g,b;
-    r = col.red()/255.0;
-    g = col.green()/255.0;
-    b = col.blue()/255.0;
-    glUniform3fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()), r, g, b);
+    glUniform1fARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), x);
 }
 
-void glwrapper_shader::Uniform (QString var, double x, double y, double z, double w){
-    Bind();
-    glUniform4fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y,z,w);
-}
-
-void glwrapper_shader::Uniformi (QString var, int x)
+void glwrapper_shader::Uniform (const QString& var, double x, double y)
 {
     Bind();
-    glUniform1iARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x);
+    glUniform2fARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), x, y);
 }
 
-void glwrapper_shader::Uniformi (QString var, int x, int y)
+void glwrapper_shader::Uniform (const QString& var, double x, double y, double z)
 {
     Bind();
-    glUniform2iARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y);
+    glUniform3fARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), x, y, z);
 }
 
-void glwrapper_shader::Uniformi (QString var, int x, int y, int z)
+void glwrapper_shader::Uniform (const QString& var, const QColor & col)
 {
     Bind();
-    glUniform3iARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y,z);
+    double r, g, b;
+    r = col.red() / 255.0;
+    g = col.green() / 255.0;
+    b = col.blue() / 255.0;
+    glUniform3fARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), r, g, b);
 }
 
-void glwrapper_shader::Uniformi (QString var, int x, int y, int z, int w)
+void glwrapper_shader::Uniform (const QString& var, double x, double y, double z, double w)
 {
     Bind();
-    glUniform4iARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),x,y,z,w);
+    glUniform4fARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), x, y, z, w);
 }
 
-
-
-
-void glwrapper_shader::Uniform (QString var, QObject *obj)
+void glwrapper_shader::Uniformi (const QString& var, int x)
 {
-    Item_buffer *b = dynamic_cast<Item_buffer*>(obj);
-    if(!b){
+    Bind();
+    glUniform1iARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), x);
+}
+
+void glwrapper_shader::Uniformi (const QString& var, int x, int y)
+{
+    Bind();
+    glUniform2iARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), x, y);
+}
+
+void glwrapper_shader::Uniformi (const QString& var, int x, int y, int z)
+{
+    Bind();
+    glUniform3iARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), x, y, z);
+}
+
+void glwrapper_shader::Uniformi (const QString& var, int x, int y, int z, int w)
+{
+    Bind();
+    glUniform4iARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), x, y, z, w);
+}
+
+void glwrapper_shader::Uniform (const QString& var, QObject *obj)
+{
+    auto *b = dynamic_cast<Item_buffer*>(obj);
+    if (!b)
+    {
         qDebug() << obj << " is not a Item_buffer";
         return;
     }
-    if(!GLEW_EXT_bindable_uniform){
+    if (!GLEW_EXT_bindable_uniform)
+    {
         qDebug() << "GL_EXT_bindable_uniform is not supported";
         return;
     }
@@ -346,37 +356,42 @@ void glwrapper_shader::Uniform (QString var, QObject *obj)
     Bind();
 
     int location = glGetUniformLocation(shader, var.toLatin1().constData());
-    b->bindableUniformBindPrivate(shader,location);
+    b->bindableUniformBindPrivate(shader, location);
 }
 
-
-
-
-void glwrapper_shader::NormalQuaternion(QString var)
+void glwrapper_shader::NormalQuaternion(const QString& var)
 {
     float mat[16];
-    glGetFloatv(GL_MODELVIEW_MATRIX,mat);
+    glGetFloatv(GL_MODELVIEW_MATRIX, mat);
     float S;
 
-    S = sqrt(mat[0]*mat[0] + mat[4]*mat[4] + mat[8]*mat[8]);
-    mat[0]/=S; mat[4]/=S; mat[8]/=S;
+    S = sqrt(mat[0] * mat[0] + mat[4] * mat[4] + mat[8] * mat[8]);
+    mat[0] /= S;
+    mat[4] /= S;
+    mat[8] /= S;
 
-    S = sqrt(mat[1]*mat[1] + mat[5]*mat[5] + mat[9]*mat[9]);
-    mat[1]/=S; mat[5]/=S; mat[9]/=S;
+    S = sqrt(mat[1] * mat[1] + mat[5] * mat[5] + mat[9] * mat[9]);
+    mat[1] /= S;
+    mat[5] /= S;
+    mat[9] /= S;
 
-    S = sqrt(mat[2]*mat[2] + mat[6]*mat[6] + mat[10]*mat[10]);
-    mat[2]/=S; mat[6]/=S; mat[10]/=S;
+    S = sqrt(mat[2] * mat[2] + mat[6] * mat[6] + mat[10] * mat[10]);
+    mat[2] /= S;
+    mat[6] /= S;
+    mat[10] /= S;
 
     float Q[4];
     S = 1 + mat[0] + mat[5] + mat[10];
-    if  ( S > 0.00000001 ){
+    if  ( S > 0.00000001 )
+    {
         S = sqrt(S) * 2;
         Q[0] = ( mat[6] - mat[9] ) / S;
         Q[1] = ( mat[8] - mat[2] ) / S;
         Q[2] = ( mat[1] - mat[4] ) / S;
         Q[3] = 0.25 * S;
     }
-    else{
+    else
+    {
         if ( mat[0] > mat[5] && mat[0] > mat[10] )
         {
             S  = sqrt( 1.0 + mat[0] - mat[5] - mat[10] ) * 2;
@@ -385,25 +400,27 @@ void glwrapper_shader::NormalQuaternion(QString var)
             Q[2] = (mat[8] + mat[2] ) / S;
             Q[3] = (mat[6] - mat[9] ) / S;
         }
-        else if ( mat[5] > mat[10] )
-        {
-            S  = sqrt( 1.0 + mat[5] - mat[0] - mat[10] ) * 2;
-            Q[0] = (mat[1] + mat[4] ) / S;
-            Q[1] = 0.25 * S;
-            Q[2] = (mat[6] + mat[9] ) / S;
-            Q[3] = (mat[8] - mat[2] ) / S;
-        } else
-        {
-            S  = sqrt( 1.0 + mat[10] - mat[0] - mat[5] ) * 2;
-            Q[0] = (mat[8] + mat[2] ) / S;
-            Q[1] = (mat[6] + mat[9] ) / S;
-            Q[2] = 0.25 * S;
-            Q[3] = (mat[1] - mat[4] ) / S;
-        }
+        else
+            if ( mat[5] > mat[10] )
+            {
+                S  = sqrt( 1.0 + mat[5] - mat[0] - mat[10] ) * 2;
+                Q[0] = (mat[1] + mat[4] ) / S;
+                Q[1] = 0.25 * S;
+                Q[2] = (mat[6] + mat[9] ) / S;
+                Q[3] = (mat[8] - mat[2] ) / S;
+            }
+            else
+            {
+                S  = sqrt( 1.0 + mat[10] - mat[0] - mat[5] ) * 2;
+                Q[0] = (mat[8] + mat[2] ) / S;
+                Q[1] = (mat[6] + mat[9] ) / S;
+                Q[2] = 0.25 * S;
+                Q[3] = (mat[1] - mat[4] ) / S;
+            }
     }
 
     Bind();
-    glUniform4fARB(glGetUniformLocationARB(shader,var.toLatin1().constData()),Q[0],Q[1],Q[2],-Q[3]);
+    glUniform4fARB(glGetUniformLocationARB(shader, var.toLatin1().constData()), Q[0], Q[1], Q[2], -Q[3]);
 }
 
 bool glwrapper_shader::isErrored() const
@@ -431,7 +448,7 @@ void glwrapper_shader::printInfoLog(GLhandleARB obj)
     glGetObjectParameterivARB(obj, GL_OBJECT_INFO_LOG_LENGTH_ARB, &infologLength);
     if (infologLength > 0)
     {
-        size_t sz = static_cast<decltype (sz)>(infologLength + 1);
+        auto sz = static_cast<size_t>(infologLength + 1);
         infoLog = new char[sz];
         memset(infoLog, 0, sz);
         glGetInfoLogARB(obj, infologLength, &charsWritten, infoLog);

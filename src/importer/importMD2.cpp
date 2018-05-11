@@ -27,9 +27,11 @@
 #include "../item_mesh.h"
 #include <QFile>
 
-namespace md2{
+namespace md2
+{
 
-    struct header_t{
+    struct header_t
+    {
         int ident;                  // magic number: "IDP2"
         int version;                // version: must be 8
 
@@ -51,65 +53,74 @@ namespace md2{
         int offset_frames;          // offset frame data
         int offset_glcmds;          // offset OpenGL command data
         int offset_end;             // offset end of file
-        };
+    };
 
     typedef float vec3_t[3];
 
-    struct skin_t{
+    struct skin_t
+    {
         char name[64];              // texture file name
-        };
+    };
 
-    struct texCoord_t{
+    struct texCoord_t
+    {
         short s;
         short t;
-        };
+    };
 
-    struct frame_t{
+    struct frame_t
+    {
         vec3_t scale;               // scale factor
         vec3_t translate;           // translation vector
         char name[16];              // frame name
         //struct vertex_t *vertices;  // list of frame's vertices
-        };
+    };
 
-    struct vertex_t{
+    struct vertex_t
+    {
         unsigned char v[3];         // position
         unsigned char normalIndex;  // normal vector index
-        };
+    };
 
-    struct glcmd_t{
+    struct glcmd_t
+    {
         float s;                    // s texture coord.
         float t;                    // t texture coord.
         int index;                  // vertex index
-        };
+    };
 
-    vec3_t anorms_table[162] = {
-        #include "anorms.h"
-        };
-    }
+    vec3_t anorms_table[162] =
+    {
+#include "anorms.h"
+    };
+}
 
 using namespace md2;
 
 
 
-void Item_node::importMD2(const QString& fn){
+void Item_node::importMD2(const QString& fn)
+{
     qDebug() << "MD2 importer start";
 
     QFile file(fn);
-    if ( !file.open( QIODevice::ReadOnly ) ) {
+    if ( !file.open( QIODevice::ReadOnly ) )
+    {
         qDebug() << "MD2_importer: File open failed";
         return;
-        }
+    }
 
     skin_t* skins = NULL;
     texCoord_t* texCoords = NULL;
     int *glcmds = NULL;
     vertex_t *vertices = NULL;
 
-    try{
+    try
+    {
         header_t header;
         file.read ((char *) &header, sizeof(header_t));
 
-        if ((header.ident != 844121161) ||(header.version != 8))throw "Not a MD2 Header";
+        if ((header.ident != 844121161) || (header.version != 8))throw "Not a MD2 Header";
 
         skins = new skin_t[header.num_skins];
         texCoords = new texCoord_t[header.num_texCoords];
@@ -132,11 +143,12 @@ void Item_node::importMD2(const QString& fn){
         int i, *pglcmds = glcmds;
         int vert_count = 0;
 
-        while ((i = *(pglcmds++)) != 0){
+        while ((i = *(pglcmds++)) != 0)
+        {
             if (i < 0)i = -i;
             vert_count += i;
-            pglcmds += 3*i;
-            }
+            pglcmds += 3 * i;
+        }
 
         Item_mesh* I_model = new Item_mesh(this, "Model", vert_count);
 
@@ -153,36 +165,43 @@ void Item_node::importMD2(const QString& fn){
         vert_count = 0;
         int index_count = 0;
         pglcmds = glcmds;
-        while ((i = *(pglcmds++)) != 0){
+        while ((i = *(pglcmds++)) != 0)
+        {
             packets = (struct glcmd_t *)pglcmds;
-            if (i < 0){
+            if (i < 0)
+            {
                 //Fan Mode
                 i = -i;
-                for (int k = 0; k < (i-2); k ++){
+                for (int k = 0; k < (i - 2); k ++)
+                {
                     I_index->set(index_count, vert_count, vert_count + k + 1, vert_count + k + 2);
                     index_count ++;
-                    }
                 }
-            else{
+            }
+            else
+            {
                 //Stripe mode
-                for (int k = 0; k < (i-2); k ++){
+                for (int k = 0; k < (i - 2); k ++)
+                {
                     if (k & 1)I_index->set(index_count, vert_count + k, vert_count + k + 2, vert_count + k + 1);
                     else I_index->set(index_count, vert_count + k, vert_count + k + 1, vert_count + k + 2);
                     index_count ++;
-                    }
                 }
-            for (int k = 0 ; k < i; k++){
-                I_uvcoord->set(vert_count,packets[k].s,packets[k].t);
-                vert_count ++;
-                }
-            pglcmds += 3*i;
             }
+            for (int k = 0 ; k < i; k++)
+            {
+                I_uvcoord->set(vert_count, packets[k].s, packets[k].t);
+                vert_count ++;
+            }
+            pglcmds += 3 * i;
+        }
 
         file.seek (header.offset_frames);
 
         frame_t frame;
 
-        for (int f = 0; f < header.num_frames; ++f){
+        for (int f = 0; f < header.num_frames; ++f)
+        {
             file.read((char*)&frame.scale, sizeof (vec3_t));
             file.read((char*)&frame.translate, sizeof (vec3_t));
             file.read((char*)&frame.name, 16);
@@ -191,33 +210,36 @@ void Item_node::importMD2(const QString& fn){
             qDebug() << frame.name << f;
             vert_count = 0;
             pglcmds = glcmds;
-            while ((i = *(pglcmds++)) != 0){
+            while ((i = *(pglcmds++)) != 0)
+            {
                 packets = (struct glcmd_t *)pglcmds;
                 if (i < 0)i = -i;
-                for (int k = 0 ; k < i; k++){
+                for (int k = 0 ; k < i; k++)
+                {
 
                     float x = frame.scale[0] * vertices[packets[k].index].v[0] + frame.translate[0];
                     float y = frame.scale[1] * vertices[packets[k].index].v[1] + frame.translate[1];
                     float z = frame.scale[2] * vertices[packets[k].index].v[2] + frame.translate[2];
-                    I_position->setInKeyFrame(f,vert_count,x,y,z);
+                    I_position->setInKeyFrame(f, vert_count, x, y, z);
 
                     float *v = anorms_table[vertices[packets[k].index].normalIndex];
 
-                    I_normal->setInKeyFrame(f,vert_count, v[0],v[1],v[2]);
+                    I_normal->setInKeyFrame(f, vert_count, v[0], v[1], v[2]);
 
                     vert_count ++;
-                    }
-                pglcmds += 3*i;
                 }
+                pglcmds += 3 * i;
             }
         }
-    catch(char *e){
+    }
+    catch (char *e)
+    {
         qDebug() << "MD2 Importer: " << e;
-        }
+    }
 
     file.close();
     if (skins != NULL)delete[] skins;
     if (texCoords != NULL)delete[] texCoords;
     if (vertices != NULL) delete[] vertices;
     if (glcmds != NULL)delete[] glcmds;
-    }
+}

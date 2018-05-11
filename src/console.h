@@ -67,7 +67,7 @@ public:
         console = parent;
         meta = nullptr;
     }
-    virtual ~ConsoleLine()override = default;
+    ~ConsoleLine()override = default;
     void keyPressEvent(QKeyEvent *e) override;
 public slots:
     void helpHandler(const QString& string);
@@ -90,7 +90,7 @@ class Console : public QObject
     Q_OBJECT
 public:
     Console(QObject *parent);
-    virtual ~Console() override;
+    ~Console() override;
     QPointer<SEngine> getEngine();
 public slots:
     void toggle(bool);
