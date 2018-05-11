@@ -28,6 +28,7 @@
 #include <QtScript>
 
 #include "prohibited_filter.h"
+#include "dock_prep.h"
 
 //***********************ConsoleCompletionBox*****************************
 
@@ -123,8 +124,8 @@ void ConsoleLine ::keyPressEvent(QKeyEvent *e)
             QObject *qobj = obj.toQObject();
             if (qobj == nullptr)
                 return; // Fix for deleted objects
-            for (int i = 0; i < qobj->children().size(); i++)
-                comp << qobj->children().at(i)->objectName();
+            for (const auto i : qobj->children())
+                comp << i->objectName();
             meta = qobj->metaObject();
         }
         // append propertys
@@ -202,9 +203,6 @@ void ConsoleLine::helpHandler(const QString &_string)
 }
 
 //***********************Console*********************************
-
-extern const Qt::DockWidgetAreas DOCK_AREAS;
-
 Console::Console(QObject *parent) :
     QObject(parent)
 {
@@ -224,18 +222,7 @@ Console::Console(QObject *parent) :
 
     widget->setLayout(layout);
 
-    dock = new QDockWidget("Console"); //, dynamic_cast<QMainWindow*>(parent));
-    dock->setAllowedAreas(DOCK_AREAS);
-    dock->setWidget(widget);
-
-    // search MainWindow
-    QWidgetList l = QApplication::topLevelWidgets();
-    for (int i = 0; i < l.size(); i++)
-    {
-        if (QMainWindow *w = dynamic_cast<QMainWindow *>(l.at(i)))
-            w->addDockWidget(Qt::RightDockWidgetArea, dock);
-    }
-
+    dock = nsDocks::createDockFromWidget(widget, tr("Console"));
     dock->hide();
     connect(in, SIGNAL(returnPressed()), this, SLOT(returnPressed()));
 }
@@ -244,7 +231,8 @@ Console::~Console()
 {
     delete in;
     delete out;
-    delete dock;
+    if (dock)
+        dock->deleteLater();
 
     if (eng)
         delete eng;

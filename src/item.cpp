@@ -53,7 +53,7 @@ Item::Item(Item *parent, const QString& name ):
 Item::~Item()
 {
     if (dock)
-        dock->deleteLater(); // owned by Mainwindow
+        dock->deleteLater(); // owned by MainWindow
     resetMenu();
 }
 
@@ -65,13 +65,8 @@ function to add a QWidget or similar to the Workspace area
 extern const Qt::DockWidgetAreas DOCK_AREAS;
 void Item::appendToWs(QWidget *w)
 {
-    dock = new QDockWidget(objectName(), ws);
-    dock->setAllowedAreas(DOCK_AREAS);
-    dock->setWidget(w);
-    ws->addDockWidget(Qt::RightDockWidgetArea, dock);
+    dock = nsDocks::createDockFromWidget(w, objectName());
 }
-
-
 
 /*!
 Function for setting the objects name.

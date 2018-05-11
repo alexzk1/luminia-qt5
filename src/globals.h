@@ -1,7 +1,7 @@
 #ifndef GLOBALS_H
 #define GLOBALS_H
 
-#include <stdio.h>
+#include <cstdio>
 #define GL_CHECK_ERROR()                        \
 ({                                               \
     GLenum error = glGetError();                \
@@ -19,5 +19,9 @@
 
 
 #include <QDebug>
+
+
+
+
 
 #endif // GLOBALS_H

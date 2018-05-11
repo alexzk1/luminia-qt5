@@ -23,9 +23,10 @@
 
 #include "dialog_factory_private.h"
 #include <QFrame>
-#include <QMainWindow>
-extern const Qt::DockWidgetAreas DOCK_AREAS;
-namespace QS{
+#include "../dock_prep.h"
+
+namespace QS
+{
 
     DockPrivate::DockPrivate(QWidget *parent) :
         QFrame(parent),
@@ -34,53 +35,46 @@ namespace QS{
         setFrameStyle(QFrame::Panel | QFrame::Sunken);
         this->parent = this;
 
-        QVBoxLayout *vbox = new QVBoxLayout(this);
+        auto vbox = new QVBoxLayout(this);
         setLayout(vbox);
         //vbox->setMargin(0);
         hbox = new QHBoxLayout;
         vbox->addLayout(hbox);
-
-
         grid = new QGridLayout;
         hbox->addLayout(grid);
         grid->setAlignment(Qt::AlignTop);
-
-        dock = new QDockWidget(tr("Script Dock"));
-        dock->setAllowedAreas(DOCK_AREAS); // lumina specific
-        dock->setWidget(this);
-
-        //search MainWindow
-        QWidgetList l = QApplication::topLevelWidgets();
-        for (int i = 0; i < l.size(); i++){
-            if (QMainWindow* w = dynamic_cast<QMainWindow*>(l.at(i))) w->addDockWidget(Qt::RightDockWidgetArea, dock);
-        }
-
+        dock = nsDocks::createDockFromWidget(this, tr("Script Dock"));
     }
 
-    DockPrivate::~DockPrivate(){
-        dock->deleteLater();
+    DockPrivate::~DockPrivate()
+    {
+        if (dock)
+            dock->deleteLater();
     }
 
 
-    void DockPrivate::addSpace(int space){
-        QSpacerItem *spacer = new QSpacerItem(0, qMax(space,0), QSizePolicy::Fixed, QSizePolicy::Fixed);
+    void DockPrivate::addSpace(int space)
+    {
+        QSpacerItem *spacer = new QSpacerItem(0, qMax(space, 0), QSizePolicy::Fixed, QSizePolicy::Fixed);
         grid->addItem(spacer, grid->rowCount(), 1);
         invisibleButtonGroup = nullptr;
     }
 
-    void DockPrivate::add(Widget *widget){
+    void DockPrivate::add(Widget *widget)
+    {
         QWidget *w = widget->widget;
         int row = grid->rowCount();
-        if (qobject_cast<Labeled *>(widget)) {
+        if (qobject_cast<Labeled *>(widget))
+        {
             QLabel *label = ((Labeled*)widget)->labelWidget;
             label->setVisible(!label->text().isEmpty());
             grid->addWidget(label, row, 0);
             grid->addWidget(w, row, 1);
         }
-        else{
+        else
             grid->addWidget(w, row, 0,  1, 2);
-        }
-        if (w && qobject_cast<QRadioButton *>(w)) {
+        if (w && qobject_cast<QRadioButton *>(w))
+        {
             if (!invisibleButtonGroup)
                 invisibleButtonGroup = new QButtonGroup(this);
             invisibleButtonGroup->addButton(qobject_cast<QRadioButton *>(w));
@@ -88,62 +82,74 @@ namespace QS{
         lastWidget = w;
     }
 
-    void DockPrivate::show(){
+    void DockPrivate::show()
+    {
         dock->show();
     }
 
-    void DockPrivate::hide(){
+    void DockPrivate::hide()
+    {
         dock->hide();
     }
 
-    void DockPrivate::setTitle(const QString &title){
+    void DockPrivate::setTitle(const QString &title)
+    {
         dock->setWindowTitle(title);
         setWindowTitle(title);
     }
 
-    Dock::Dock(const QString &title, QWidget *parent){
+    Dock::Dock(const QString &title, QWidget *parent)
+    {
         d = new DockPrivate(parent);
         widget = d;
         if (!title.isEmpty())
             setTitle(title);
     }
 
-    Dock::Dock(QObject*){
+    Dock::Dock(QObject*)
+    {
         d = new DockPrivate(nullptr);
         widget = d;
     }
 
-    Dock::~Dock(){
+    Dock::~Dock()
+    {
         delete d;
     }
 
-    void Dock::setTitle(const QString &title){
+    void Dock::setTitle(const QString &title)
+    {
         d->setTitle(title);
     }
 
     /*!
-title property
-*/
-    QString Dock::title() const {
+    title property
+    */
+    QString Dock::title() const
+    {
         return d->windowTitle();
     }
 
-    void Dock::setWidth(int width){
+    void Dock::setWidth(int width)
+    {
         d->width = width;
     }
 
     /*!
-width property
-*/
-    int Dock::width() const {
+    width property
+    */
+    int Dock::width() const
+    {
         return d->width;
     }
     /*!
-void newTab(String name)\n
-add a new tab with name "name"
-*/
-    void Dock::newTab(const QString &label){
-        if (!d->tabWidget) {
+    void newTab(String name)\n
+    add a new tab with name "name"
+    */
+    void Dock::newTab(const QString &label)
+    {
+        if (!d->tabWidget)
+        {
             d->tabWidget = new QTabWidget(d);
             int row = d->grid->rowCount();
             d->grid->addWidget(d->tabWidget, row, 0, 1, 2);
@@ -152,60 +158,66 @@ add a new tab with name "name"
         d->tabWidget->addTab(w, label);
         d->parent = w;
         d->hbox = new QHBoxLayout(w);
-        d->grid = new QGridLayout(0);
+        d->grid = new QGridLayout(nullptr);
         d->hbox->addLayout(d->grid);
         d->grid->setAlignment(Qt::AlignTop);
     }
     /*!
-String currentTab()\n
-returns the name of the current active Tab.
-*/
-    QString Dock::currentTab() const{
-        if (!d->tabWidget) {
+    String currentTab()\n
+    returns the name of the current active Tab.
+    */
+    QString Dock::currentTab() const
+    {
+        if (!d->tabWidget)
             return QString("");
-        }
         return d->tabWidget->tabText(d->tabWidget->currentIndex ());
     }
     /*!
-newColumn();\n
-start a new column of widgets
-*/
-    void Dock::newColumn(){
-        if (d->grid->rowCount()) {
+    newColumn();\n
+    start a new column of widgets
+    */
+    void Dock::newColumn()
+    {
+        if (d->grid->rowCount())
+        {
             d->hbox->addSpacing(17);
-            d->grid = new QGridLayout(0);
+            d->grid = new QGridLayout(nullptr);
             d->hbox->addLayout(d->grid);
             d->grid->setAlignment(Qt::AlignTop);
         }
     }
     /*!
-addSpace(number);\n
-add a Spacer
-*/
-    void Dock::addSpace(int space){
+    addSpace(number);\n
+    add a Spacer
+    */
+    void Dock::addSpace(int space)
+    {
         d->addSpace(space);
     }
 
     /*!
-add(Widget);\n
-add a Widget to the dialog
-*/
-    void Dock::add(Widget *widget){
+    add(Widget);\n
+    add a Widget to the dialog
+    */
+    void Dock::add(Widget *widget)
+    {
         d->add(widget);
     }
 
     /*!
-show();\n
-show the dock.
-*/
-    void Dock::show(){
+    show();\n
+    show the dock.
+    */
+    void Dock::show()
+    {
         d->show();
     }
     /*!
-hide();\n
-hide the dock.
-*/
-    void Dock::hide(){
+    hide();\n
+    hide the dock.
+    */
+    void Dock::hide()
+    {
         d->hide();
     }
 

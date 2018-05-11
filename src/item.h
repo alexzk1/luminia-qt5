@@ -48,13 +48,13 @@ class Item : public QObject, public QTreeWidgetItem, public QScriptable
     Q_OBJECT
 public:
     Item(Item *parent, const QString& label1);
-    virtual ~Item() override;
+    ~Item() override;
     virtual bool dragAccept(Item*);
     virtual QString statusText() const
     {
         return QString();
     }
-    virtual void setData ( int column, int role,  const QVariant &value ) override;
+    void setData ( int column, int role,  const QVariant &value ) override;
     void setName (const QString& name);
     QString getName() const;
     Item *parent() const;
@@ -87,7 +87,7 @@ protected:
     template<class T, class ...Args>
     T* makeNewItemNoThis(Args... args)
     {
-        T* ptr = new T(args...);
+        auto ptr = new T(args...);
         QScriptEngine *eng = engine();
         if (eng)
             ptr->bindToEngine(eng);
@@ -121,7 +121,7 @@ class Item_world : public Item
 public:
     Item_world();
     void setCamSize(int w, int h);
-    virtual bool dragAccept(Item*)override;
+    bool dragAccept(Item*)override;
 public slots:
 
     void setTime(double value);
@@ -130,13 +130,13 @@ public slots:
     int getCamWidth();
     int getCamHeight();
     void Call(const QString& function, const QVariantList& args = QVariantList());
-    virtual QString getType()const override;
-    virtual void deleteLater() override;
+    QString getType()const override;
+    void deleteLater() override;
 protected:
     double timev;
     int CamWidth, CamHeight;
-    virtual bool isDeletable() const override;
-    virtual void addMenu(QMenu *menu) override;
+    bool isDeletable() const override;
+    void addMenu(QMenu *menu) override;
 signals:
     void update();
 public:
@@ -187,9 +187,9 @@ class Item_node : public Item_matrix
     Q_OBJECT
 public:
     Item_node( Item *parent, const QString& label1);
-    virtual bool dragAccept(Item*) override;
+    bool dragAccept(Item*) override;
 public slots:
-    virtual QString getType()const override;
+    QString getType()const override;
     void Call(const QString& function, const QVariantList& args = QVariantList());
     //Model importer section: Source in importer/
     void importModel(const QString& filename = "");
@@ -215,7 +215,7 @@ protected:
     void importX  (const QString& filename);
     void importCMF(const QString& filename);
 
-    virtual void addMenu(QMenu *menu) override;
+    void addMenu(QMenu *menu) override;
 };
 
 //**********************************************************
@@ -230,10 +230,10 @@ class Item_cam : public Item_matrix
     Q_PROPERTY(int Far READ getFar WRITE Far)
 public:
     Item_cam(Item_world *parent, const QString& label1);
-    virtual ~Item_cam() override = default;
+    ~Item_cam() override = default;
 public slots:
-    virtual QString getType() const override;
-    virtual void deleteLater() override;
+    QString getType() const override;
+    void deleteLater() override;
 
 protected:
     double getNear();
@@ -241,7 +241,7 @@ protected:
     void Near(double val);
     void Far(double val);
     GLCam *cam;
-    virtual bool isDeletable() const override;
+    bool isDeletable() const override;
 };
 
 
@@ -258,7 +258,7 @@ class Item_edit : public Item
     Q_OBJECT
 public:
     Item_edit( Item *parent, const QString& label1);
-    virtual ~Item_edit() override;
+    ~Item_edit() override;
 public slots:
 
     void saveas(const QString& filename = "");
@@ -270,13 +270,13 @@ public slots:
     QString text() const;
 
     void setText(const QString&);
-    virtual QString getType() const override;
+    QString getType() const override;
 
 protected:
     QPointer<SourceEdit> edit;
     QList<QPointer<QAction>> commonActions;
     QString fn;
-    virtual void addMenu(QMenu *menu) override;
+    void addMenu(QMenu *menu) override;
 };
 
 //**********************************************************
@@ -289,11 +289,11 @@ class Item_shader : public Item_edit
     Q_ENUMS(shadertype)
 public:
     Item_shader( Item *parent, const QString& label1, int shadertype);
-    virtual ~Item_shader() override = default;
+    ~Item_shader() override = default;
     enum shadertype {Vertexshader, Geometryshader, Fragmentshader};
     int getShaderType();
 public slots:
-    virtual QString getType()const override
+    QString getType()const override
     {
         return QString("Shader");
     }
@@ -316,14 +316,14 @@ class Item_script : public Item_edit
     Q_OBJECT
 public:
     Item_script( Item *parent, const QString& label1);
-    virtual ~Item_script() override;
+    ~Item_script() override;
 
 public slots:
     void run();
     void stop();
     bool isRunning() const;
     void Call(const QString& function, const QVariantList& args = QVariantList());
-    virtual QString getType()const override;
+    QString getType()const override;
 private slots:
     void completationHandler(const QString&);
     void helpHandler(const QString&);
@@ -349,8 +349,8 @@ class Item_uniform: public Item
     friend class glwrapper_shader;
 public:
     Item_uniform( Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT);
-    virtual ~Item_uniform() override;
-    virtual QString statusText()const override;
+    ~Item_uniform() override;
+    QString statusText()const override;
 
     double& operator()(unsigned dim = 0, unsigned index = 0, unsigned keyframe = 0);
 
@@ -377,7 +377,7 @@ public slots:
 
     int getFormat();
 
-    virtual QString getType() const override;
+    QString getType() const override;
 
 protected:
     void refresh();
@@ -394,7 +394,7 @@ protected:
         int *i;
         float *f;
     } buf, tmp_buf;
-    virtual void addMenu(QMenu *menu) override;
+    void addMenu(QMenu *menu) override;
 private:
     double ref_buf; //doublebuffering for reference
     int ref_pos; //position in double buffer
@@ -413,8 +413,8 @@ class Item_buffer: public Item
     friend class glwrapper_shader;
 public:
     Item_buffer(Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT, bool normalized_int = true);
-    virtual ~Item_buffer() override;
-    virtual QString statusText()const override;
+    ~Item_buffer() override;
+    QString statusText()const override;
 
     double& operator()(unsigned dim = 1, unsigned index = 1, unsigned keyframe = 1);
 
@@ -446,13 +446,7 @@ public slots:
     unsigned getFormat();
     bool isNormalizedInt();
 
-    virtual QString getType() const override
-    {
-        return QString("Buffer");
-    }
-
-
-
+    QString getType() const override;
 protected:
     void refresh();
     unsigned size;
@@ -491,7 +485,7 @@ protected:
     bool bound_by_GPU; // bound by GPU
     bool is_mapped;
 
-    virtual void addMenu(QMenu *menu) override;
+    void addMenu(QMenu *menu) override;
 private:
     double ref_buf, ref_buf_old; //doublebuffering for reference, old to detect writing.
     int ref_pos; //position in double buffer
@@ -512,9 +506,9 @@ protected:
 public:
     using id_t = int64_t;
     Item_bone(Item *parent, const QString& label1, Item_armature *armature, id_t id = -1);
-    virtual ~Item_bone() override;
-    virtual QString statusText() const override;
-    virtual bool dragAccept(Item*) override;
+    ~Item_bone() override;
+    QString statusText() const override;
+    bool dragAccept(Item*) override;
     virtual QPointer<Item_armature> getArmature() const;
     float* getJoint()
     {
@@ -536,7 +530,7 @@ public slots:
     void EulerRotation(float, float, float);
     virtual void Reset();
 
-    virtual QString getType() const override;
+    QString getType() const override;
 
 private:
     const Item_armature* armature;
@@ -552,7 +546,7 @@ protected:
     void qmult(float *qa, float *qb, float *out);
     void qrot(float *v, float *q, float *out);
     void qrotaround(float *v, float *p, float *q, float *out);
-    virtual void addMenu(QMenu *menu) override;
+    void addMenu(QMenu *menu) override;
 
 
     virtual id_t requestId(id_t id);
@@ -570,20 +564,20 @@ class Item_armature : public Item_bone
     friend class Item_bone;
 public:
     Item_armature( Item *parent, const QString& label1);
-    virtual QString statusText() const override;
-    virtual QPointer<Item_armature> getArmature() const override;
+    QString statusText() const override;
+    QPointer<Item_armature> getArmature() const override;
 public slots:
     void Quaternions(QObject* shader, QString var);     //Quaternion
     void Joints(QObject* shader, QString var);      //Joints
     void Matrices(QObject* _shader, QString var);       //4x4 matrices
 
     void Reset() override;
-    virtual QString getType() const override;
+    QString getType() const override;
 
 protected:
     std::vector<Item_bone*> getSortedBones();
-    virtual float* getParentJoint() override;
-    virtual id_t requestId(id_t id) override final;
+    float* getParentJoint() override;
+    id_t requestId(id_t id)  final;
 private:
     std::set<id_t> used_ids;
     id_t           current_max_id;

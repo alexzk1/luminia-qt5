@@ -36,7 +36,6 @@
 #include "dock_prep.h"
 
 QPointer<MainWindow> MainWindow::instance;
-extern const Qt::DockWidgetAreas DOCK_AREAS;
 
 MainWindow::MainWindow()
 {
@@ -45,11 +44,9 @@ MainWindow::MainWindow()
 
     setDockNestingEnabled(true);
 
-    QPointer<QDockWidget> dockTree = new QDockWidget("World Tree", this);
+    treeview = new TreeView (this);
+    QPointer<QDockWidget> dockTree = nsDocks::createDockFromWidget(treeview, tr("World Tree"), this);
     dockTree->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea); //yeh, dont want possible top/bottom for the tree
-
-    treeview = new TreeView (dockTree);
-    dockTree->setWidget(treeview);
 
     addDockWidget(Qt::LeftDockWidgetArea, dockTree);
 

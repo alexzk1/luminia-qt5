@@ -24,7 +24,7 @@
 #include <QTextEdit>
 #include <QGLWidget>
 #include <QDockWidget>
-#include "mainwindow.h"
+#include "dock_prep.h"
 
 
 extern const Qt::DockWidgetAreas DOCK_AREAS;
@@ -36,11 +36,7 @@ Profiler::Profiler(QObject *parent):
     text = new QTextEdit();
     text->setReadOnly(true);
 
-    dock = new QDockWidget("Profiler");
-    dock->setAllowedAreas(DOCK_AREAS);
-    dock->setWidget(text);
-
-    MainWindow::instance->addDockWidget(Qt::RightDockWidgetArea, dock);
+    dock = nsDocks::createDockFromWidget(text, tr("Profiler"));
     dock->hide();
 
     registered = 0;
@@ -52,7 +48,9 @@ Profiler::Profiler(QObject *parent):
 Profiler::~Profiler()
 {
     delete text;
-    delete dock;
+    if (dock)
+        dock->deleteLater();
+
     freeQueries();
 }
 

@@ -51,7 +51,7 @@ else {
 include($$PWD/src/base64/base64.pri)
 PRE_TARGETDEPS += base64
 
-HEADERS	+=	src/mainwindow.h \
+HEADERS	=	src/mainwindow.h \
                 src/glcam.h src/tree.h \
                 src/item.h \
                 src/item_image.h \
@@ -89,7 +89,7 @@ HEADERS	+=	src/mainwindow.h \
     src/prohibited_filter.h \
     src/texture2lum.h
 
-SOURCES +=	src/main.cpp \
+SOURCES =	src/main.cpp \
                 src/mainwindow.cpp \
                 src/glcam.cpp \
                 src/tree.cpp \
@@ -136,10 +136,11 @@ SOURCES +=	src/main.cpp \
                 src/factory/file_factory_private.cpp \
                 src/factory/colorwidget_factory_private.cpp \
                 src/factory/factory.cpp \
-    src/loaderpaths.cpp \
-    src/script_extender_engine.cpp \
-    src/script_header_parser.cpp \
-    src/filterableitem.cpp
+                src/loaderpaths.cpp \
+                src/script_extender_engine.cpp \
+                src/script_header_parser.cpp \
+                src/filterableitem.cpp \
+                src/dock_prep.cpp
 
 
 debug: SOURCES +=     src/tests.cpp

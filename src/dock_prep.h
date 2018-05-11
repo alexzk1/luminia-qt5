@@ -2,16 +2,13 @@
 #define DOCK_PREP_H
 
 #include <QWidget>
+class QDockWidget;
 
-//should be called on nested widgets, not a dock itself
-void inline applyPolicy(QWidget* w, int hs = 10, int vs = 1)
+namespace nsDocks
 {
-    auto p = w->sizePolicy();
-    p.setVerticalStretch(vs);
-    p.setHorizontalStretch(hs);
-    w->setSizePolicy(p);
+    //should be called on nested widgets, not a dock itself
+    void applyPolicy(QWidget* w, int hs = 10, int vs = 1);
+    QDockWidget* createDockFromWidget(QWidget* widget, const QString& dockName = "",  QWidget * parentWidget = nullptr);
 }
-
-
 
 #endif // DOCK_PREP_H

@@ -35,10 +35,6 @@
 
 Q_SCRIPT_DECLARE_QMETAOBJECT(glwrapper, QObject*);
 
-
-//u can use this constant to reconfigure dockers globally (allowed areas)
-extern const Qt::DockWidgetAreas DOCK_AREAS(Qt::DockWidgetArea::AllDockWidgetAreas);
-
 int main(int argc, char **argv)
 {
 
