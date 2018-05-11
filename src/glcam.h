@@ -36,8 +36,8 @@ class GLCam : public QGLWidget
     Q_OBJECT
     friend class Item_cam;
 public:
-    GLCam(QWidget* parent,Item_cam* cam); //, const QGLWidget * shareWidget = NULL);
-    virtual ~GLCam() override;
+    GLCam(QWidget* parent, Item_cam* cam); //, const QGLWidget * shareWidget = NULL);
+    ~GLCam() override;
 public slots:
 
 protected:
@@ -48,7 +48,7 @@ protected:
     void mouseMoveEvent (QMouseEvent *ev)override;
     void mouseReleaseEvent (QMouseEvent *ev)override;
     void wheelEvent (QWheelEvent *ev)override;
-    virtual void keyPressEvent(QKeyEvent *e)override;
+    void keyPressEvent(QKeyEvent *e)override;
 public:
     void resizeGL( int w, int h )override;
 

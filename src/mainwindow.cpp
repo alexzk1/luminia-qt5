@@ -42,11 +42,9 @@ MainWindow::MainWindow()
     instance = this;
     Item::ws = this;
 
-    setDockNestingEnabled(true);
-
     treeview = new TreeView (this);
     QPointer<QDockWidget> dockTree = nsDocks::createDockFromWidget(treeview, tr("World Tree"), this);
-    dockTree->setAllowedAreas(Qt::LeftDockWidgetArea);
+
 
     addDockWidget(Qt::LeftDockWidgetArea, dockTree);
 

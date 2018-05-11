@@ -27,15 +27,17 @@ QGLWidget* GLCam::shareWidget = nullptr;
 
 
 //GLCam::GLCam( QWidget* parent, Item_cam* _cam, const QGLWidget *shareWidget): QGLWidget( parent, shareWidget ){
-GLCam::GLCam( QWidget* parent, Item_cam* _cam): QGLWidget( parent, GLCam::shareWidget )
+GLCam::GLCam( QWidget* parent, Item_cam* _cam):
+    QGLWidget( parent, GLCam::shareWidget )
 {
-    if(!shareWidget)
+    if (!shareWidget)
         shareWidget = this;
 
     cam = _cam;
 
     object = 0;
-    zoom =1.0 ;
+    zoom = 1.0 ;
+    setSizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::MinimumExpanding);
     setMinimumHeight ( 240 );
     setMinimumWidth ( 320 );
     setFocusPolicy(Qt::StrongFocus);
@@ -70,18 +72,19 @@ void GLCam::paintGL()
         float mat[16];
         cam->getInverseMatrix(mat);
         glLoadMatrixf(mat);
-        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it)){
+        if (auto* scriptitem = dynamic_cast<Item_script*>(*it))
+        {
             //simple code to apply the nodes matices, a stack based could be better
             QList<float*> matrixlist;
-            Item_matrix* m = reinterpret_cast<Item_matrix*>(scriptitem); //Only used to get the parent
-            while( (m = dynamic_cast<Item_matrix*>(m->parent()))!= nullptr){
+            auto* m = reinterpret_cast<Item_matrix*>(scriptitem); //Only used to get the parent
+            while ( (m = dynamic_cast<Item_matrix*>(m->parent())) != nullptr)
+            {
                 float *mat =  m->getMatrix();
                 matrixlist.append(mat);
             }
 
-            for (int k = matrixlist.size()-1; k >= 0; k--){
+            for (int k = matrixlist.size() - 1; k >= 0; k--)
                 glMultMatrixf(matrixlist.at(k));
-            }
 
             scriptitem->Call("render");
             Item_buffer::UnbindAll(); //unbind all VBOs
@@ -101,25 +104,23 @@ void GLCam::paintGL()
   Set up the OpenGL rendering state, and define display list
 */
 
-void GLCam::initializeGL(){
+void GLCam::initializeGL()
+{
     glewInit();
     if (!GLEW_ARB_vertex_shader && GLEW_ARB_fragment_shader)
-    {
         FATAL_ERROR("No GLSL support\n");
-    }
-    if (!GLEW_EXT_framebuffer_object){
+    if (!GLEW_EXT_framebuffer_object)
         FATAL_ERROR("No GL_EXT_framebuffer_object support\n");
-    }
 
-    glClearColor(0,0,0,0); 		// Set OpenGL clear to black
+    glClearColor(0, 0, 0, 0);   // Set OpenGL clear to black
     glEnable(GL_VERTEX_PROGRAM_POINT_SIZE_ARB); //don't know why that state exist....
 
     GLint i;
     glGetIntegerv( GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS_NV, &i);
     glGetIntegerv( GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_COMPONENTS_NV, &i);
     glGetIntegerv( GL_MAX_BINDABLE_UNIFORM_SIZE_EXT, &i);
-    glPixelStorei(GL_PACK_ALIGNMENT,1); //avoid trouble with non power of two textures
-    glPixelStorei(GL_UNPACK_ALIGNMENT,1);
+    glPixelStorei(GL_PACK_ALIGNMENT, 1); //avoid trouble with non power of two textures
+    glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 }
 
 /*!
@@ -144,7 +145,7 @@ void GLCam::mousePressEvent (QMouseEvent*)
         //printf("Vertex: %f %f %f\n",data->vertices[i].x,data->vertices[i].y,data->vertices[i].z);
         }
     glEnd();
-//paintGL();
+    //paintGL();
     glReadPixels(ev->pos().x(),height()- ev->pos().y(),1,1,GL_RGB,GL_FLOAT,&readpixel);
     printf("Color: %d %d %d\n",abs(readpixel[0]*255),abs(readpixel[1]*255),abs(readpixel[2]*255));
     //abs((rgbpixels[p]*255)
@@ -174,8 +175,8 @@ wheel event modifies the FOV (zoom) of the projection matrix
 void GLCam::wheelEvent (QWheelEvent *ev)
 {
     makeCurrent();
-    if (ev->delta()>0.0)	zoom *= 0.75;
-    else	zoom *=1.33333333;
+    if (ev->delta() > 0.0)    zoom *= 0.75;
+    else    zoom *= 1.33333333;
     //resizeGL(width(),height());
 
     GLdouble w = zoom * width() / height();
@@ -215,7 +216,7 @@ void GLCam::resizeGL( int width, int height )
     QTreeWidgetItemIterator it(cam->world);
     while (*it)
     {
-        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))scriptitem->Call(QString("resizeEvent"),QVariantList() << width << height);
+        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))scriptitem->Call(QString("resizeEvent"), QVariantList() << width << height);
         ++it;
     }
 }
@@ -238,17 +239,19 @@ void GLCam::keyPressEvent(QKeyEvent *e)
         setParent(nullptr);
         showFullScreen();
     }
-    else if (e->key() == Qt::Key_F && fullscreen)
-    {
-        setParent(fullscreen);
-        if (QDockWidget *w = dynamic_cast<QDockWidget*>(fullscreen))w->setWidget(this);
-        fullscreen = nullptr;
-    }
+    else
+        if (e->key() == Qt::Key_F && fullscreen)
+        {
+            setParent(fullscreen);
+            if (QDockWidget *w = dynamic_cast<QDockWidget*>(fullscreen))w->setWidget(this);
+            fullscreen = nullptr;
+        }
 
     QTreeWidgetItemIterator it(cam->world);
-    while (*it){
+    while (*it)
+    {
         //#ifndef QTSCRIPT
-        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))scriptitem->Call(QString("keypressEvent"),QVariantList() << e->text ());
+        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))scriptitem->Call(QString("keypressEvent"), QVariantList() << e->text ());
         //#endif
         //#ifdef QTSCRIPT
         //if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))scriptitem->call(QString("keypressEvent"),  QScriptValueList()<< QScriptValue (e->text ()));

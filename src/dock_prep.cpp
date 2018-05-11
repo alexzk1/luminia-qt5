@@ -2,8 +2,9 @@
 #include <QDockWidget>
 #include "mainwindow.h"
 #include <memory>
+#include <QTimer>
 
-static const Qt::DockWidgetAreas DOCK_AREAS(Qt::DockWidgetArea::RightDockWidgetArea);
+static const Qt::DockWidgetAreas DOCK_AREAS(Qt::DockWidgetArea::LeftDockWidgetArea | Qt::DockWidgetArea::RightDockWidgetArea);
 
 void nsDocks::applyPolicy(QWidget *w, int hs, int vs)
 {
@@ -21,16 +22,30 @@ QDockWidget* nsDocks::createDockFromWidget(QWidget *srcWidget, const QString &do
     MainWindow::instance->addDockWidget(Qt::RightDockWidgetArea, dock);
 
     QPointer<QWidget> src(srcWidget);
+
     std::shared_ptr<bool> once(new bool(true));
+
     QObject::connect(dock, &QDockWidget::topLevelChanged, MainWindow::instance, [dock, src, once](bool top)
     {
-        if (top && dock && *once)
+        if (dock && src)
         {
-            *once = false;
-            if (src)
-                src->adjustSize();
-            dock->adjustSize();
-            dock->move(30, 100);
+            if (top)
+            {
+                //giving user some time to move it around
+                dock->setAllowedAreas(Qt::NoDockWidgetArea);
+                QTimer::singleShot(3000, MainWindow::instance, [dock]()
+                {
+                    dock->setAllowedAreas(DOCK_AREAS);
+                });
+
+                if (*once)
+                {
+                    *once = false;
+                    if (src)
+                        src->adjustSize();
+                    dock->adjustSize();
+                }
+            }
         }
     });
 
