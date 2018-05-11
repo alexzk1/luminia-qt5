@@ -3,7 +3,7 @@
 #include "mainwindow.h"
 #include <memory>
 
-static const Qt::DockWidgetAreas DOCK_AREAS(Qt::DockWidgetArea::AllDockWidgetAreas);
+static const Qt::DockWidgetAreas DOCK_AREAS(Qt::DockWidgetArea::RightDockWidgetArea);
 
 void nsDocks::applyPolicy(QWidget *w, int hs, int vs)
 {
@@ -30,6 +30,7 @@ QDockWidget* nsDocks::createDockFromWidget(QWidget *srcWidget, const QString &do
             if (src)
                 src->adjustSize();
             dock->adjustSize();
+            dock->move(30, 100);
         }
     });
 

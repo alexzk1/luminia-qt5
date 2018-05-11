@@ -46,7 +46,7 @@ MainWindow::MainWindow()
 
     treeview = new TreeView (this);
     QPointer<QDockWidget> dockTree = nsDocks::createDockFromWidget(treeview, tr("World Tree"), this);
-    dockTree->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea); //yeh, dont want possible top/bottom for the tree
+    dockTree->setAllowedAreas(Qt::LeftDockWidgetArea);
 
     addDockWidget(Qt::LeftDockWidgetArea, dockTree);
 

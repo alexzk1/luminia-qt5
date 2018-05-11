@@ -38,7 +38,7 @@ class TextEdit : public QTextEdit
     Q_OBJECT
 public:
     TextEdit(QWidget *parent);
-
+    QSize sizeHint() const override;
 protected:
     void keyPressEvent(QKeyEvent *e) override;
     SourceEdit* parent;
@@ -144,6 +144,7 @@ public:
     void setCompleatationList(const QStringList&, int offset = 0);
     void setHelpString(const QString&);
     void appendActionToBar(QAction *act, QAction *before = nullptr);
+
 protected:
     void emitRequestCompletationList(const QString&);
     TextEdit *edit;

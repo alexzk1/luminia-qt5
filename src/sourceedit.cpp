@@ -31,6 +31,12 @@ TextEdit::TextEdit(QWidget *_parent):
 {
     parent = static_cast<SourceEdit*>(_parent);
     completationOpen = false;
+    setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
+}
+
+QSize TextEdit::sizeHint() const
+{
+    return {800, 600};
 }
 
 void TextEdit::keyPressEvent(QKeyEvent *e)
