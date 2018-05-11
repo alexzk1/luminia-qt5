@@ -248,101 +248,57 @@ Highlighter::Highlighter(QTextEdit *parent):
 
 void Highlighter::highlightBlock( const QString &text)
 {
-
     QTextCharFormat myClassFormat;
-    int index, length;
 
-    const  static QRegExp floats("([0-9]+\\.[0-9]+)");
-    myClassFormat.setForeground(Qt::darkMagenta);
-    index = text.indexOf(floats);
-    while (index >= 0)
+    const auto testAndApply = [&myClassFormat, &text, this](const HighlightRule & rule)
     {
-        length = floats.matchedLength();
-        setFormat(index, length, myClassFormat);
-        index = text.indexOf(floats, index + length);
-    }
+        myClassFormat.setForeground(rule.foreground);
+        myClassFormat.setFontWeight(rule.fontWeight);
 
-    const static QRegExp function("([A-Za-z0-9]+)\\s*\\(");
-    myClassFormat.setForeground(Qt::blue);
-    index = text.indexOf(function);
-    while (index >= 0)
+        int pos = 0;
+        while ((pos = rule.exp.indexIn(text, pos)) != -1)
+        {
+            int l = rule.exp.matchedLength();
+            setFormat(pos, l, myClassFormat);
+            pos += l;
+        }
+    };
+
+
+    const static std::vector<HighlightRule> defaultRules =
     {
-        length = function.matchedLength();
-        setFormat(index, length - 1, myClassFormat);
-        index = text.indexOf(function, index + length);
-    }
+        {"([0-9]+\\.[0-9]+)", Qt::darkMagenta},
 
-    const static QRegExp glsltypes("\\b(float|int|void|bool|true|false|mat2|mat3|mat4|mat2x2|mat3x2|mat4x2|mat2x3|mat3x3|mat4x3|mat2x4|mat3x4|mat4x4|vec2|vec3|vec4|bvec2|bvec3|bvec4|ivec2|ivec3|ivec4|sampler1D|sampler2D|sampler3D|samplerCube|sampler1DShadow|sampler2DShadow|attribute|const|uniform|varying|in|out|inout|input|output|hvec2|hvec3|vec4|dvec2|dvec3|dvec4|fvec2|fvec3|fvec4|sampler2DRect|sampler3DRect|sampler2dRectShadow|long|short|double|half|fixed|unsigned|lowp|mediump|highp|precision)\\b");
+        {"([A-Za-z0-9]+)(?=\\s*\\()", Qt::blue},
 
-    //   myClassFormat.setFontWeight(QFont::Bold);
-    myClassFormat.setForeground(Qt::darkRed);
-    index = text.indexOf(glsltypes);
-    while (index >= 0)
-    {
-        length = glsltypes.matchedLength();
-        setFormat(index, length, myClassFormat);
-        index = text.indexOf(glsltypes, index + length);
-    }
+        {
+            "\\b(float|int|void|bool|true|false|mat2|mat3|mat4|mat2x2|mat3x2|mat4x2|mat2x3|mat3x3|mat4x3|"
+            "mat2x4|mat3x4|mat4x4|vec2|vec3|vec4|bvec2|bvec3|bvec4|ivec2|ivec3|ivec4|sampler1D|sampler2D|"
+            "sampler3D|samplerCube|sampler1DShadow|sampler2DShadow|attribute|const|uniform|varying|in|out|"
+            "inout|input|output|hvec2|hvec3|vec4|dvec2|dvec3|dvec4|fvec2|fvec3|fvec4|sampler2DRect|sampler3DRect|"
+            "sampler2dRectShadow|long|short|double|half|fixed|unsigned|lowp|mediump|highp|precision)\\b", Qt::darkRed
+        },
 
-    const static QRegExp string("\"[.\n]*\"");
-    index = text.indexOf(string);
-    while (index >= 0)
-    {
-        length = string.matchedLength();
-        setFormat(index, length, myClassFormat);
-        index = text.indexOf(string, index + length);
-    }
+        {"\"[.\n]*\"", QColor("#008000"),},
 
-    myClassFormat.setFontWeight(QFont::Bold);
+        {
+            "(radians|degrees|sin|cos|tan|asin|acos|atan|pow|exp|log|exp2|log2|sqrt|inversesqrt|abs|sign|floor|"
+            "ceil|fract|mod|min|max|clamp|mix|step|smoothstep|length|distance|dot|cross|normalize|ftransform|faceforward|"
+            "reflect|refract|matrixCompMult|outerProduct|transpose|lessThan|lessThanEqual|greaterThan|greaterThanEqual|"
+            "equal|notEqual|any|all|not|texture1D|texture1DProj|texture1DLod|texture1DProjLod|texture2D|texture2DProj|"
+            "texture2DLod|texture2DProjLod|texture3D|texture3DProj|texture3DLod|texture3DProjLod|textureCube|"
+            "textureCubeLod|shadow1D|shadow2D|shadow1DProj|shadow2DProj|shadow1DLod|shadow2DLod|shadow1DProjLod|"
+            "shadow2DProjLod|dFdx|dFdy|fwidth|noise1|noise2|noise3|noise4)(?=\\s*\\()", Qt::blue, QFont::Bold
+        },
 
-    const static QRegExp buildin("(radians|degrees|sin|cos|tan|asin|acos|atan|pow|exp|log|exp2|log2|sqrt|inversesqrt|abs|sign|floor|ceil|fract|mod|min|max|clamp|mix|step|smoothstep|length|distance|dot|cross|normalize|ftransform|faceforward|reflect|refract|matrixCompMult|outerProduct|transpose|lessThan|lessThanEqual|greaterThan|greaterThanEqual|equal|notEqual|any|all|not|texture1D|texture1DProj|texture1DLod|texture1DProjLod|texture2D|texture2DProj|texture2DLod|texture2DProjLod|texture3D|texture3DProj|texture3DLod|texture3DProjLod|textureCube|textureCubeLod|shadow1D|shadow2D|shadow1DProj|shadow2DProj|shadow1DLod|shadow2DLod|shadow1DProjLod|shadow2DProjLod|dFdx|dFdy|fwidth|noise1|noise2|noise3|noise4)\\s*\\(");
+        {"\\b(break|continue|do|for|while|if|else|discard|return|goto|switch|default|case|struct|asm|class|union|enum|var|typedef|template|this|packed|centroid)\\b", Qt::black, QFont::Bold},
 
-    index = text.indexOf(buildin);
-    myClassFormat.setForeground(Qt::blue);
-    while (index >= 0)
-    {
-        length = buildin.matchedLength();
-        setFormat(index, length - 1, myClassFormat);
-        index = text.indexOf(buildin, index + length);
-    }
+        {"//.*", Qt::gray, 0},
 
-    const static QRegExp glslkeywords("\\b(break|continue|do|for|while|if|else|discard|return|goto|switch|default|case|struct|asm|class|union|enum|typedef|template|this|packed|centroid)\\b");
-
-
-    myClassFormat.setForeground(Qt::black);
-
-    index = text.indexOf(glslkeywords);
-    while (index >= 0)
-    {
-        length = glslkeywords.matchedLength();
-        setFormat(index, length, myClassFormat);
-        index = text.indexOf(glslkeywords, index + length);
-    }
-
-
-    const static QRegExp comment("//.*");
-    myClassFormat.setFontWeight(0);
-    myClassFormat.setForeground(Qt::gray);
-
-    index = text.indexOf(comment);
-    while (index >= 0)
-    {
-        length = comment.matchedLength();
-        setFormat(index, length, myClassFormat);
-        index = text.indexOf(comment, index + length);
-    }
-
-    const static QRegExp pre("#.*");
-    myClassFormat.setFontWeight(0);
-    myClassFormat.setForeground(Qt::darkGreen);
-
-    index = text.indexOf(comment);
-    while (index >= 0)
-    {
-        length = pre.matchedLength();
-        setFormat(index, length, myClassFormat);
-        index = text.indexOf(pre, index + length);
-    }
+        {"#.*", Qt::darkBlue},
+    };
+    for (const auto& r : defaultRules)
+        testAndApply(r);
 }
 
 /*********************************************************************/

@@ -92,7 +92,15 @@ protected:
     TextEdit *editor;
 };
 
+struct HighlightRule
+{
+    QRegExp exp;
+    QBrush  foreground;
+    int     fontWeight;
 
+    HighlightRule(const QString& rule, const QBrush& fg, int w = 0):
+        exp(QRegExp(rule)), foreground(fg), fontWeight(w) {}
+};
 
 /*!
 Higlighter for ECMA script and GLSL
