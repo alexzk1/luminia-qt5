@@ -74,10 +74,6 @@ bool Item_world::isDeletable() const
 
 void Item_world::addMenu(QMenu *menu)
 {
-    menu->addAction ( QIcon(), tr("Add Virtual"), this, SLOT( addVirtual()));
-    menu->addAction ( QIcon(":/images/xpm/node.xpm"), tr("Add Node"), this, SLOT( addNode()));
-    menu->addAction ( QIcon(":/images/xpm/cam.xpm"), tr("Add Cam"), this, SLOT( addCam()));
-    menu->addSeparator();
     auto a = menu->addAction ( QIcon(":/images/new.png"), tr("Clear World"));
     connect(a, &QAction::triggered, MainWindow::instance, &MainWindow::clearWorld);
 }

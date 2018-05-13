@@ -33,14 +33,13 @@ QString Item_node::getType()const
 
 Item_node::Item_node( Item *parent, const QString& name) : Item_matrix( parent, name)
 {
-    setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
+    setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled | Qt::ItemIsDropEnabled);
     //Icon = xpm_node;
     setIcon(0, QIcon(":/images/xpm/node.xpm"));
 }
 
 void Item_node::addMenu(QMenu *menu)
 {
-    menu->addAction( QIcon(":/images/xpm/armature.xpm"),  tr("Add Armature") , this, SLOT( addArmature()));
     menu->addAction( QIcon( ":/images/xpm/importer.xpm"), tr("Import Model"), this, SLOT(importModel()) );
 }
 
@@ -49,22 +48,22 @@ accept the most drag events
 */
 bool Item_node::dragAccept(Item* i)
 {
-    if (i->getType()=="Node")return true;
-    if (i->getType()=="Mesh")return true;
-    if (i->getType()=="Text")return true;
-    if (i->getType()=="Shader")return true;
-    if (i->getType()=="Script")return true;
-    if (i->getType()=="Texture")return true;
+    if (i->getType() == "Node")return true;
+    if (i->getType() == "Mesh")return true;
+    if (i->getType() == "Text")return true;
+    if (i->getType() == "Shader")return true;
+    if (i->getType() == "Script")return true;
+    if (i->getType() == "Texture")return true;
     //if (i->getType()=="Stream")return true;
-    if (i->getType()=="Armature")return true;
-    if (i->getType()=="Buffer")return true;
-    if (i->getType()=="Uniform")return true;
+    if (i->getType() == "Armature")return true;
+    if (i->getType() == "Buffer")return true;
+    if (i->getType() == "Uniform")return true;
     return false;
 }
 
 QObject *Item_node::addBuffer(const QString &label1, unsigned dim, unsigned size, unsigned keyframes, int type, bool normalized_int)
 {
-    return makeNewItem<Item_buffer>(label1, dim, size,keyframes, type, normalized_int);
+    return makeNewItem<Item_buffer>(label1, dim, size, keyframes, type, normalized_int);
 }
 
 QObject *Item_node::addMesh(const QString &name, int numOfVertices)
@@ -133,31 +132,31 @@ This function trys to call "functionname" in all Script items in the subtree.
 Can't be called recursive!
 */
 // same code as Item_world::Call();
-void Item_node::Call(const QString& function, const QVariantList& args){
+void Item_node::Call(const QString& function, const QVariantList& args)
+{
     static int rec = 0;
-    if(rec > 8)return;
+    if (rec > 8)return;
     rec++;
 
     QTreeWidgetItemIterator it(this);
     while (*it)
     {
-        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it)){
+        if (Item_script* scriptitem = dynamic_cast<Item_script*>(*it))
+        {
             glPushMatrix();
             //simple code to apply the nodes matices, a stack based could be better
             QList<float*> matrixlist;
             Item_matrix* m = reinterpret_cast<Item_matrix*>(scriptitem); //Only used to get the parent
-            while((m = dynamic_cast<Item_matrix*>(m->parent()))!=nullptr)
+            while ((m = dynamic_cast<Item_matrix*>(m->parent())) != nullptr)
             {
                 float *mat =  m->getMatrix();
                 matrixlist.append(mat);
             }
 
-            for (int k = matrixlist.size()-1; k >= 0; k--)
-            {
+            for (int k = matrixlist.size() - 1; k >= 0; k--)
                 glMultMatrixf(matrixlist.at(k));
-            }
 
-            scriptitem->Call(function,args);
+            scriptitem->Call(function, args);
 
             Item_buffer::UnbindAll(); // clear all client and attribute arrays
 

@@ -125,6 +125,40 @@ void Item::contextmenu(const QPoint& point)
     if (!menu)
     {
         menu = new QMenu(ws);
+        QMenu *submenu = nullptr;
+
+        //listing meta-methods "add*", despite what documentation says, it does not list parent's methods. So have to do long way...
+        std::set<QString> once; //ensuring that if they fix qt, program will be working yet
+        const auto processObject = [&submenu, this, &once](const QMetaObject * metaObject)
+        {
+            for (int i = metaObject->methodOffset(); i < metaObject->methodCount(); ++i)
+            {
+                const auto method = metaObject->method(i);
+                auto n = QString::fromLatin1(method.name());
+
+                if (!once.count(n) && method.parameterCount() == 0 && n.startsWith("add", Qt::CaseInsensitive))
+                {
+                    once.insert(n);
+                    if (!submenu)
+                        submenu = menu->addMenu(tr("Add"));
+                    n.remove("add", Qt::CaseInsensitive);
+                    QString icon_name = QString(":/images/xpm/%1.xpm").arg(n.toLower());
+                    auto a = submenu->addAction(QIcon(icon_name), n);
+                    connect(a, &QAction::triggered, this, [method, this]()
+                    {
+                        method.invoke(this, Qt::QueuedConnection);
+                    });
+                }
+            };
+        };
+
+        auto meta = this->metaObject();
+        while (meta)
+        {
+            processObject(meta);
+            meta = meta->superClass();
+        }
+
         addMenu(menu);
         if (menu->actions().size())
             menu->addSeparator();

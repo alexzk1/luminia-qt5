@@ -33,24 +33,26 @@ component
 
 class Item_component : public Item_buffer
 {
-    Q_OBJECT
-    Q_ENUMS(comptype)
+    Q_OBJECT Q_ENUMS(comptype)
 public:
-    enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
+    enum comptype {VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
     Item_component(Item_mesh *parent, const QString& label1, int comptype, int dimension, int keyframes = 1, int format = GL_FLOAT, bool normalized_int = true);
-    virtual ~Item_component() override = default;
+    ~Item_component() override = default;
     //virtual QString statusText() const;
-    int getCompType(){return comptype;}
+    int getCompType()
+    {
+        return comptype;
+    }
 public slots:
-    virtual void setDim( unsigned dimension = 1, unsigned dummy = 0, unsigned keyframes = 1, unsigned format= GL_FLOAT, bool normalized_int = true) override; //the parent size will be used
+    void setDim( unsigned dimension = 1, unsigned dummy = 0, unsigned keyframes = 1, unsigned format = GL_FLOAT, bool normalized_int = true) override; //the parent size will be used
     void Bind();
     void BindKeyFrame(int key);
     void Unbind();
-    virtual QString getType()const override;
+    QString getType()const override;
 protected:
     int comptype;
     Item_mesh *parent;
-    virtual void addMenu(QMenu *menu) override;
+    void addMenu(QMenu *menu) override;
 };
 
 

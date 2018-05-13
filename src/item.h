@@ -506,7 +506,8 @@ protected:
 public:
     using id_t = int64_t;
     Item_bone(Item *parent, const QString& label1, Item_armature *armature, id_t id = -1);
-    ~Item_bone() override;
+    ~Item_bone() override = default;
+
     QString statusText() const override;
     bool dragAccept(Item*) override;
     virtual QPointer<Item_armature> getArmature() const;
@@ -517,11 +518,7 @@ public:
     id_t getId() const;
 
 public slots:
-    QObject* addBone(QString Name);
-    void addBone()
-    {
-        addBone(QString("Bone"));
-    }
+    QObject* addBone(const QString& name = "Bone");
     void setJoint(float x, float y, float z);
     void Rotate(float a, float b, float c, float d);  // relative rotation
     void Rotation(float a, float b, float c, float d);  //absolute rotation
@@ -546,8 +543,6 @@ protected:
     void qmult(float *qa, float *qb, float *out);
     void qrot(float *v, float *q, float *out);
     void qrotaround(float *v, float *p, float *q, float *out);
-    void addMenu(QMenu *menu) override;
-
 
     virtual id_t requestId(id_t id);
 };
@@ -567,9 +562,9 @@ public:
     QString statusText() const override;
     QPointer<Item_armature> getArmature() const override;
 public slots:
-    void Quaternions(QObject* shader, QString var);     //Quaternion
-    void Joints(QObject* shader, QString var);      //Joints
-    void Matrices(QObject* _shader, QString var);       //4x4 matrices
+    void Quaternions(QObject* shader, const QString& var);     //Quaternion
+    void Joints(QObject* shader, const QString& var);      //Joints
+    void Matrices(QObject* _shader, const QString& var);       //4x4 matrices
 
     void Reset() override;
     QString getType() const override;

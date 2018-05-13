@@ -1,19 +1,26 @@
 # Contributor: Angelo Theodorou <encelo@users.sourceforge.net>
+# Contributor: Oleksiy Zakharov <alexzkhr@gmail.com>
 
-pkgname=lumina
-pkgver=0.4.0
+pkgname=lumina-modern-2018
+pkgver=0.5.0
 pkgrel=3
 pkgdesc="Free cross-platform development environment for GLSL shaders"
+
+provides=('luminia')
+conflicts=('luminia')
+replaces=('luminia')
+
+#not sure, this one may work on arm too ...but never tried
 arch=('i686' 'x86_64')
-url="http://lumina.sourceforge.net"
+url="git://github.com/alexzk1/luminia-qt5"
+
 license=('GPL')
 depends=('qt5-base lz4 qt5-script')
 makedepends=('glew')
 optdepends=('blender: for mesh export script')
 install=lumina.install
-source=(http://downloads.sourceforge.net/$pkgname/Lumina-$pkgver.tar.bz2 lumina.desktop search_paths.patch source_edit.patch)
-md5sums=('f6d17cb7ee39fbcc88623ba3ab252524' '3e99ede58a3fd82c209fc72b887ebc39'
-         '4a6126d743a05184a8a45874d186f6d3' 'dc46667f3d19a119d2daa89b45e262ba')
+source=(git://github.com/alexzk1/luminia-qt5)
+md5sums=('SKIP')
 
 build() {
   cd $srcdir/Lumina-$pkgver

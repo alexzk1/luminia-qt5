@@ -19,6 +19,7 @@
 ** Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 *********************************************************************************/
 
+//todo: replace all that by qscintila
 
 #include "sourceedit.h"
 #include <QApplication>
@@ -43,28 +44,26 @@ void TextEdit::keyPressEvent(QKeyEvent *e)
 {
 
     QTextEdit::keyPressEvent(e);
-    if (completationOpen) return; // don't open a second completationbox
-
-    QTextCursor cursor = textCursor();
-
-    QChar rchar = cursor.block().text()[cursor.position() - cursor.block().position()];
-    if (!rchar.isLetterOrNumber())
+    if (!completationOpen)
     {
-
-        //request a new completation list
-        QString lstring = cursor.block().text().left(cursor.position() - cursor.block().position());
-        parent->requestCompletationList(lstring);
-        QString last = lstring.split(QRegExp("\\W")).last();
-        //open the completationbox if the list has more than one entry
-        if (parent->completationList.count() != 0 && !rchar.isLetterOrNumber() )
+        QTextCursor cursor = textCursor();
+        QChar rchar = cursor.block().text()[cursor.position() - cursor.block().position()];
+        if (!rchar.isLetterOrNumber())
         {
-            ;
-            QWidget *box = new CompletionBox(this, parent->completationList, last.left(last.length() - parent->completationOffset - 1));
-            box->move(mapToGlobal(cursorRect().bottomLeft()));
-            box->show();
-            connect(parent, SIGNAL(HelpStringSignal(const QString&)), box, SLOT(setHelpString(const QString&)));
-            connect(box, SIGNAL(requestHelpString(const QString&)), parent, SLOT(emitRequestHelpString(const QString&)));
 
+            //request a new completation list
+            QString lstring = cursor.block().text().left(cursor.position() - cursor.block().position());
+            parent->requestCompletationList(lstring);
+            QString last = lstring.split(QRegExp("\\W")).last();
+            //open the completationbox if the list has more than one entry
+            if (parent->completationList.count() != 0 && !rchar.isLetterOrNumber() )
+            {
+                QWidget *box = new CompletionBox(this, parent->completationList, last.left(last.length() - parent->completationOffset - 1));
+                box->move(mapToGlobal(cursorRect().bottomLeft()));
+                box->show();
+                connect(parent, SIGNAL(HelpStringSignal(const QString&)), box, SLOT(setHelpString(const QString&)));
+                connect(box, SIGNAL(requestHelpString(const QString&)), parent, SLOT(emitRequestHelpString(const QString&)));
+            }
         }
     }
 }

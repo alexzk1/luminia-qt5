@@ -33,7 +33,7 @@ QDockWidget* nsDocks::createDockFromWidget(QWidget *srcWidget, const QString &do
             {
                 //giving user some time to move it around
                 dock->setAllowedAreas(Qt::NoDockWidgetArea);
-                QTimer::singleShot(3000, MainWindow::instance, [dock, src]()
+                QTimer::singleShot(3000, MainWindow::instance, [dock]()
                 {
                     if (dock)
                         dock->setAllowedAreas(DOCK_AREAS);

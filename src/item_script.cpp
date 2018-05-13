@@ -39,7 +39,7 @@ Item_script::Item_script( Item *parent, const QString& name) :
 
     const auto addAction = [this](auto a, auto b, auto c)
     {
-        QAction *act = new QAction(a, b, this);
+        auto act = new QAction(a, b, this);
         connect(act, &QAction::triggered, this, c);
         commonActions.push_front(act);
     };
@@ -147,7 +147,7 @@ void Item_script::completationHandler(const QString& line)
             else
             {
                 //Factory prototypes
-                QRegExp searchProto(parts[0] + "\\s*=\\s*new\\s*(\\w+)[\\(|;]");
+                QRegExp searchProto(parts[0] + R"(\s*=\s*new\s*(\w+)[\(|;])");
                 searchProto.indexIn(text());
                 meta = Factory::metaObjectFrom(searchProto.cap(1));
                 if (meta != nullptr)
