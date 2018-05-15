@@ -260,8 +260,8 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
                                                         item = s;
 
                                                     }
-
-    item->restoreSavedDock(attributes.value("dock"));
+    if (item)
+        item->restoreSavedDock(attributes.value("dock"));
     content.clear();
     return true;
 }
@@ -405,6 +405,7 @@ void LumGenerator::processItem(Item *item, int depth)
         auto dock = item->saveDock();
         if (dock.size())
             out << "dock=\"" << dock << "\" ";
+
         if (type == "Node")
         {
             out << ">\n";

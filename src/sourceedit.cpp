@@ -30,6 +30,7 @@
 TextEdit::TextEdit(QWidget *_parent):
     QTextEdit(_parent)
 {
+    setAcceptRichText(false);
     parent = static_cast<SourceEdit*>(_parent);
     completationOpen = false;
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
@@ -272,16 +273,16 @@ void Highlighter::highlightBlock( const QString &text)
 
     const static std::vector<HighlightRule> defaultRules =
     {
-        {"([0-9]+\\.[0-9]+)", Qt::darkMagenta},
+        {R"(([0-9\.]+)(?=\W+))", Qt::darkMagenta},
 
-        {"([A-Za-z0-9]+)(?=\\s*\\()", Qt::blue},
-
+        {R"(([A-z_]\w+)(?=\s*\())", QColor("#02677c"), QFont::Normal},
+        {R"(((function|void|bool|int|float|long|short)\s+[A-z_]\w+)(?=\s*\())", QColor("#02677c"), QFont::Bold},
         {
             "\\b(float|int|void|bool|true|false|mat2|mat3|mat4|mat2x2|mat3x2|mat4x2|mat2x3|mat3x3|mat4x3|"
             "mat2x4|mat3x4|mat4x4|vec2|vec3|vec4|bvec2|bvec3|bvec4|ivec2|ivec3|ivec4|sampler1D|sampler2D|"
             "sampler3D|samplerCube|sampler1DShadow|sampler2DShadow|attribute|const|uniform|varying|in|out|"
             "inout|input|output|hvec2|hvec3|vec4|dvec2|dvec3|dvec4|fvec2|fvec3|fvec4|sampler2DRect|sampler3DRect|"
-            "sampler2dRectShadow|long|short|double|half|fixed|unsigned|lowp|mediump|highp|precision)\\b", Qt::darkRed
+            "sampler2dRectShadow|long|short|double|half|fixed|unsigned|lowp|mediump|highp|precision)\\b", QColor("#a5810c"),
         },
 
         {"\"[.\n]*\"", QColor("#008000"),},
@@ -296,11 +297,15 @@ void Highlighter::highlightBlock( const QString &text)
             "shadow2DProjLod|dFdx|dFdy|fwidth|noise1|noise2|noise3|noise4)(?=\\s*\\()", Qt::blue, QFont::Bold
         },
 
-        {"\\b(break|continue|do|for|while|if|else|discard|return|goto|switch|default|case|struct|asm|class|union|enum|var|typedef|template|this|packed|centroid)\\b", Qt::black, QFont::Bold},
+        {
+            "\\b(break|continue|do|for|while|if|else|discard|return|goto|switch|default|case|struct|asm|class|"
+            "union|enum|var|function|typedef|template|this|packed|centroid)\\b", Qt::black, QFont::Bold
+        },
 
-        {"//.*", Qt::gray, 0},
-
+        {"gl_\\w+", QColor("#e0756c"), QFont::DemiBold},
         {"#.*", Qt::darkBlue},
+        {"//.*", Qt::gray, 0} //line comment rule must be last, so it recolors all other rules worked above
+
     };
     for (const auto& r : defaultRules)
         testAndApply(r);
