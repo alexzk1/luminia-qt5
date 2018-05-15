@@ -225,15 +225,13 @@ void MainWindow::about()
                        "Old Expired Homepage with Tutorials:<br><a href='http://lumina.sourceforge.net'>http://lumina.sourceforge.net</a>"));
 }
 
-
-
 void MainWindow::hide_all_editors()
 {
     QTreeWidgetItemIterator it(treeview->world);
     while (*it)
     {
         if (auto edititem = dynamic_cast<Item_edit*>(*it))
-            edititem->dock->hide();
+            edititem->hideDock();
         ++it;
     }
 }

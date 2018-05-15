@@ -41,8 +41,8 @@ QPointer<Profiler>   Item::profiler = nullptr;
 Item::Item(Item *parent, const QString& name ):
     QObject(parent),
     QTreeWidgetItem(parent, 0),
-    menu(nullptr),
-    dock(nullptr)
+    dock(nullptr),
+    menu(nullptr)
 {
     setIcon(0, QIcon(":/images/xmp/world.xpm"));
     setName(name);
@@ -183,6 +183,12 @@ void Item::destroyAll()
     });
 }
 
+void Item::hideDock()
+{
+    if (dock)
+        dock->hide();
+}
+
 void Item::deleteLater()
 {
     QList<Item*> allItems = findChildren<Item*>(QString(), Qt::FindDirectChildrenOnly);
@@ -261,6 +267,38 @@ void Item::resetMenu()
     if (menu)
         menu->deleteLater();
     menu = nullptr;
+}
+
+QString Item::saveDock() const
+{
+    QString r;
+    if (dock)
+    {
+        QBuffer buffer;
+        buffer.open(QIODevice::WriteOnly);
+        QDataStream os(&buffer);
+        os << dock->isFloating();
+        os << dock->saveGeometry();
+        r = buffer.buffer().toBase64();
+    }
+    return r;
+}
+
+void Item::restoreSavedDock(const QString &src)
+{
+    if (dock && !src.isEmpty())
+    {
+        auto tmp = QByteArray::fromBase64(src.toUtf8());
+        QBuffer buffer(&tmp);
+        buffer.open(QIODevice::ReadOnly);
+        QDataStream is(&buffer);
+        bool a;
+        is >> a;
+        QByteArray g;
+        is >> g;
+        dock->setFloating(a);
+        dock->restoreGeometry(g);
+    }
 }
 
 void Item::buildMenu(QMenu *menu)

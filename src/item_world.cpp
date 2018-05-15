@@ -67,6 +67,11 @@ void Item_world::deleteLater()
     //do nothing
 }
 
+void Item_world::destroyAll()
+{
+    Item::destroyAll();
+}
+
 bool Item_world::isDeletable() const
 {
     return false;

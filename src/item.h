@@ -64,6 +64,10 @@ public:
     QString getFullScriptName() const;
     void bindToEngine(QScriptEngine *eng, bool localNames = false);
     void resetMenu(); //support for reloading plugins maybe ...because menu is built once
+
+    QString saveDock() const;
+    void    restoreSavedDock(const QString& src);
+
 public slots:
     QObject *findChild(const QString& name) const;
     QList<Item*> findChildrenByType ( const QString &) const;
@@ -74,8 +78,9 @@ public slots:
     }
     void contextmenu(const QPoint&);
     virtual QString getType()const;
+    virtual void destroyAll();//destroys all childs
 
-    void destroyAll();//destroys all childs
+    void hideDock();
 protected:
     virtual void addMenu(QMenu *menu)
     {
@@ -100,11 +105,12 @@ protected:
         return makeNewItemNoThis<T>(this, args...);
     }
     virtual bool isDeletable() const;
+    QPointer<QDockWidget> dock;
 private:
     QPointer<QMenu> menu;
     void buildMenu(QMenu *menu);
 public:
-    QPointer<QDockWidget> dock;
+
     static QPointer<MainWindow> ws;
     static QPointer<Item_world> world;
     static QPointer<Profiler> profiler;
@@ -131,7 +137,8 @@ public slots:
     int getCamHeight();
     void Call(const QString& function, const QVariantList& args = QVariantList());
     QString getType()const override;
-    void deleteLater() override;
+    void deleteLater() final;
+    void destroyAll()  final;
 protected:
     double timev;
     int CamWidth, CamHeight;

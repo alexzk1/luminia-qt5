@@ -5,6 +5,8 @@
 #include <memory.h>
 #include <string>
 #include "file_loader.h"
+#include <QString>
+#include <QByteArray>
 
 #define COMPRESSED_TEX_SIGN "%COMPR%"
 #define messageMaxBytes (1048576)
@@ -16,7 +18,7 @@ namespace utility
         const static std::string sign(COMPRESSED_TEX_SIGN);
         //lets try dumb way 1st...
         std::vector<char> result;
-        size_t sz = static_cast<size_t>(100 + src.size() * 4 / 3.);
+        auto sz = static_cast<size_t>(100 + src.size() * 4 / 3.);
         result.resize(sz + sign.length());
         auto delta = (compressed) ? sign.length() : 0;
         if (compressed)
