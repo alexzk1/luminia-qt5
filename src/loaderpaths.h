@@ -14,7 +14,9 @@ public:
     //goes over program's pathes and lists unique file names, i.e. "test.js" will be present in 2 dirs, once will be listed
     const static QString PLUGINS;
     const static QString SCRIPTS;
-    static QStringList  listFilesInSubfolder(const QString& subfolder, const QString& extension="js");
+    static QStringList  listFilesInSubfolder(const QString& subfolder, const QString& extension = "js");
+
+    static void spawnCopy(const QString &file2open = "");
 };
 
 #endif // LOADERPATHS_H

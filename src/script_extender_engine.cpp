@@ -1,3 +1,5 @@
+#include <utility>
+
 #include "script_extender_engine.h"
 #include "factory/factory.h"
 #include "item.h"
@@ -17,12 +19,12 @@ SEngine::SEngine(QObject *itm):
     setupEngine(itm);
 }
 
-SEngine::SEngine(QObject *o, const QString &fileName):
+SEngine::SEngine(QObject *o, QString fileName):
     QObject (o),
     eng(),
     obj(nullptr),
     ogl(nullptr),
-    filename(fileName)
+    filename(std::move(fileName))
 {
     setupEngine(o);
 }
@@ -36,7 +38,7 @@ SEngine::~SEngine()
 
 bool SEngine::equals(const SEngine *c) const
 {
-    return c->obj==obj && c->filename == filename;
+    return c->obj == obj && c->filename == filename;
 }
 
 QScriptValue SEngine::run()
@@ -68,12 +70,12 @@ QScriptValue SEngine::execJsFunc(const QString &function, const QVariantList &ar
     QScriptValueList qsarglist = QScriptValueList();
     for (const auto& v : args)
     {
-        QObject* obj = v.value<QObject*>();
-        if(obj)
+        auto obj = v.value<QObject*>();
+        if (obj)
             qsarglist << eng.newQObject (obj);
         else
         {
-            switch(v.type())
+            switch (v.type())
             {
                 case QVariant::Double:
                 case QVariant::Bool:
@@ -100,7 +102,7 @@ QScriptValue SEngine::execJsFunc(const QString &function, const QVariantList &ar
     return f;
 }
 
-void SEngine::bindItem(QPointer<Item> itm, bool localy)
+void SEngine::bindItem(const QPointer<Item>& itm, bool localy)
 {
     if (itm)
         itm->bindToEngine(&eng, localy);
@@ -135,7 +137,7 @@ void SEngine::setupEngine(QObject *o)
     if (obj)
     {
         connect(obj, SIGNAL(destroyed()), this, SLOT(deleteLater()));
-        eng.globalObject().setProperty("obj" , eng.newQObject(obj));
+        eng.globalObject().setProperty("obj", eng.newQObject(obj));
     }
 
     ogl = new glwrapper(this, "gl");
@@ -143,7 +145,7 @@ void SEngine::setupEngine(QObject *o)
 
     QScriptValue ogl_sv = eng.newQObject(ogl);
     ogl_sv.setPrototype(eng.scriptValueFromQMetaObject<glwrapper>());
-    eng.globalObject().setProperty("gl" , ogl_sv );
+    eng.globalObject().setProperty("gl", ogl_sv );
     Factory::Factory(eng);
 
     ScriptExtender::loadImported(this);

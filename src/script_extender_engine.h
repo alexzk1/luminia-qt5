@@ -37,7 +37,7 @@ class SEngine: public QObject, public utility::NoCopyAssignMove
     Q_OBJECT
 public:
     SEngine(QObject *o);
-    SEngine(QObject *o, const QString& fileName);
+    SEngine(QObject *o, QString  fileName);
     virtual ~SEngine() override;
     bool equals(const SEngine *c) const;
 
@@ -46,7 +46,7 @@ public:
     QScriptValue run(QFile &file);
     QScriptValue execJsFunc(const QString& function, const QVariantList& args);
 
-    void bindItem(QPointer<Item> itm, bool localy = false);
+    void bindItem(const QPointer<Item>& itm, bool localy = false);
     QScriptEngine& getEngine();
     QPointer<glwrapper> getGl() const;
 signals:

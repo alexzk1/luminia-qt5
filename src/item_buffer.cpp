@@ -354,11 +354,6 @@ void Item_buffer::refresh()
         is_mapped = false;
 
 
-
-
-
-
-
         qDebug() << "Item_buffer::refresh()" << buf.v << is_mapped << "buf.v == NULL !";
         return;
     }
@@ -695,8 +690,8 @@ This functions disables all ClientState and VertexAttribArrays. Is called after 
 */
 void Item_buffer::UnbindAll()
 {
-    for ( int i = 0; i < boundedAttributeLocations.size(); i++)
-        Unbind(boundedAttributeLocations.at(i));
+    for (int boundedAttributeLocation : boundedAttributeLocations)
+        Unbind(boundedAttributeLocation);
     boundedAttributeLocations.clear();
     boundedTransformFeedback.clear();
 }
@@ -744,16 +739,16 @@ void Item_buffer::PropertiesDialog()
 
     int row = 0;
 
-    QLabel l_dim("Dim:", 0);
+    QLabel l_dim("Dim:", nullptr);
     grid.addWidget(&l_dim, row, 0);
-    QSpinBox s_dim(0);
+    QSpinBox s_dim(nullptr);
     grid.addWidget(&s_dim, row, 1);
     s_dim.setValue(getDim());
     s_dim.setRange(1, 4);
     row++;
 
-    QLabel l_size("Size:", 0);
-    QSpinBox s_size(0);
+    QLabel l_size("Size:", nullptr);
+    QSpinBox s_size(nullptr);
     s_size.setRange(1, 1 << 24);
     s_size.setValue(getSize());
     if (getType() != "Component")
@@ -763,9 +758,9 @@ void Item_buffer::PropertiesDialog()
         row++;
     }
 
-    QLabel l_key("Keyframes:", 0);
+    QLabel l_key("Keyframes:", nullptr);
     grid.addWidget(&l_key, row, 0);
-    QSpinBox s_key(0);
+    QSpinBox s_key(nullptr);
     grid.addWidget(&s_key, row, 1);
     s_key.setRange(1, 10000);
     s_key.setValue(getKeyFrames());
@@ -774,7 +769,7 @@ void Item_buffer::PropertiesDialog()
 
     QLabel l_format("Format:");
     grid.addWidget(&l_format, row, 0);
-    QComboBox c_format(0);
+    QComboBox c_format(nullptr);
     grid.addWidget(&c_format, row, 1);
     c_format.addItems(QStringList() << "Float" << "Byte" << "Unsigned Byte" << "Short" << "Unsigned Short" << "Int" << "Unsigned Int" << "Half Float");
     switch (format)
@@ -821,11 +816,11 @@ void Item_buffer::PropertiesDialog()
     QHBoxLayout buttons;
     buttonwidget.setLayout(&buttons);
 
-    QPushButton ok("OK", 0);
+    QPushButton ok("OK", nullptr);
     connect (&ok, SIGNAL(clicked()), &d, SLOT (accept()));
     buttons.addWidget(&ok);
 
-    QPushButton cancel("Cancel", 0);
+    QPushButton cancel("Cancel", nullptr);
     connect (&cancel, SIGNAL(clicked()), &d, SLOT (reject()));
     buttons.addWidget(&cancel);
 

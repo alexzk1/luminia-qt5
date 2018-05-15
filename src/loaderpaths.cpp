@@ -6,6 +6,8 @@
 #include <QDebug>
 #include <algorithm>
 #include <set>
+#include <QProcess>
+
 const QString LoaderPaths::PLUGINS = "plugins";
 const QString LoaderPaths::SCRIPTS = "scripts";
 
@@ -21,7 +23,7 @@ QString LoaderPaths::findObject(const QString &fullFileName, const QStringList &
         else
         {
             auto dlist = buildDirsList(QString(), relTo);
-            const auto name = (tmp.isRelative())?fullFileName:tmp.fileName();
+            const auto name = (tmp.isRelative()) ? fullFileName : tmp.fileName();
             for (const auto& p : dlist)
             {
                 QFileInfo t(p + QDir::separator() + name);
@@ -39,7 +41,8 @@ QString LoaderPaths::findObject(const QString &fullFileName, const QStringList &
 
 QStringList LoaderPaths::buildDirsList(const QString &forWhat, QStringList relTo)
 {
-    const static QStringList search_pathches = {
+    const static QStringList search_pathches =
+    {
         QFileInfo(QCoreApplication::arguments().at(0)).absolutePath(),
         QDir::homePath() + QDir::separator() + ".luminia",
         "/usr/share/luminia",
@@ -47,7 +50,7 @@ QStringList LoaderPaths::buildDirsList(const QString &forWhat, QStringList relTo
     relTo.append(search_pathches);
     if (!forWhat.isEmpty())
     {
-        std::for_each(relTo.begin(), relTo.end(),[&forWhat](auto& v)
+        std::for_each(relTo.begin(), relTo.end(), [&forWhat](auto & v)
         {
             v += forWhat;
         });
@@ -60,17 +63,16 @@ QStringList LoaderPaths::listFilesInSubfolder(const QString &subfolder, const QS
     QStringList result;
     std::set<QString> no_same_name;
     auto folders = buildDirsList(QDir::separator() + subfolder + QDir::separator());
-    for(const auto& p : folders)
+    for (const auto& p : folders)
     {
         QDir dir(p);
         dir.setFilter( QDir::Files);
         dir.setSorting( QDir::Size | QDir::Reversed );
         QFileInfoList list = dir.entryInfoList();
 
-        for (int i = 0, sz = list.size(); i < sz; ++i)
+        for (const auto & fileInfo : list)
         {
-            const QFileInfo fileInfo = list.at(i);
-            const QString name = fileInfo.fileName();
+            const auto name = fileInfo.fileName();
 
             if (fileInfo.suffix() == extension && !no_same_name.count(name))
             {
@@ -80,4 +82,14 @@ QStringList LoaderPaths::listFilesInSubfolder(const QString &subfolder, const QS
         }
     }
     return result;
+}
+
+void LoaderPaths::spawnCopy(const QString &file2open)
+{
+    QString my_name = QFileInfo(QCoreApplication::arguments().at(0)).absoluteFilePath();
+    //qDebug() << "Spawning: " << my_name << file2open;
+    if (file2open.isEmpty())
+        QProcess::startDetached(my_name);
+    else
+        QProcess::startDetached(my_name, {file2open}, QFileInfo(file2open).absolutePath());
 }

@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE lumina>
-<lumina version="0.3">
+<lumina version="4">
     <node name="Node">
         <shader name="Fragmentshader" type="fragment">varying vec3 T,N; 
 uniform vec4 col; 

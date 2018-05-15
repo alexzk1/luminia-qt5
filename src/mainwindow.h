@@ -39,20 +39,18 @@ class MainWindow : public QMainWindow, public utility::SaveableWidget<MainWindow
     Q_OBJECT
 public:
     MainWindow();
-    virtual ~MainWindow() override;
+    ~MainWindow() override;
 
     void setupErrorHandler(SEngine* engine);
     static QPointer<MainWindow> instance;
 
 public slots:
-    void spaceballEvent(int *val);
     void hasErrorText(const QString &error);
     void clearWorld();
 private slots:
 
-    void clear();
-    void append();
-    void open(const QString & appendfilename = "");
+    void spawnNewApplication(const QString &file2open = "");
+    void open(const QString &file2open = "");
     void saveAs();
     void save();
     void about();
@@ -79,8 +77,7 @@ private:
     QToolBar *timeToolBar;
     QToolBar *scriptToolBar;
 
-    QAction *clearAct;
-    QAction *appendAct;
+    QAction *newProjectAct;
 
     QAction *saveAct;
     QAction *saveAsAct;
@@ -102,9 +99,11 @@ private:
 
     QPointer<QAction> switchDockTree;
 protected:
-    virtual void recurseWrite(QSettings& settings, QObject* object) override;
-    virtual void recurseRead(QSettings& settings, QObject* object) override;
-    void showFileName(const QString& name);
+    void recurseWrite(QSettings& settings, QObject* object) override;
+    void recurseRead(QSettings& settings, QObject* object) override;
+    void updateTitle();
+private:
+    const static QString fileNameFilter;
 };
 
 #endif

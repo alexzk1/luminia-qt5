@@ -31,8 +31,8 @@ class LumHandler : public QXmlDefaultHandler
 {
 public:
     LumHandler(Item *root, const QString & path = "");
-    virtual ~LumHandler() override;
-    bool startElement(const QString &namespaceURI, const QString &localName,const QString &qName, const QXmlAttributes &attributes) override;
+    ~LumHandler() override = default;
+    bool startElement(const QString &namespaceURI, const QString &localName, const QString &qName, const QXmlAttributes &attributes) override;
     bool endElement(const QString &namespaceURI, const QString &localName, const QString &qName) override;
     bool characters(const QString &str) override;
     bool fatalError(const QXmlParseException &exception)override;
@@ -54,7 +54,7 @@ class QDir;
 class LumGenerator
 {
 public:
-    LumGenerator(Item *rootitem){item = rootitem;}
+    LumGenerator(Item *rootitem);
     bool write(QIODevice *device);
 
 private:

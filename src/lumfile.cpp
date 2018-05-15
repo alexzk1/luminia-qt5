@@ -35,15 +35,14 @@
 #include <QDebug>
 #include "texture2lum.h"
 
+//now will be using integer numbering but...
+constexpr long CURRENT_FILE_VERSION = 4;
+
 LumHandler::LumHandler(Item *root, const QString & _path): QXmlDefaultHandler ()
 {
     item = root;
     luminaTag = false;
     path = _path;
-}
-
-LumHandler::~LumHandler()
-{
 }
 
 bool LumHandler::startElement(const QString & /* namespaceURI */,
@@ -61,9 +60,9 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
     if (qName == "lumina")
     {
         QString version = attributes.value("version");
-        if (!version.isEmpty() && (version.toDouble() > 0.301))
+        if (!version.isEmpty() && (version.toInt() > CURRENT_FILE_VERSION))
         {
-            errorStr = QObject::tr("This file is written by a newer lumina version");
+            errorStr = QObject::tr("This file is written by a newer lumina version.");
             return false;
         }
 
@@ -87,11 +86,14 @@ bool LumHandler::startElement(const QString & /* namespaceURI */,
                     if (qName == "shader")
                     {
                         int shadertype = 0;
-                        if (attributes.value("type") == "vertex")shadertype = Item_shader::Vertexshader;
+                        if (attributes.value("type") == "vertex")
+                            shadertype = Item_shader::Vertexshader;
                         else
-                            if (attributes.value("type") == "geometry")shadertype = Item_shader::Geometryshader;
+                            if (attributes.value("type") == "geometry" || attributes.value("type") == "geometrie") //bugfix, old version had wrong name
+                                shadertype = Item_shader::Geometryshader;
                             else
-                                if (attributes.value("type") == "fragment")shadertype = Item_shader::Fragmentshader;
+                                if (attributes.value("type") == "fragment")
+                                    shadertype = Item_shader::Fragmentshader;
                         item = new Item_shader(item, attributes.value("name"), shadertype);
                     }
                     else
@@ -268,10 +270,12 @@ bool LumHandler::endElement(const QString & /* namespaceURI */,
                             const QString & /* localName */,
                             const QString &qName)
 {
+
     if (qName == "lumina")
     {
-        for (int i = 0; i < runlater.size(); ++i)
-            runlater.at(i)->run();
+        item->world->setTime(0);
+        for (auto i : runlater)
+            i->run();
     }
     else
     {
@@ -316,7 +320,6 @@ bool LumHandler::endElement(const QString & /* namespaceURI */,
                                     item = item->parent();
                                 }
     }
-    item->world->setTime(0);
 
     return true;
 }
@@ -344,6 +347,11 @@ QString LumHandler::errorString() const
 
 /********************************************************************************************/
 
+LumGenerator::LumGenerator(Item *rootitem)
+    : item(rootitem)
+{
+}
+
 bool LumGenerator::write(QIODevice *device)
 {
     QFile *f;
@@ -361,19 +369,17 @@ bool LumGenerator::write(QIODevice *device)
     out.setCodec("UTF-8");
     out << "<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n"
         << "<!DOCTYPE lumina>\n"
-        << "<lumina version=\"0.3\">\n";
+        << QString("<lumina version=\"%1\">\n").arg(CURRENT_FILE_VERSION);
 
     processItem(item, 1);
 
     out << "</lumina>\n";
 
-    if (relto)delete relto;
+    if (relto)
+        delete relto;
 
     return true;
 }
-
-
-
 
 QString LumGenerator::indent(int depth)
 {
@@ -412,7 +418,7 @@ void LumGenerator::processItem(Item *item, int depth)
                     if (!dynamic_cast<Item_script*>(item)->isRunning())
                         out << indent(depth) << "<script name=\"" << item->objectName() << "\">";
                     else
-                        out << indent(depth) << "<script name=\"" << item->objectName() << "\" run=\"true\">";
+                        out << indent(depth) << "<script name=\"" << item->objectName() << R"(" run="true">)";
 
 
                     out << escapedText(static_cast<Item_edit*>(item)->raw_text());
@@ -428,7 +434,7 @@ void LumGenerator::processItem(Item *item, int depth)
                                 stype = "vertex" ;
                                 break;
                             case Item_shader::Geometryshader:
-                                stype = "geometrie";
+                                stype = "geometry";
                                 break;
                             case Item_shader::Fragmentshader:
                                 stype = "fragment";
@@ -442,7 +448,7 @@ void LumGenerator::processItem(Item *item, int depth)
                     else
                         if (type == "Texture")
                         {
-                            Item_texture *T = static_cast<Item_texture*>(item);
+                            auto T = static_cast<Item_texture*>(item);
                             out << indent(depth) << "<texture name=\"" << item->objectName() << "\" ";
 
                             if (T->getFilename() != "")
@@ -498,7 +504,7 @@ void LumGenerator::processItem(Item *item, int depth)
                             else
                                 if (type == "Index")
                                 {
-                                    Item_index* in = static_cast<Item_index*>(item);
+                                    auto in = static_cast<Item_index*>(item);
                                     out << indent(depth) << "<index name=\"" << item->objectName() << "\" primitive=\"" << in->getIPP() << "\">\n";
                                     out << in->getData();
                                     out << indent(depth) << "</index>\n";
@@ -506,7 +512,7 @@ void LumGenerator::processItem(Item *item, int depth)
                                 else
                                     if (type == "Component")
                                     {
-                                        Item_component* co = static_cast<Item_component*>(item);
+                                        auto co = static_cast<Item_component*>(item);
                                         QString comptype;
                                         switch (co->getCompType())
                                         {
@@ -571,7 +577,7 @@ void LumGenerator::processItem(Item *item, int depth)
                                     else
                                         if (type == "Buffer")
                                         {
-                                            Item_buffer* buf = static_cast<Item_buffer*>(item);
+                                            auto buf = static_cast<Item_buffer*>(item);
                                             out << indent(depth) << "<buffer name=\"" << item->objectName() << "\" size=\"" << buf->getSize();
                                             out << "\" dim=\"" << buf->getDim() << "\" keyframes=\"" << buf->getKeyFrames() << "\"";
 
@@ -609,7 +615,7 @@ void LumGenerator::processItem(Item *item, int depth)
                                         else
                                             if (type == "Uniform")
                                             {
-                                                Item_uniform* buf = static_cast<Item_uniform*>(item);
+                                                auto buf = static_cast<Item_uniform*>(item);
                                                 out << indent(depth) << "<uniform name=\"" << item->objectName() << "\" size=\"" << buf->getSize();
                                                 out << "\" dim=\"" << buf->getDim() << "\" keyframes=\"" << buf->getKeyFrames() << "\"";
 
@@ -639,7 +645,10 @@ void LumGenerator::processItem(Item *item, int depth)
                                                     {
                                                         float *joint = static_cast<Item_bone*>(item)->getJoint();
                                                         auto id = static_cast<Item_bone*>(item)->getId();
-                                                        out << indent(depth) << "<bone name=\"" << item->objectName() << "\" id=\"" << id << "\" jointx=\"" << joint[0] << "\" jointy=\"" << joint[1] << "\" jointz=\"" << joint[2] << "\">\n";
+                                                        out << indent(depth) << "<bone name=\"" <<
+                                                            item->objectName() << "\" id=\"" << id << "\" jointx=\""
+                                                            << joint[0] << "\" jointy=\"" << joint[1] << "\" jointz=\"" << joint[2] << "\">\n";
+
                                                         for (int i = 0; i < item->childCount(); ++i)
                                                             processItem(static_cast<Item*>(item->child(i)), depth + 1);
                                                         out << indent(depth) << "</bone>\n";
