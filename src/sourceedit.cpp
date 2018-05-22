@@ -31,7 +31,7 @@ TextEdit::TextEdit(QWidget *_parent):
     QTextEdit(_parent)
 {
     setAcceptRichText(false);
-    parent = static_cast<SourceEdit*>(_parent);
+    parent = dynamic_cast<SourceEdit*>(_parent); //let it crash later if wrong parent...
     completationOpen = false;
     setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
 }
@@ -43,11 +43,10 @@ QSize TextEdit::sizeHint() const
 
 void TextEdit::keyPressEvent(QKeyEvent *e)
 {
-
     QTextEdit::keyPressEvent(e);
     if (!completationOpen)
     {
-        QTextCursor cursor = textCursor();
+        const auto cursor = textCursor();
         QChar rchar = cursor.block().text()[cursor.position() - cursor.block().position()];
         if (!rchar.isLetterOrNumber())
         {
@@ -270,7 +269,7 @@ void Highlighter::highlightBlock( const QString &text)
         }
     };
 
-
+    //order is important here, some next rules change prev. coloring. It seems cannot use "look before" in regexp
     const static std::vector<HighlightRule> defaultRules =
     {
         {R"(([0-9\.]+)(?=\W+))", Qt::darkMagenta},
@@ -302,7 +301,7 @@ void Highlighter::highlightBlock( const QString &text)
             "union|enum|var|function|typedef|template|this|packed|centroid)\\b", Qt::black, QFont::Bold
         },
 
-        {"gl_\\w+", QColor("#e0756c"), QFont::DemiBold},
+        {"gl_\\w+", QColor("#e0756c"), QFont::Normal},
         {"#.*", Qt::darkBlue},
         {"//.*", Qt::gray, 0} //line comment rule must be last, so it recolors all other rules worked above
 
@@ -316,10 +315,16 @@ void Highlighter::highlightBlock( const QString &text)
 SourceEdit::SourceEdit(QWidget *parent):
     QWidget(parent)
 {
+    //more fonts from https://habr.com/post/358992/
     const static QStringList prefFontsFamilies =
     {
         "Source Code Pro",
+        "Monaco",
+        "Consolas",
         "Ubuntu Mono",
+        "Menlo",
+        "DejaVu Sans Mono",
+        "Droid Sans Mono"
         "Courier",
     };
     static QFontDatabase db;
