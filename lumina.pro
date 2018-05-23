@@ -45,13 +45,16 @@ CONFIG(debug) {
 else {
     DEFINES += NDEBUG
     message( "Building the RELEASE Version" )
-    QMAKE_CXXFLAGS += -O3
+    #delegated to packager
+    #QMAKE_CXXFLAGS += -O3
 }
 
 include($$PWD/src/base64/base64.pri)
+include($$PWD/src/editors/editors.pri)
+
 PRE_TARGETDEPS += base64
 
-HEADERS	=	src/mainwindow.h \
+HEADERS	+=	src/mainwindow.h \
                 src/glcam.h src/tree.h \
                 src/item.h \
                 src/item_image.h \
@@ -89,7 +92,7 @@ HEADERS	=	src/mainwindow.h \
     src/prohibited_filter.h \
     src/texture2lum.h
 
-SOURCES =	src/main.cpp \
+SOURCES +=	src/main.cpp \
                 src/mainwindow.cpp \
                 src/glcam.cpp \
                 src/tree.cpp \

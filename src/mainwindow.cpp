@@ -140,38 +140,80 @@ void MainWindow::updateTitle()
     if (fileName.isEmpty())
         setWindowTitle("");
     else
+    {
         setWindowTitle(QString(tr("[%1]")).arg(fileName)); //qt automatically appends program name at the end for such [%1] text...
+        updatedLastFilesList();
+    }
+}
+
+const static QString last_proj_key = "LastProjects";
+
+void MainWindow::updatedLastFilesList()
+{
+    QSettings settings;
+    settings.beginGroup(getSettingsGroupName(this));
+    QStringList stored = settings.value(last_proj_key).toStringList();
+
+    //making current file on top of list
+    if (stored.contains(fileName))
+        stored.removeOne(fileName);
+    stored.insert(0, fileName);
+
+    while (stored.size() > 15)
+        stored.removeLast();
+    settings.setValue(last_proj_key, stored);
+    settings.endGroup();
+    settings.sync();
+}
+
+void MainWindow::reloadLastFilesList()
+{
+    QSettings settings;
+    settings.beginGroup(getSettingsGroupName(this));
+    QStringList stored = settings.value(last_proj_key).toStringList();
+    settings.endGroup();
+    if (historyMenu)
+    {
+        historyMenu->clear();
+        for (const auto& fn : stored)
+        {
+            auto act = historyMenu->addAction(fn);
+            connect(act, &QAction::triggered, this, std::bind(&MainWindow::open, this, fn));
+        }
+    }
 }
 
 void MainWindow::open(const QString& file2open)
 {
-
     QString selected = fileNameFilter;
     auto fileN = (file2open.isEmpty()) ? QFileDialog::getOpenFileName(this, tr("Lumina Open File"), lastPath, fileNameFilter, &selected) : file2open;
     if (!fileN.isEmpty())
     {
-        if (fileName.isEmpty())
+        if (fileN != fileName)
         {
-            lastPath = QFileInfo(fileN).absolutePath();
-
-            LumHandler handler(treeview->world, lastPath);
-            QXmlSimpleReader reader;
-            reader.setContentHandler(&handler);
-
-            QFile file(fileN);
-            if (file.open(QFile::ReadOnly | QFile::Text))
+            if (fileName.isEmpty())
             {
-                QXmlInputSource xmlInputSource(&file);
-                if (reader.parse(xmlInputSource))
-                    statusBar()->showMessage(tr("File loaded."), 2000);
-                fileName = fileN;
-                updateTitle();
+                lastPath = QFileInfo(fileN).absolutePath();
+
+                LumHandler handler(treeview->world, lastPath);
+                QXmlSimpleReader reader;
+                reader.setContentHandler(&handler);
+
+                QFile file(fileN);
+                if (file.open(QFile::ReadOnly | QFile::Text))
+                {
+                    QXmlInputSource xmlInputSource(&file);
+                    if (reader.parse(xmlInputSource))
+                        statusBar()->showMessage(tr("File loaded."), 2000);
+                    fileName = fileN;
+                    updateTitle();
+                }
+                else
+                    QMessageBox::warning(this, tr("Lumina Project Files"), tr("Cannot read file %1:\n%2.").arg(fileN).arg(file.errorString()));
             }
             else
-                QMessageBox::warning(this, tr("Lumina Project Files"), tr("Cannot read file %1:\n%2.").arg(fileN).arg(file.errorString()));
+                spawnNewApplication(fileN);
         }
-        else
-            spawnNewApplication(fileN);
     }
 }
 
@@ -292,8 +334,8 @@ void MainWindow::createActions()
     consoleToggleAct->setCheckable (true);
     connect(consoleToggleAct, SIGNAL(toggled(bool)), console, SLOT(toggle(bool)));
 
-    quitAct = new QAction(tr("&Quit"), this);
-    quitAct->setShortcut(QKeySequence("alt+X"));
+    quitAct = new QAction(tr("&Exit"), this);
+    quitAct->setShortcut(QKeySequence("ctrl+Q"));
     quitAct->setStatusTip(tr("Quit the application"));
     connect(quitAct, SIGNAL(triggered()), this, SLOT(close()));
 
@@ -322,13 +364,14 @@ void MainWindow::createActions()
 void MainWindow::createMenus()
 {
     fileMenu = menuBar()->addMenu(tr("&File"));
+    fileMenu->addAction(newProjectAct);
     fileMenu->addAction(openAct);
-
-    fileMenu->addAction(saveAct);
-    fileMenu->addAction(saveAsAct);
+    historyMenu = fileMenu->addMenu(tr("&Recent Projects"));
+    connect(historyMenu, &QMenu::aboutToShow, this, &MainWindow::reloadLastFilesList);
 
     fileMenu->addSeparator();
-    fileMenu->addAction(newProjectAct);
+    fileMenu->addAction(saveAct);
+    fileMenu->addAction(saveAsAct);
     fileMenu->addSeparator();
 
     fileMenu->addAction(quitAct);

@@ -57,7 +57,7 @@ private slots:
     void hide_all_editors();
     void run_all_scripts();
     void stop_all_scripts();
-
+    void reloadLastFilesList();
 private:
     void createActions();
     void createMenus();
@@ -67,41 +67,44 @@ private:
     QString fileName;
     QString lastPath;
 
-    TreeView *treeview;
+    QPointer<TreeView> treeview;
 
-    QMenu *fileMenu;
-    QMenu *editMenu;
-    QMenu *helpMenu;
-    QToolBar *fileToolBar;
-    QToolBar *editToolBar;
-    QToolBar *timeToolBar;
-    QToolBar *scriptToolBar;
+    QPointer<QMenu> fileMenu;
+    QPointer<QMenu> editMenu;
+    QPointer<QMenu> helpMenu;
+    QPointer<QToolBar> fileToolBar;
+    QPointer<QToolBar> editToolBar;
+    QPointer<QToolBar> timeToolBar;
+    QPointer<QToolBar> scriptToolBar;
 
-    QAction *newProjectAct;
+    QPointer<QAction> newProjectAct;
 
-    QAction *saveAct;
-    QAction *saveAsAct;
-    QAction *openAct;
-    QAction *aboutAct;
-    QAction *aboutQtAct;
-    QAction *quitAct;
+    QPointer<QAction> saveAct;
+    QPointer<QAction> saveAsAct;
+    QPointer<QAction> openAct;
+    QPointer<QAction> aboutAct;
+    QPointer<QAction> aboutQtAct;
+    QPointer<QAction> quitAct;
 
-    QAction *hide_all_editors_Act;
-    QAction *run_all_scripts_Act;
-    QAction *stop_all_scripts_Act;
+    QPointer<QAction> hide_all_editors_Act;
+    QPointer<QAction> run_all_scripts_Act;
+    QPointer<QAction> stop_all_scripts_Act;
 
 
-    QAction *profilerToggleAct;
-    QAction *consoleToggleAct;
+    QPointer<QAction> profilerToggleAct;
+    QPointer<QAction> consoleToggleAct;
 
-    TimeWidget *time;
-    Console *console;
+    QPointer<TimeWidget> time;
+    QPointer<Console>    console;
 
     QPointer<QAction> switchDockTree;
+    QPointer<QMenu>   historyMenu;
 protected:
     void recurseWrite(QSettings& settings, QObject* object) override;
     void recurseRead(QSettings& settings, QObject* object) override;
     void updateTitle();
+    void updatedLastFilesList();
+
 private:
     const static QString fileNameFilter;
 };

@@ -7,7 +7,9 @@
 #include <map>
 #include <atomic>
 #include <QSettings>
-namespace utility {
+#include <utility>
+namespace utility
+{
 
     template<class T>
     class SaveableWidget
@@ -30,10 +32,15 @@ namespace utility {
 
     protected:
         SaveableWidget() = default;
-        SaveableWidget(const QString& prefix):
+        SaveableWidget(QString  prefix):
             lastSett(),
-            prefix(prefix)
+            prefix(std::move(prefix))
         {
+        }
+
+        QString getSettingsGroupName(QWidget* widget) const
+        {
+            return prefix + widget->objectName();
         }
 
         void readSettings(QWidget* window)
@@ -45,13 +52,11 @@ namespace utility {
                 {
                     QSettings settings;
 
-                    settings.beginGroup(prefix + window->objectName());
+                    settings.beginGroup(getSettingsGroupName(window));
                     QVariant value = settings.value("geometry");
 
                     if (!value.isNull())
-                    {
                         window->restoreGeometry(value.toByteArray());
-                    }
                     else
                     {
                         //supporting old saves
@@ -75,7 +80,7 @@ namespace utility {
             {
                 QSettings settings;
 
-                settings.beginGroup(prefix + window->objectName());
+                settings.beginGroup(getSettingsGroupName(window));
                 settings.setValue("pos", window->pos());
                 settings.setValue("size", window->size());
                 settings.setValue("geometry", window->saveGeometry());
@@ -96,9 +101,7 @@ namespace utility {
             Q_UNUSED(settings)
             Q_UNUSED(object)
         }
-        virtual ~SaveableWidget()
-        {
-        }
+        virtual ~SaveableWidget() = default;
 
     public:
         void resetSizePos()
