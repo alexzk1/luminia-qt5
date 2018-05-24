@@ -130,7 +130,7 @@ private:
     QTextEdit *editor;
 };
 
-
+#include "editors/Cebitor.h"
 class SourceEdit : public QWidget
 {
     friend class TextEdit;

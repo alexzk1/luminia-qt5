@@ -49,9 +49,6 @@ int main(int argc, char **argv)
     app.setApplicationDisplayName("Luminia Modern");
     app.setOrganizationDomain("pasteover.net");
     app.setOrganizationName("pasteover.net");
-
-
-    Q_INIT_RESOURCE(lumina);
     app.setWindowIcon(QIcon(":/images/lumina.png"));
 
     qRegisterMetaType<GLenum>("GLenum");

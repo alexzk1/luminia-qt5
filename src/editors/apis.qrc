@@ -1,0 +1,5 @@
+<RCC>
+    <qresource prefix="/">
+        <file>apis/glsl.api</file>
+    </qresource>
+</RCC>

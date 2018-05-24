@@ -15,8 +15,8 @@ arch=('i686' 'x86_64')
 url="git://github.com/alexzk1/luminia-qt5"
 
 license=('GPL')
-depends=('qt5-base lz4 qt5-script')
-makedepends=('glew')
+depends=('qt5-base lz4 qt5-script qscintilla-qt5')
+makedepends=('glew flex')
 optdepends=('blender: for mesh export script')
 install=lumina.install
 source=(git://github.com/alexzk1/luminia-qt5)
