@@ -45,7 +45,7 @@ class ConsoleCompletionBox : public AbstractCompletionBox
     Q_OBJECT
 public:
     ConsoleCompletionBox (ConsoleLine *line, const QStringList& completions, const QString& searchstring);
-    virtual ~ConsoleCompletionBox()override;
+    ~ConsoleCompletionBox()override;
 protected:
     void finishCompletion() override;
     ConsoleLine *line;

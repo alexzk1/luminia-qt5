@@ -128,17 +128,17 @@ QString Item_texture::statusText() const
     switch (type)
     {
         case GL_TEXTURE_3D:
-            return QString("3D Texture %1 x %2 x %3 %4").arg(width).arg(height).arg(depth).arg(texturetype[formatindex].name);
+            return QString(tr("3D Texture %1 x %2 x %3 %4")).arg(width).arg(height).arg(depth).arg(texturetype[formatindex].name);
         case GL_TEXTURE_2D:
-            return QString("2D Texture %1 x %2 %3").arg(width).arg(height).arg(texturetype[formatindex].name);
+            return QString(tr("2D Texture %1 x %2 %3")).arg(width).arg(height).arg(texturetype[formatindex].name);
         case GL_TEXTURE_CUBE_MAP:
-            return QString("Cube Texture %1  %3").arg(width).arg(texturetype[formatindex].name);
+            return QString(tr("Cube Texture %1  %3")).arg(width).arg(texturetype[formatindex].name);
         case GL_TEXTURE_RECTANGLE:
-            return QString("Rectangle Texture %1 x %2 %3").arg(width).arg(height).arg(texturetype[formatindex].name);
+            return QString(tr("Rectangle Texture %1 x %2 %3")).arg(width).arg(height).arg(texturetype[formatindex].name);
         case GL_TEXTURE_2D_ARRAY_EXT:
-            return QString("2D Array Texture %1 x %2 with  %3 Layer %4").arg(width).arg(height).arg(depth).arg(texturetype[formatindex].name);
+            return QString(tr("2D Array Texture %1 x %2 with  %3 Layer %4")).arg(width).arg(height).arg(depth).arg(texturetype[formatindex].name);
         default:
-            return QString("Empty Texture");
+            return QString(tr("Empty Texture"));
     }
 }
 

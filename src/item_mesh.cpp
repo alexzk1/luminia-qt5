@@ -22,8 +22,9 @@
 #include "incgl.h"
 #include <math.h>
 
-Item_mesh::Item_mesh( Item *parent, const QString& label1, int vertices) : Item( parent,label1 ){
-    setFlags(Qt::ItemIsEnabled|Qt::ItemIsSelectable | Qt::ItemIsEditable| Qt::ItemIsDragEnabled);
+Item_mesh::Item_mesh( Item *parent, const QString& label1, int vertices) : Item( parent, label1 )
+{
+    setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled);
     setIcon( 0, QIcon(":/images/xpm/stream.xpm") );
 
     num_of_vertices = vertices;
@@ -38,16 +39,15 @@ void Item_mesh::addMenu(QMenu *menu)
     menu->addAction( QIcon(":/images/xpm/quaternion.xpm"), tr("Create Texspace Quaternion"), this, SLOT( genTexSpaceQuaternion()));
 }
 
-
-
-QString Item_mesh::statusText() const{
-    return QString("Mesh  %1 Vertices").arg(num_of_vertices);
+QString Item_mesh::statusText() const
+{
+    return QString("%2; %1 Vertices").arg(num_of_vertices).arg(Item::statusText());
 }
 
 /*!
 Object addIndex(String name, Number vertices_per_primitive)\n
 */
-QObject* Item_mesh::addIndex(const QString& label1 , int verts_per_prim)
+QObject* Item_mesh::addIndex(const QString& label1, int verts_per_prim)
 {
     return makeNewItem<Item_index>(label1, verts_per_prim, 0);
 }
@@ -90,7 +90,7 @@ QObject *Item_mesh::addQuaternion()
 /*!
 Object addComponent(Enum Type, String name="Component", Number dimension=4)\n
 */
-QObject* Item_mesh::addComponent(int type ,const QString& label1, int dimension, int keyframes, int format)
+QObject* Item_mesh::addComponent(int type, const QString& label1, int dimension, int keyframes, int format)
 {
     return makeNewItemNoThis<Item_component>(this, label1, type, dimension, keyframes, format);
 }
@@ -99,17 +99,19 @@ QObject* Item_mesh::addComponent(int type ,const QString& label1, int dimension,
 void Draw(Enum mode)\n
 Draw the mesh without index. Recommend for gl.POINTS and gl.POINT_SPRITES.
 */
-void Item_mesh::Draw(int mode){
+void Item_mesh::Draw(int mode)
+{
     profiler->start();
-    if (mode == GL_POINT_SPRITE_ARB){
+    if (mode == GL_POINT_SPRITE_ARB)
+    {
         glEnable(GL_POINT_SPRITE_ARB);
-        glDrawArrays(GL_POINTS, 0 , num_of_vertices);
+        glDrawArrays(GL_POINTS, 0, num_of_vertices);
         glDisable(GL_POINT_SPRITE_ARB);
         profiler->stop();
         return;
     }
 
-    glDrawArrays(mode, 0 , num_of_vertices);
+    glDrawArrays(mode, 0, num_of_vertices);
     profiler->stop();
 }
 
@@ -117,17 +119,19 @@ void Item_mesh::Draw(int mode){
 void DrawInstanced(number instances, Enum mode)\n
 Draw "instances" times the mesh without index. Recommend for gl.POINTS and gl.POINT_SPRITES.
 */
-void Item_mesh::DrawInstanced( int  num_of_i, int mode){
+void Item_mesh::DrawInstanced( int  num_of_i, int mode)
+{
     profiler->start();
-    if (mode == GL_POINT_SPRITE_ARB){
+    if (mode == GL_POINT_SPRITE_ARB)
+    {
         glEnable(GL_POINT_SPRITE_ARB);
-        glDrawArraysInstancedEXT(GL_POINTS, 0 , num_of_vertices, num_of_i);
+        glDrawArraysInstancedEXT(GL_POINTS, 0, num_of_vertices, num_of_i);
         glDisable(GL_POINT_SPRITE_ARB);
         profiler->stop();
         return;
     }
 
-    glDrawArraysInstancedEXT(mode, 0 , num_of_vertices, num_of_i);
+    glDrawArraysInstancedEXT(mode, 0, num_of_vertices, num_of_i);
     profiler->stop();
 }
 
@@ -145,10 +149,10 @@ void Item_mesh::setNumOfVertices(unsigned num)
     num_of_vertices = num;
 
     QTreeWidgetItemIterator it(this);
-    while (*it) {
-        if (Item_component* ic = dynamic_cast<Item_component*>(*it)){
+    while (*it)
+    {
+        if (Item_component* ic = dynamic_cast<Item_component*>(*it))
             ic->setDim( ic->getDim(), ic->getSize(), ic->getKeyFrames(), ic->getFormat(), ic->isNormalizedInt());
-        }
         ++it;
     }
 }
@@ -157,6 +161,7 @@ void Item_mesh::setNumOfVertices(unsigned num)
 number getNumOfVertices()\n
 get the number of vertices
 */
-unsigned Item_mesh::getNumOfVertices(){
+unsigned Item_mesh::getNumOfVertices()
+{
     return num_of_vertices;
 }

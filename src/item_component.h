@@ -38,7 +38,6 @@ public:
     enum comptype {VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
     Item_component(Item_mesh *parent, const QString& label1, int comptype, int dimension, int keyframes = 1, int format = GL_FLOAT, bool normalized_int = true);
     ~Item_component() override = default;
-    //virtual QString statusText() const;
     int getCompType()
     {
         return comptype;

@@ -3,13 +3,15 @@ HEADERS += \
     $$PWD/QsciLexerGlsl.h \
     $$PWD/FlexLexer.h \
     $$PWD/Cebitor.h \
-    $$PWD/CebErrors.h
+    $$PWD/CebErrors.h \
+    $$PWD/searchbox.h
 
 SOURCES += \
     $$PWD/QsciLexerGlsl.cpp \
     $$PWD/font_family_picker.cpp \
     $$PWD/Cebitor.cpp \
-    $$PWD/CebErrors.cpp
+    $$PWD/CebErrors.cpp \
+    $$PWD/searchbox.cpp
 
 #GSLS support from https://github.com/NCCA/ShaderEnvironmentBuilde
 
@@ -58,3 +60,6 @@ LIBS += -lqscintilla2_qt5
 
 RESOURCES += \
     $$PWD/apis.qrc
+
+FORMS += \
+    $$PWD/searchbox.ui

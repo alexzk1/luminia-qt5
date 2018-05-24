@@ -50,10 +50,7 @@ public:
     Item(Item *parent, const QString& label1);
     ~Item() override;
     virtual bool dragAccept(Item*);
-    virtual QString statusText() const
-    {
-        return QString();
-    }
+    virtual QString statusText() const;
     void setData ( int column, int role,  const QVariant &value ) override;
     void setName (const QString& name);
     QString getName() const;
@@ -252,11 +249,9 @@ protected:
 };
 
 
+class QToolBar;
+class SearchBox;
 //**********************************************************
-class SourceEdit;
-class LineNumberWidget;
-class Highlighter;
-
 /*!
 The basis class for scripts and shaders.
 */
@@ -272,18 +267,28 @@ public slots:
     void load(const QString& filename = "");
 
     void reload();
-    QString raw_text() const;
-
     QString text() const;
 
+    QString raw_text() const;
     void setText(const QString&);
-    QString getType() const override;
 
+    QString getType() const override;
 protected:
-    QPointer<SourceEdit> edit;
     QList<QPointer<QAction>> commonActions;
-    QString fn;
+    QPointer<SearchBox>      searchBox;
+
     void addMenu(QMenu *menu) override;
+    virtual QWidget* createTextEditor(QWidget *parent) const;
+    void appendActionToBar(QAction *act, QAction *before);
+
+    Item_edit(int derived, Item *parent, const QString& label1);
+    void initParent();
+private:
+    QPointer<QWidget>   hostWidget;
+    QPointer<QWidget>   editor;
+    QPointer<QToolBar>  buttonsBar;
+
+    QString fn;
 };
 
 //**********************************************************
@@ -297,18 +302,17 @@ class Item_shader : public Item_edit
 public:
     Item_shader( Item *parent, const QString& label1, int shadertype);
     ~Item_shader() override = default;
-    enum shadertype {Vertexshader, Geometryshader, Fragmentshader};
+    enum shadertype {Vertexshader = 0, Geometryshader, Fragmentshader};
     int getShaderType();
+    QString statusText() const override;
 public slots:
     QString getType()const override
     {
         return QString("Shader");
     }
-private slots:
-    void completationHandler(const QString&);
-    void helpHandler(const QString&);
 protected:
     int shadertype;
+    QWidget* createTextEditor(QWidget *parent) const override;
 };
 //**********************************************************
 
@@ -332,14 +336,14 @@ public slots:
     void Call(const QString& function, const QVariantList& args = QVariantList());
     QString getType()const override;
 private slots:
-    void completationHandler(const QString&);
-    void helpHandler(const QString&);
     void switchIcon(bool isRunning);
 private:
     void deleteEngine();
     bool running;
     QPointer<SEngine> engine;
     const QMetaObject *meta;
+protected:
+    QWidget* createTextEditor(QWidget *parent) const override;
 };
 
 

@@ -46,7 +46,7 @@ QStringList LoaderPaths::buildDirsList(const QString &forWhat, QStringList relTo
         QFileInfo(QCoreApplication::arguments().at(0)).absolutePath(),
         QDir::homePath() + QDir::separator() + ".luminia",
         "/usr/share/luminia",
-        ":/", //search in root of compiled in resources too with lowest priority
+        ":", //search in root of compiled in resources too with lowest priority
     };
     relTo.append(search_pathches);
     if (!forWhat.isEmpty())

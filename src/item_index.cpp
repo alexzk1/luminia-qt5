@@ -44,18 +44,20 @@ Item_index::~Item_index()
 }
 
 
-QString Item_index::statusText()const{
-    switch(indices_per_primitive){
+QString Item_index::statusText()const
+{
+    switch (indices_per_primitive)
+    {
         case 6:
-            return QString("Index %1 Triangles with adjacency").arg(num_of_primitives);
+            return QString(tr("%2; %1 Triangles with adjacency")).arg(num_of_primitives).arg(Item::statusText());
         case 4:
-            return QString("Index %1 Quads").arg(num_of_primitives);
+            return QString(tr("%2; %1 Quads")).arg(num_of_primitives).arg(Item::statusText());
         case 3:
-            return QString("Index %1 Triangles").arg(num_of_primitives);
+            return QString(tr("%2; %1 Triangles")).arg(num_of_primitives).arg(Item::statusText());
         case 2:
-            return QString("Index %1 Lines").arg(num_of_primitives);
+            return QString(tr("%2; %1 Lines")).arg(num_of_primitives).arg(Item::statusText());
         default:
-            return QString("Index %1 Points").arg(num_of_primitives);
+            return QString(tr("%2; %1 Points")).arg(num_of_primitives).arg(Item::statusText());
     }
 }
 
@@ -64,33 +66,45 @@ void Draw([Enum mode])\n
 The index draw function. Mode should be empty, but it can be used
 to overiding the quad or triangle by points
 */
-void Item_index::Draw(int mode){
+void Item_index::Draw(int mode)
+{
     GL_CHECK_ERROR();
-    if (mode == -1){
-        switch (indices_per_primitive){
-            case  2: mode = GL_LINES;			break;
-            case  3: mode = GL_TRIANGLES;			break;
-            case  4: mode = GL_QUADS;			break;
-            case  6: mode = GL_TRIANGLES_ADJACENCY_EXT;	break;
-            default: mode = GL_POINTS;
+    if (mode == -1)
+    {
+        switch (indices_per_primitive)
+        {
+            case  2:
+                mode = GL_LINES;
+                break;
+            case  3:
+                mode = GL_TRIANGLES;
+                break;
+            case  4:
+                mode = GL_QUADS;
+                break;
+            case  6:
+                mode = GL_TRIANGLES_ADJACENCY_EXT;
+                break;
+            default:
+                mode = GL_POINTS;
 
         }
     }
 
     glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, VBO);
 
-    if(needrefresh){
-        glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, num_of_primitives * indices_per_primitive * sizeof(int) , index, GL_DYNAMIC_DRAW_ARB);
-    }
+    if (needrefresh)
+        glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, num_of_primitives * indices_per_primitive * sizeof(int), index, GL_DYNAMIC_DRAW_ARB);
     needrefresh = 0;
     GL_CHECK_ERROR();
 
     profiler->start();
-    if (mode == GL_POINT_SPRITE_ARB){
+    if (mode == GL_POINT_SPRITE_ARB)
+    {
         glEnable(GL_POINT_SPRITE_ARB);
         glDrawElements(GL_POINTS, num_of_primitives * indices_per_primitive, GL_UNSIGNED_INT, (char *) nullptr);
         glDisable(GL_POINT_SPRITE_ARB);
-        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
+        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
         profiler->stop();
         return;
     }
@@ -98,7 +112,7 @@ void Item_index::Draw(int mode){
     profiler->stop();
     GL_CHECK_ERROR();
 
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 }
 
 /*!
@@ -109,31 +123,42 @@ to overiding the quad or triangle by points
 void Item_index::DrawInstanced(int  num_of_i, int mode)
 {
     GL_CHECK_ERROR();
-    if (mode == -1){
-        switch (indices_per_primitive){
-            case  2: mode = GL_LINES;			break;
-            case  3: mode = GL_TRIANGLES;			break;
-            case  4: mode = GL_QUADS;			break;
-            case  6: mode = GL_TRIANGLES_ADJACENCY_EXT;	break;
-            default: mode = GL_POINTS;
+    if (mode == -1)
+    {
+        switch (indices_per_primitive)
+        {
+            case  2:
+                mode = GL_LINES;
+                break;
+            case  3:
+                mode = GL_TRIANGLES;
+                break;
+            case  4:
+                mode = GL_QUADS;
+                break;
+            case  6:
+                mode = GL_TRIANGLES_ADJACENCY_EXT;
+                break;
+            default:
+                mode = GL_POINTS;
 
         }
     }
 
     glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, VBO);
 
-    if(needrefresh){
-        glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, num_of_primitives * indices_per_primitive * sizeof(int) , index, GL_DYNAMIC_DRAW_ARB);
-    }
+    if (needrefresh)
+        glBufferDataARB(GL_ELEMENT_ARRAY_BUFFER_ARB, num_of_primitives * indices_per_primitive * sizeof(int), index, GL_DYNAMIC_DRAW_ARB);
     needrefresh = 0;
     GL_CHECK_ERROR();
 
     profiler->start();
-    if (mode == GL_POINT_SPRITE_ARB){
+    if (mode == GL_POINT_SPRITE_ARB)
+    {
         glEnable(GL_POINT_SPRITE_ARB);
         glDrawElements(GL_POINTS, num_of_primitives * indices_per_primitive, GL_UNSIGNED_INT, (char *) NULL);
         glDisable(GL_POINT_SPRITE_ARB);
-        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
+        glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
         profiler->stop();
         return;
     }
@@ -143,7 +168,7 @@ void Item_index::DrawInstanced(int  num_of_i, int mode)
     profiler->stop();
     GL_CHECK_ERROR();
 
-    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB,0);
+    glBindBufferARB(GL_ELEMENT_ARRAY_BUFFER_ARB, 0);
 }
 
 
@@ -151,17 +176,30 @@ void Item_index::DrawInstanced(int  num_of_i, int mode)
 void add(number a, number b, number c, number d)
 add a primitive to the index. Only dim arguments are valid
 */
-void Item_index::set(int i, int a, int b, int c, int d, int e, int f){
+void Item_index::set(int i, int a, int b, int c, int d, int e, int f)
+{
 
     int ofs = i * indices_per_primitive;
 
-    switch (indices_per_primitive){
-        case 6: index[ofs + 5]=f;
-            [[clang::fallthrough]]; case 5: index[ofs + 4]=e;
-            [[clang::fallthrough]]; case 4: index[ofs + 3]=d;
-            [[clang::fallthrough]]; case 3: index[ofs + 2]=c;
-            [[clang::fallthrough]]; case 2: index[ofs + 1]=b;
-            [[clang::fallthrough]]; case 1: index[ofs + 0]=a;
+    switch (indices_per_primitive)
+    {
+        case 6:
+            index[ofs + 5] = f;
+            [[clang::fallthrough]];
+        case 5:
+            index[ofs + 4] = e;
+            [[clang::fallthrough]];
+        case 4:
+            index[ofs + 3] = d;
+            [[clang::fallthrough]];
+        case 3:
+            index[ofs + 2] = c;
+            [[clang::fallthrough]];
+        case 2:
+            index[ofs + 1] = b;
+            [[clang::fallthrough]];
+        case 1:
+            index[ofs + 0] = a;
     }
     needrefresh = 1;
 
@@ -171,19 +209,32 @@ void Item_index::set(int i, int a, int b, int c, int d, int e, int f){
 void add(number a, number b, number c, number d, number d, number e)
 add a primitive to the index. Only dim arguments are valid
 */
-void Item_index::add(int a, int b, int c, int d, int e, int f){
+void Item_index::add(int a, int b, int c, int d, int e, int f)
+{
     int ofs = num_of_primitives * indices_per_primitive;
 
     num_of_primitives++;
     resize();
 
-    switch (indices_per_primitive){
-        case 6: index[ofs + 5]=f;
-            [[clang::fallthrough]]; case 5: index[ofs + 4]=e;
-            [[clang::fallthrough]]; case 4: index[ofs + 3]=d;
-            [[clang::fallthrough]]; case 3: index[ofs + 2]=c;
-            [[clang::fallthrough]]; case 2: index[ofs + 1]=b;
-            [[clang::fallthrough]]; case 1: index[ofs + 0]=a;
+    switch (indices_per_primitive)
+    {
+        case 6:
+            index[ofs + 5] = f;
+            [[clang::fallthrough]];
+        case 5:
+            index[ofs + 4] = e;
+            [[clang::fallthrough]];
+        case 4:
+            index[ofs + 3] = d;
+            [[clang::fallthrough]];
+        case 3:
+            index[ofs + 2] = c;
+            [[clang::fallthrough]];
+        case 2:
+            index[ofs + 1] = b;
+            [[clang::fallthrough]];
+        case 1:
+            index[ofs + 0] = a;
     }
 
 }
@@ -191,19 +242,21 @@ void Item_index::add(int a, int b, int c, int d, int e, int f){
 /*!
 internal used reszie function
 */
-void Item_index::resize(){
+void Item_index::resize()
+{
     //static int size = 0;
-    index = (int *) realloc(index,(num_of_primitives * indices_per_primitive) * sizeof(int));
+    index = (int *) realloc(index, (num_of_primitives * indices_per_primitive) * sizeof(int));
     needrefresh = 1;
 }
 /*!
 void del(number index, number n)\n
 delet at index n primitives
 */
-void Item_index::del(int i, int num){
+void Item_index::del(int i, int num)
+{
     int ipp = indices_per_primitive;
 
-    memcpy (&index[i * ipp],&index[(i+num) * ipp] ,(num_of_primitives - i - num) * ipp * sizeof(int));
+    memcpy (&index[i * ipp], &index[(i + num) * ipp], (num_of_primitives - i - num) * ipp * sizeof(int));
     num_of_primitives -= num;
     resize();
 }
@@ -216,25 +269,28 @@ QString Item_index::getType() const
 /*!
 set data function for lum files
 */
-void Item_index::setData(QString content){
+void Item_index::setData(QString content)
+{
     QStringList list = content.split(QRegExp("\\s+"));
 
     int num_of_indices = list.count();
     num_of_primitives = num_of_indices / indices_per_primitive;
     resize();
     qDebug() << "set" << num_of_indices << "indices";
-    for (int i = 0; i < num_of_indices; i ++){
+    for (int i = 0; i < num_of_indices; i ++)
         index[i] = list.at(i).toInt();
-    }
 }
 /*!
 get data for lum files
 */
-QString Item_index::getData(){
+QString Item_index::getData()
+{
     QString data;
     QString num;
-    for (int i = 0; i < num_of_primitives; i ++){
-        for ( int k = 0; k < indices_per_primitive; k++){
+    for (int i = 0; i < num_of_primitives; i ++)
+    {
+        for ( int k = 0; k < indices_per_primitive; k++)
+        {
             num.setNum (index[i * indices_per_primitive + k ]);
             data.append(num).append (" ");
         }
@@ -246,6 +302,7 @@ QString Item_index::getData(){
 void getIPP()\n
 returns the number of indices per primitive
 */
-int Item_index::getIPP(){
+int Item_index::getIPP()
+{
     return indices_per_primitive;
 }

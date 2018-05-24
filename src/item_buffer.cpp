@@ -212,30 +212,30 @@ QString Item_buffer::statusText() const
 {
     QString k("");
     if (keyframes > 1)
-        k = QString ("%3 Keyframes with").arg(keyframes);
+        k = QString (tr("%3 Keyframes with")).arg(keyframes);
 
     QString n("");
     if (normalized_int)
-        n = QString("normalized ");
+        n = QString(tr("normalized "));
 
     switch (format)
     {
         case GL_BYTE:
-            return QString("Buffer %1 %2 %3Byte%4").arg(k).arg(size).arg(n).arg(dim);
+            return QString(tr("%5; %1 %2 %3Byte%4")).arg(k).arg(size).arg(n).arg(dim).arg(Item::statusText());
         case GL_UNSIGNED_BYTE:
-            return QString("Buffer %1 %2 %3Unsigned Byte%4").arg(k).arg(size).arg(n).arg(dim);
+            return QString(tr("%5; %1 %2 %3Unsigned Byte%4")).arg(k).arg(size).arg(n).arg(dim).arg(Item::statusText());
         case GL_SHORT:
-            return QString("Buffer %1 %2 %3Short%4").arg(k).arg(size).arg(n).arg(dim);
+            return QString(tr("%5; %1 %2 %3Short%4")).arg(k).arg(size).arg(n).arg(dim).arg(Item::statusText());
         case GL_UNSIGNED_SHORT:
-            return QString("Buffer %1 %2 %3Unsigned Short%4").arg(k).arg(size).arg(n).arg(dim);
+            return QString(tr("%5; %1 %2 %3Unsigned Short%4")).arg(k).arg(size).arg(n).arg(dim).arg(Item::statusText());
         case GL_INT:
-            return QString("Buffer %1 %2 %3Int%4").arg(k).arg(size).arg(n).arg(dim);
+            return QString(tr("%5; %1 %2 %3Int%4")).arg(k).arg(size).arg(n).arg(dim).arg(Item::statusText());
         case GL_UNSIGNED_INT:
-            return QString("Buffer %1 %2 %3Unsigned Int%4").arg(k).arg(size).arg(n).arg(dim);
+            return QString(tr("%5; %1 %2 %3Unsigned Int%4")).arg(k).arg(size).arg(n).arg(dim).arg(Item::statusText());
         case GL_HALF_FLOAT_ARB:
-            return QString("Buffer %1 %2 Half Float%3").arg(k).arg(size).arg(dim);
+            return QString(tr("%5; %1 %2 Half Float%3")).arg(k).arg(size).arg(dim).arg(Item::statusText());
         default:
-            return QString("Buffer %1 %2 Float%3").arg(k).arg(size).arg(dim);
+            return QString(tr("%5; %1 %2 Float%3")).arg(k).arg(size).arg(dim).arg(Item::statusText());
     }
 }
 #include <QGLContext>

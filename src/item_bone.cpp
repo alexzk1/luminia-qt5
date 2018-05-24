@@ -52,7 +52,7 @@ internal used function to get a status string for the statusbar on mause over
 */
 QString Item_bone::statusText() const
 {
-    return QString("Bone %1 Joint: (%2; %3; %4)").arg(id).arg(joint[0]).arg(joint[1]).arg(joint[2]);
+    return QString(tr("%5; ID %1 Joint: (%2; %3; %4)")).arg(id).arg(joint[0]).arg(joint[1]).arg(joint[2]).arg(Item::statusText());
 }
 
 /*!

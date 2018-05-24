@@ -378,3 +378,8 @@ bool Item::dragAccept(Item*)
     return false;
 }
 
+QString Item::statusText() const
+{
+    return tr("Type: ") + getType();
+}
+

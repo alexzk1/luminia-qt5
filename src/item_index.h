@@ -33,13 +33,13 @@ class Item_index: public Item
     Q_OBJECT
     friend class Item_mesh;
 public:
-    Item_index( Item *parent, const QString& label1, int indices_per_primitive=3 , int num =0);
-    virtual ~Item_index() override;
+    Item_index( Item *parent, const QString& label1, int indices_per_primitive = 3, int num = 0);
+    ~Item_index() override;
 
     void setData(QString);
     QString getData();
     int getIPP();
-    virtual QString statusText()const override;
+    QString statusText()const override;
 public slots:
 
     void Draw(int mode = -1);
@@ -47,7 +47,7 @@ public slots:
     void set(int index, int a, int b = 0, int c = 0, int d = 0, int e = 0, int f = 0);
     void add(int a, int b = 0, int c = 0, int d = 0, int e = 0, int f = 0);
     void del(int index, int num);
-    virtual QString getType()const override;
+    QString getType()const override;
 
 protected:
     int* index;

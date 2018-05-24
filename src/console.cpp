@@ -26,6 +26,7 @@
 #include <QApplication>
 #include <QMainWindow>
 #include <QtScript>
+#include <QTextEdit>
 
 #include "prohibited_filter.h"
 #include "dock_prep.h"

@@ -1,9 +1,14 @@
 #include <iostream>
-#include <QAction>
+
+#include <QShortcut>
+#include <QKeySequence>
+#include <QIcon>
+
 #include <QSettings>
 #include <QStringList>
 #include <QTextStream>
 #include <QFile>
+#include <QLineEdit>
 
 #include <Qsci/qscicommand.h>
 #include <Qsci/qscicommandset.h>
@@ -11,7 +16,7 @@
 #include "Cebitor.h"
 #include "QsciLexerGlsl.h"
 #include "CebErrors.h"
-
+#include "searchbox.h"
 //------------------------------------------------------------------------------
 /// @file Cebitor.cpp
 /// @brief implementation of Cebitor class
@@ -21,15 +26,20 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-Cebitor::Cebitor(bool isGLSL, QWidget *_parent) :
-    QsciScintilla(_parent)
+Cebitor::Cebitor(SearchBox *searchbox, bool isGLSL, QWidget *_parent) :
+    QsciScintilla(_parent),
+    m_searchBox(searchbox)
 {
-    setMinimumHeight(300);
+
+    connect(searchbox, &SearchBox::searchNext,  this, &Cebitor::searchNext);
+    connect(searchbox, &SearchBox::searchPrev,   this, &Cebitor::searchPrev);
+    connect(searchbox, &SearchBox::highlightAll, this, &Cebitor::highlightAllSearch);
 
     // Create and assign the lexer
     QsciLexer* lex = new QsciLexerGLSL(this);
     setLexer(lex);
 
+    setUtf8(true);
     // Set the margin defaults
     setMarginType(0, MarginType::NumberMargin);
     setMarginWidth(0, " 012");
@@ -55,8 +65,11 @@ Cebitor::Cebitor(bool isGLSL, QWidget *_parent) :
 
     // Set auto-indent
     setAutoIndent(true);
+    setTabIndents(true);
+    setBackspaceUnindents(true);
+    setTabWidth(4);
     setIndentationsUseTabs(false);
-    setIndentationWidth(2);
+    setIndentationWidth(4);
 
     // Enable scroll width tracking and set the scroll width to a low number
     // Scintilla doesn't track line length, so if we wanted automated scrollbar
@@ -75,18 +88,11 @@ Cebitor::Cebitor(bool isGLSL, QWidget *_parent) :
     standardCommands()->boundTo(Qt::Key_Slash | Qt::CTRL)->setKey(0);
 
     // rebind CTRL-/ to comment function
-    auto *commentAction = new QAction(this);
-    commentAction->setShortcut(Qt::Key_Slash | Qt::CTRL);
+    new QShortcut(QKeySequence("ctrl+/"), this, SLOT(comment()), SLOT(comment()), Qt::WidgetShortcut);
 
-    connect(commentAction, SIGNAL(triggered()), this, SLOT(comment()));
-    addAction(commentAction);
 
     // bind CTRL-F to search function
-    auto *searchAction = new QAction(this);
-    searchAction->setShortcut(Qt::Key_F | Qt::CTRL);
-
-    connect(searchAction, SIGNAL(triggered()), this, SLOT(toggleSearchBox()));
-    addAction(searchAction);
+    new QShortcut(QKeySequence("ctrl+F"), this, SLOT(toggleSearchBox()), SLOT(toggleSearchBox()), Qt::WidgetShortcut);
 
     // define search indicator
     m_searchIndicator = indicatorDefine(IndicatorStyle::PlainIndicator, -1);
@@ -100,7 +106,11 @@ Cebitor::Cebitor(bool isGLSL, QWidget *_parent) :
     // work-around since using built-in focusInEvent causes caret to be invisible
     connect(this, SIGNAL(SCN_FOCUSIN()), this, SLOT(resetHighlightColour()));
 }
-
+//------------------------------------------------------------------------------
+QSize Cebitor::sizeHint() const
+{
+    return {800, 600};
+}
 //------------------------------------------------------------------------------
 
 void Cebitor::clearErrors()
@@ -111,7 +121,7 @@ void Cebitor::clearErrors()
 
 void Cebitor::searchNext()
 {
-    QString searchTerm = m_searchLineEdit->text();
+    QString searchTerm = m_searchBox->line()->text();
     bool found;
     found = findFirst(searchTerm, false, false, false, true);
     if (found)
@@ -125,7 +135,7 @@ void Cebitor::searchNext()
 
 void Cebitor::searchPrev()
 {
-    QString searchTerm = m_searchLineEdit->text();
+    QString searchTerm = m_searchBox->line()->text();
     bool found;
     found = findFirst(searchTerm, false, false, false, true, false);
     if (found)
@@ -138,20 +148,13 @@ void Cebitor::searchPrev()
 }
 
 //------------------------------------------------------------------------------
-
-void Cebitor::highlightAllSearch(const QString &)
-{
-    highlightAllSearch();
-}
-
-//------------------------------------------------------------------------------
 void Cebitor::highlightAllSearch()
 {
     clearIndicatorRange(0, 0, lines(), text(lines()).length(), m_searchIndicator);
     int line;
     int indexFrom;
     int indexTo;
-    QString searchTerm = m_searchLineEdit->text();
+    QString searchTerm = m_searchBox->line()->text();
     if (searchTerm.length() == 0)
         return;
     int current;
@@ -289,17 +292,17 @@ void Cebitor::comment()
 
 void Cebitor::toggleSearchBox()
 {
-    bool searchFocus = m_searchLineEdit->hasFocus();
+    bool searchFocus = m_searchBox->line()->hasFocus();
     if (!searchFocus)
     {
         connect(this, SIGNAL(textChanged()), this, SLOT(highlightAllSearch()));
-        m_searchWidget->show();
-        m_searchLineEdit->setFocus();
+        m_searchBox->show();
+        m_searchBox->line()->setFocus();
     }
     else
     {
         disconnect(this, SIGNAL(textChanged()), this, SLOT(highlightAllSearch()));
-        m_searchWidget->hide();
+        m_searchBox->hide();
         setFocus();
         clearIndicatorRange(0, 0, lines(), text(lines()).length(), m_searchIndicator);
     }

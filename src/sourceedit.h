@@ -22,30 +22,11 @@
 #ifndef SOURCEEDIT_H
 #define SOURCEEDIT_H
 
-#include <QTextEdit>
 #include <QFrame>
 #include <QListWidget>
 #include <QVBoxLayout>
 #include <QLabel>
-#include <QSyntaxHighlighter>
-#include <QToolBar>
 
-class SourceEdit;
-
-class TextEdit : public QTextEdit
-{
-    friend class CompletionBox;
-    Q_OBJECT
-public:
-    TextEdit(QWidget *parent);
-    QSize sizeHint() const override;
-protected:
-    void keyPressEvent(QKeyEvent *e) override;
-    SourceEdit* parent;
-private:
-    bool completationOpen;
-
-};
 
 /*!
 The Abstract Completation box implement common code for  Text and line edits
@@ -76,92 +57,5 @@ protected:
     QStringList completions;
     QString searchString;
 };
-
-/*!
-completation box for a TextEdit
-*/
-class CompletionBox : public AbstractCompletionBox
-{
-    Q_OBJECT
-public:
-    CompletionBox(TextEdit *editor, const QStringList& completions, const QString& searchstring);
-    ~CompletionBox() override;
-
-protected:
-    void finishCompletion() override;
-    TextEdit *editor;
-};
-
-struct HighlightRule
-{
-    QRegExp exp;
-    QBrush  foreground;
-    int     fontWeight;
-
-    HighlightRule(const QString& rule, const QBrush& fg, int w = 0):
-        exp(QRegExp(rule)), foreground(fg), fontWeight(w) {}
-};
-
-/*!
-Higlighter for ECMA script and GLSL
-*/
-class QTextEdit;
-class Highlighter : public QSyntaxHighlighter
-{
-    Q_OBJECT
-public:
-    Highlighter(QTextEdit *parent);
-    ~Highlighter() override = default;
-    void highlightBlock( const QString &text) override;
-};
-
-
-
-
-class LineNumberWidget : public QWidget
-{
-    Q_OBJECT
-public:
-    LineNumberWidget(QTextEdit *editor, QWidget *parent = nullptr);
-protected:
-    void paintEvent(QPaintEvent *) override;
-
-private:
-    QTextEdit *editor;
-};
-
-#include "editors/Cebitor.h"
-class SourceEdit : public QWidget
-{
-    friend class TextEdit;
-    friend class CompletionBox;
-    Q_OBJECT
-public:
-    SourceEdit(QWidget *parent = nullptr);
-    ~SourceEdit() override = default;
-    void setText(const QString&);
-    QString getText()const;
-    void setCompleatationList(const QStringList&, int offset = 0);
-    void setHelpString(const QString&);
-    void appendActionToBar(QAction *act, QAction *before = nullptr);
-
-protected:
-    void emitRequestCompletationList(const QString&);
-    TextEdit *edit;
-    QToolBar *buttonsBar;
-    LineNumberWidget *linenumbers;
-    Highlighter *highlighter;
-    QStringList completationList;
-    int completationOffset;
-public slots:
-    void emitRequestHelpString(const QString&);
-
-signals:
-    void requestCompletationList(const QString&);
-    void requestHelpString(const QString&);
-    void HelpStringSignal(const QString&);
-};
-
-
 
 #endif

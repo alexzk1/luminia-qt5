@@ -20,22 +20,98 @@
 *********************************************************************************/
 
 #include "item.h"
-#include "sourceedit.h"
 #include <QFileInfo>
 #include <QFileDialog>
 #include <QCoreApplication>
 #include <QDebug>
+#include <QTextEdit>
+#include <QHBoxLayout>
+#include <QVBoxLayout>
+#include <QToolBar>
+#include "editors/searchbox.h"
+
 #include "loaderpaths.h"
 #include "mainwindow.h"
+#include "editors/Cebitor.h"
 
 Item_edit::Item_edit( Item *parent, const QString& name) :
     Item( parent, name ),
     commonActions()
 {
-    //fileNormal = new QPixmap( pix_file );
+    initParent();
+}
 
-    edit =  new SourceEdit(nullptr);
-    appendToWs(edit);
+Item_edit::Item_edit(int derived, Item *parent, const QString &label1):
+    Item( parent, label1 ),
+    commonActions()
+{
+    //this allows to properly call createTextEditor
+    Q_UNUSED(derived);
+}
+
+
+QString Item_edit::getType() const
+{
+    return QString("Text");
+}
+
+Item_edit::~Item_edit()
+{
+    if (hostWidget)
+        delete hostWidget;
+    else qDebug() << "~Item_edit: edit already deleted";
+}
+
+void Item_edit::addMenu(QMenu *menu)
+{
+    for (const auto& a : commonActions)
+    {
+        if (a)
+            menu->addAction(a);
+    }
+}
+
+QWidget *Item_edit::createTextEditor(QWidget * parent) const
+{
+    return new QTextEdit(parent);
+}
+
+void Item_edit::appendActionToBar(QAction *act, QAction *before)
+{
+    if (before == nullptr)
+    {
+        if (act)
+            buttonsBar->addAction(act);
+        else
+            buttonsBar->addSeparator();
+    }
+    else
+    {
+        if (act)
+            buttonsBar->insertAction(before, act);
+        else
+            buttonsBar->insertSeparator(before);
+    }
+}
+
+void Item_edit::initParent()
+{
+    hostWidget = new QWidget(nullptr);
+    auto layout = new QVBoxLayout(hostWidget);
+    hostWidget->setLayout(layout);
+    buttonsBar = new QToolBar(hostWidget);
+    buttonsBar->setOrientation(Qt::Horizontal);
+
+    searchBox = new SearchBox(hostWidget);
+
+    layout->setSpacing (0);
+    layout->setMargin ( 0);
+    layout->addWidget(buttonsBar);
+    layout->addWidget(searchBox);
+    layout->addWidget(editor = createTextEditor(hostWidget));
+
+
+    appendToWs(hostWidget);
     setIcon(0, QIcon(":/images/xpm/edit.xpm"));
     setFlags(Qt::ItemIsEnabled | Qt::ItemIsSelectable | Qt::ItemIsEditable | Qt::ItemIsDragEnabled);
 
@@ -50,29 +126,7 @@ Item_edit::Item_edit( Item *parent, const QString& name) :
     addAction ( QIcon(":/images/xpm/reload.xpm"), tr("Reload File"),  &Item_edit::reload);
 
     for (const auto& a : commonActions)
-        edit->appendActionToBar(a);
-
-}
-
-QString Item_edit::getType() const
-{
-    return QString("Text");
-}
-
-Item_edit::~Item_edit()
-{
-    if (edit)
-        delete edit;
-    else qDebug() << "~Item_edit: edit already deleted";
-}
-
-void Item_edit::addMenu(QMenu *menu)
-{
-    for (const auto& a : commonActions)
-    {
-        if (a)
-            menu->addAction(a);
-    }
+        appendActionToBar(a, nullptr);
 }
 
 /*!
@@ -89,7 +143,7 @@ void Item_edit::saveas(const QString& filename)
         if (!file.open(QIODevice::WriteOnly | QIODevice::Text))return;
 
         QTextStream out(&file);
-        out << edit->getText();
+        out << raw_text();
     }
 }
 
@@ -117,17 +171,9 @@ void Item_edit::reload()
         if ( !file.open(QIODevice::ReadOnly | QIODevice::Text ) )
             return;
         QTextStream ts( &file );
-        edit->setText( ts.readAll() );
-        edit->show();
+        setText( ts.readAll() );
+        hostWidget->show();
     }
-}
-
-/*!
-returns the editors text as string without processing #include
-*/
-QString Item_edit::raw_text() const
-{
-    return edit->getText();
 }
 
 /*!
@@ -136,9 +182,13 @@ This function returns the text of the editor with proceessed "#include"
 */
 QString Item_edit::text()const
 {
+    QString txt = raw_text();
+    if (qobject_cast<QTextEdit*>(editor))
+        return txt;
+
     QRegExp rx( "(#include .+\n)" );
     rx.setMinimal(true);
-    QString txt = edit->getText();
+
 
     int pos = 0;
 
@@ -173,12 +223,31 @@ QString Item_edit::text()const
     return txt;
 }
 
+/*!
+returns the editors text as string without processing #include
+*/
+QString Item_edit::raw_text() const
+{
+    auto t1 = qobject_cast<QTextEdit*>(editor);
+    if (t1)
+        return t1->toPlainText();
 
+    auto t2 = qobject_cast<Cebitor*>(editor);
+    if (t2)
+        return t2->text();
+    return "";
+}
 
 /*!
 
 */
 void Item_edit::setText(const QString& text)
 {
-    edit->setText(text);
+    auto t1 = qobject_cast<QTextEdit*>(editor);
+    if (t1)
+        t1->setText(text);
+
+    auto t2 = qobject_cast<Cebitor*>(editor);
+    if (t2)
+        t2->setText(text);
 }

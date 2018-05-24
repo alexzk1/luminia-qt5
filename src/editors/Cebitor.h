@@ -1,7 +1,7 @@
 #ifndef _CEBITOR_H__
 #define _CEBITOR_H__
 
-#include <QLineEdit>
+#include <QPointer>
 #include <Qsci/qsciscintilla.h>
 
 //------------------------------------------------------------------------------
@@ -16,6 +16,7 @@
 /// @class Cebitor
 /// @brief CEB text editor class inherits from QsciScintilla
 //------------------------------------------------------------------------------
+class SearchBox;
 class Cebitor : public QsciScintilla
 {
     Q_OBJECT;
@@ -32,23 +33,9 @@ public:
     //----------------------------------------------------------------------------
     /// @brief Cebitor constructor, initialises default values
     //----------------------------------------------------------------------------
-    Cebitor(bool isGLSL, QWidget *_parent );
+    Cebitor(SearchBox* searchbox, bool isGLSL, QWidget *_parent );
     //----------------------------------------------------------------------------
-    /// @brief stores widget containing the searchbar
-    //----------------------------------------------------------------------------
-    inline void setSearchWidget( QWidget *_searchWidget )
-    {
-        m_searchWidget = _searchWidget;
-    }
-    //----------------------------------------------------------------------------
-    /// @brief stores QLineEdit widget from the searchbar
-    //----------------------------------------------------------------------------
-    inline void setSearchLineEdit( QLineEdit *_searchLineEdit )
-    {
-        m_searchLineEdit = _searchLineEdit;
-    }
-    //----------------------------------------------------------------------------
-
+    QSize sizeHint() const override;
 public slots:
     //----------------------------------------------------------------------------
     /// @brief Removes all error and warning line markers
@@ -57,30 +44,14 @@ public slots:
     //----------------------------------------------------------------------------
     /// @brief Search for next occurance
     //----------------------------------------------------------------------------
-    void searchNext();
-    //----------------------------------------------------------------------------
-    /// @brief Search for previous occurance
-    //----------------------------------------------------------------------------
-    void searchPrev();
-    //----------------------------------------------------------------------------
+
     /// @brief sets indicator for each search result
     //----------------------------------------------------------------------------
     void highlightAllSearch();
     //----------------------------------------------------------------------------
-    /// @brief sets indicator for each search result
-    /// @param[in] _text the text that has been changed
-    //----------------------------------------------------------------------------
-    void highlightAllSearch(const QString&);
-    //----------------------------------------------------------------------------
 protected:
     //----------------------------------------------------------------------------
-    /// @brief widget containing the searchbar
-    //----------------------------------------------------------------------------
-    QWidget          *m_searchWidget;
-    //----------------------------------------------------------------------------
-    /// @brief searchbar QLineEdit widget
-    //----------------------------------------------------------------------------
-    QLineEdit        *m_searchLineEdit;
+    QPointer<SearchBox> m_searchBox;
     //----------------------------------------------------------------------------
     /// @brief vector of all line markers
     //----------------------------------------------------------------------------
@@ -110,6 +81,11 @@ protected:
     //----------------------------------------------------------------------------
 
 protected slots:
+    void searchNext();
+    //----------------------------------------------------------------------------
+    /// @brief Search for previous occurance
+    //----------------------------------------------------------------------------
+    void searchPrev();
     //----------------------------------------------------------------------------
     /// @brief comment out all selected lines
     //----------------------------------------------------------------------------

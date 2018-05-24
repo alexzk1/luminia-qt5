@@ -31,16 +31,15 @@ mesh
 */
 class Item_mesh : public Item
 {
-    Q_OBJECT
-    Q_ENUMS(comptype)
+    Q_OBJECT Q_ENUMS(comptype)
 
 public:
-    enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
-    Item_mesh( Item *parent , const QString& label1, int vertices = 0);
-    virtual QString statusText() const;
+    enum comptype {VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
+    Item_mesh( Item *parent, const QString& label1, int vertices = 0);
+    QString statusText() const override;
 
 
-    Q_INVOKABLE QObject* addIndex(const QString& label = "Index" , int numOfVertices = 3);
+    Q_INVOKABLE QObject* addIndex(const QString& label = "Index", int numOfVertices = 3);
     Q_INVOKABLE QObject* addVertex();
     Q_INVOKABLE QObject* addGeneric();
     Q_INVOKABLE QObject* addVector();
@@ -48,7 +47,7 @@ public:
     Q_INVOKABLE QObject* addUvCoords();
     Q_INVOKABLE QObject* addBonedeep();
     Q_INVOKABLE QObject* addQuaternion();
-    Q_INVOKABLE QObject* addComponent(int type ,const QString& label1, int dimension, int keyframes= 1, int format=GL_FLOAT);
+    Q_INVOKABLE QObject* addComponent(int type, const QString& label1, int dimension, int keyframes = 1, int format = GL_FLOAT);
 public slots:
 
     unsigned getNumOfVertices();
@@ -60,13 +59,16 @@ public slots:
 
 
     void genNormal(Item_component* position = nullptr);
-    void genTangent(Item_component* position = nullptr,Item_component* normal = nullptr,Item_component* texcoord = nullptr);
-    void genTexSpaceQuaternion(Item_component* normal = nullptr,Item_component* tangent = nullptr);
+    void genTangent(Item_component* position = nullptr, Item_component* normal = nullptr, Item_component* texcoord = nullptr);
+    void genTexSpaceQuaternion(Item_component* normal = nullptr, Item_component* tangent = nullptr);
 
-    virtual QString getType() const {return QString("Mesh");}
+    QString getType() const override
+    {
+        return QString("Mesh");
+    }
 protected:
     unsigned num_of_vertices;
-    virtual void addMenu(QMenu *menu);
+    void addMenu(QMenu *menu) override;
 };
 
 #endif
