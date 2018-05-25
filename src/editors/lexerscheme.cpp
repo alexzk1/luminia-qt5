@@ -4,6 +4,7 @@
 #include "../loaderpaths.h"
 #include <sstream>
 #include <FlexLexer.h>
+#include <QDebug>
 
 LexerScheme::LexerScheme(const QStringList& apisToLoad, QsciScintilla *_parent)
 {
@@ -29,27 +30,27 @@ void LexerScheme::styleText(const int start, const int end)
     if (start == end)
         return;
 
-    dataBuf.resize(end - start + 1); // that will keep memory reserved by biggest chunk happened
+    dataBuf.resize((end - start + 1) * 3); //gona support UTF-8
+
     //get text to be styled
+
     editor()->SendScintilla(QsciScintilla::SCI_GETTEXTRANGE, start, end, dataBuf.data());
     std::istringstream istr (dataBuf.data());
-
     //style keywords
 
-    int tok;
-    int loc = 0;
+
 
     std::vector<int> tokens;
     auto flex = getFlex();
-    tok = flex->yylex(&istr);
 
-    while (tok > 0)
+
+    for (int tok = flex->yylex(&istr), loc = 0; tok > 0; tok = flex->yylex())
     {
-        tokens.push_back(tok);
-        tokens.push_back(loc);
-        tokens.push_back(flex->YYLeng());
-        loc = loc + flex->YYLeng();
-        tok = flex->yylex();
+        tokens.push_back(tok); //style
+        tokens.push_back(loc); //position
+        auto len = flex->YYLeng();
+        tokens.push_back(len); //length
+        loc += len;
     }
 
     bool is_mlc{false};
@@ -66,12 +67,11 @@ void LexerScheme::styleText(const int start, const int end)
     if (start > 0)
         update_mlc(editor()->SendScintilla(QsciScintilla::SCI_GETSTYLEAT, start - 1));
 
-
-
+    // qDebug() << "START\n" << dataBuf.data() << "\nEND\n";
     for (int i = 0, tokensCount = tokens.size(); i < tokensCount; i = i + 3)
     {
-        startStyling(start + tokens[i + 1]);
         int style = tokens[i];
+        startStyling(start + tokens[i + 1]);
 
         if (!is_mlc && style == StyleType::MLC_END)
             style = StyleType::ILLEGAL;
@@ -81,13 +81,21 @@ void LexerScheme::styleText(const int start, const int end)
         if (is_mlc)
             style = StyleType::MLC_START;
 
+        auto tmp = QString::fromUtf8(dataBuf.data() + tokens[i + 1], tokens[i + 2]);
+        if (identifiers.contains(tmp))
+        {
+            if (style == StyleType::DEFAULT)
+                style = StyleType::IDENTIFIER;
+            //else
+            // style = style | StyleType::ITALIC;
+        }
         setStyling(tokens[i + 2], style);
     }
 }
 
 QString LexerScheme::description(const int style) const
 {
-    switch (style)
+    switch (style & ~StyleType::ITALIC)
     {
         case StyleType::NONE:
         {
@@ -129,6 +137,10 @@ QString LexerScheme::description(const int style) const
         {
             return "DATATYPE";
         }
+        case StyleType::IDENTIFIER:
+        {
+            return "IDENTIFIER";
+        }
         default:
         {
             return QString(style);
@@ -136,10 +148,19 @@ QString LexerScheme::description(const int style) const
     }
 }
 
+void LexerScheme::setIdentifiers(const QSet<QString> &newOnes)
+{
+    identifiers = newOnes;
+}
+
 QColor LexerScheme::defaultColor(const int style) const
 {
-    switch (style)
+    switch (style & ~StyleType::ITALIC)
     {
+        case StyleType::IDENTIFIER:
+        {
+            return {"#109bd4"};
+        }
         case StyleType::DEFAULT:
         {
             return {247, 247, 241};
@@ -192,7 +213,7 @@ QColor LexerScheme::defaultColor(const int style) const
 //------------------------------------------------------------------------------
 QColor LexerScheme::defaultPaper(const int style) const
 {
-    switch (style)
+    switch (style & ~StyleType::ITALIC)
     {
         case StyleType::ILLEGAL:
         {
@@ -212,7 +233,7 @@ QFont LexerScheme::defaultFont(const int style) const
     int weight = 50;
     int size = 12;
     bool italic = false;
-    switch (style)
+    switch (style & ~StyleType::ITALIC)
     {
         case StyleType::DEFAULT:
         {
@@ -226,6 +247,8 @@ QFont LexerScheme::defaultFont(const int style) const
             break;
         }
     }
+    if (style & StyleType::ITALIC)
+        italic = true;
 
     return QFont(pickBestAvailFontFamily(), size, weight, italic);
 }

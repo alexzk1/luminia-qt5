@@ -9,6 +9,7 @@
 #include "no_copy.h"
 #include <QStringList>
 #include <QPointer>
+#include <QSet>
 
 //------------------------------------------------------------------------------
 /// @file QsciLexerGlsl.h
@@ -28,10 +29,11 @@ class LexerScheme: public QsciLexerCustom, public utility::NoCopyAssignMove
 public:
     enum StyleType
     {
-        NONE,         ///<No styling
+        NONE = 0,         ///<No styling
         DEFAULT,      ///<Default
         NUMBER,       ///<Numbers
         KEYWORD,      ///<GLSL Keywords
+        IDENTIFIER,   ///something which looks like variable name and not recognized as anything else
         FUNCTION,     ///<Functions
         STRING,       ///<Strings
         COMMENT,      ///<Comments
@@ -42,7 +44,8 @@ public:
         GLOBAL,       ///<Global gl_ variables
         MLC_START,    ///multiline comment start
         MLC_END,      ///multiline comment end
-        ILLEGAL       ///<Illegal GLSL characters
+        ILLEGAL,      ///<Illegal GLSL characters
+        ITALIC = 0x1000,
     };
 
     LexerScheme(const QStringList &apisToLoad, QsciScintilla *_parent = nullptr);
@@ -73,6 +76,7 @@ public:
     //----------------------------------------------------------------------------
     QString description(const int style ) const override;
 
+    virtual void setIdentifiers(const QSet<QString>& newOnes);
 protected:
     using ScannerPtr = std::shared_ptr<FlexLexer>;
 
@@ -94,7 +98,8 @@ private:
     //----------------------------------------------------------------------------
     ScannerPtr     m_flexScanner{};
     //----------------------------------------------------------------------------
-    std::vector<char> dataBuf{}; //avoiding memory reallocations on each lexing call
+    QSet<QString>     identifiers{};
+    std::vector<char> dataBuf;
 };
 
 #endif // LEXERSCHEME_H

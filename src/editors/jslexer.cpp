@@ -9,11 +9,18 @@
 JSLexer::JSLexer(QsciScintilla *_parent):
     LexerScheme({}, _parent)
 {
+    setIdentifiers({});
 }
 //------------------------------------------------------------------------------
 const char *JSLexer::language() const
 {
     return "JavaScript";
+}
+
+void JSLexer::setIdentifiers(const QSet<QString> &newOnes)
+{
+    const static QSet<QString> tmp{"World", "gl"};
+    LexerScheme::setIdentifiers(tmp + newOnes);
 }
 //------------------------------------------------------------------------------
 LexerScheme::ScannerPtr JSLexer::createScanner() const

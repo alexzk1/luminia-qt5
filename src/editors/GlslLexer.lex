@@ -10,6 +10,15 @@
 %option c++
 %option prefix="GLSL"
 
+DIGIT    [0-9]
+WORD     [a-zA-Z_]
+ALNUM    [0-9a-zA-Z_]
+SPACE    [\t\n\r ]
+
+ID	     {WORD}{ALNUM}*
+NID      [^a-zA-Z_0-9]
+NWORD    [^a-zA-Z_]
+
 %{
   #include "../lexerscheme.h"
 %}
@@ -46,17 +55,17 @@
 "struct"                  { return LexerScheme::StyleType::KEYWORD; }
 
 (?#/* "/.?" added to override function rule*/)
-[iu]?sampler(([123]D)|Cube)|([12]DArray)|2DRect|Buffer/.? { return LexerScheme::StyleType::DATATYPE; }
-sampler(([123]D)|Cube)|([12]DArray)|((2DRect)Shadow)/.?   { return LexerScheme::StyleType::DATATYPE; }
-[ibu]?vec[234]/.?                                         { return LexerScheme::StyleType::DATATYPE; }
-mat[234](x[234])?/.?                                      { return LexerScheme::StyleType::DATATYPE; }
-(u?int)|"float"|"bool"|"void"/.?                          { return LexerScheme::StyleType::DATATYPE; }
+[iu]?sampler(([123]D)|Cube)|([12]DArray)|2DRect|Buffer/{NID} { return LexerScheme::StyleType::DATATYPE; }
+sampler(([123]D)|Cube)|([12]DArray)|((2DRect)Shadow)/{NID}   { return LexerScheme::StyleType::DATATYPE; }
+[ibu]?vec[234]/{NID}                                         { return LexerScheme::StyleType::DATATYPE; }
+mat[234](x[234])?/{NID}                                      { return LexerScheme::StyleType::DATATYPE; }
+(u?int)/{NID}|"float"|"bool"|"void"                                { return LexerScheme::StyleType::DATATYPE; }
 
 "//".*                        { return LexerScheme::StyleType::COMMENT; }
 "/*"			                    { return LexerScheme::StyleType::MLC_START;}
 "*/"			                    { return LexerScheme::StyleType::MLC_END;}
 ^#.*                          { return LexerScheme::StyleType::HASHCOMMENT; }
-[ \t\n\r]                     { return LexerScheme::StyleType::WHITESPACE; }
+{SPACE}                       { return LexerScheme::StyleType::WHITESPACE; }
 
 [\*\+\-\/\>\<\%\^\|\&\!\=]?\=? |
 &&   |
@@ -66,19 +75,25 @@ mat[234](x[234])?/.?                                      { return LexerScheme::
 \?:  |
 ">>"|"<<"\=?                  { return LexerScheme::StyleType::OPERATOR; }
 
-gl_[a-zA-Z0-9]+               { return LexerScheme::StyleType::GLOBAL; } 
+{ID}\.{NWORD}+                { return LexerScheme::StyleType::ILLEGAL; }
 
-[Tt]rue |
-[Ff]alse |
--?+?[0-9]+"."?[0-9]*f?l?u?    { return LexerScheme::StyleType::NUMBER; }
+gl_{ALNUM}*                   { return LexerScheme::StyleType::GLOBAL; } 
 
-[a-zA-Z0-9]+/\(               { return LexerScheme::StyleType::FUNCTION; }
+"true"|"false"                { return LexerScheme::StyleType::NUMBER; }
+
+[-+]?{DIGIT}+[lu]?            { return LexerScheme::StyleType::NUMBER; }
+[-+]?{DIGIT}+\.?{DIGIT}*f?    { return LexerScheme::StyleType::NUMBER; }
+
+[\.]{2,}                      { return LexerScheme::StyleType::ILLEGAL; }
+
+{ID}{NID}*/\(                 { return LexerScheme::StyleType::FUNCTION; }
+
 [\(\)\{\}\[\]] |
 [#@\?:;,_\~\\] |
 [a-zA-Z0-9]+   |
 "."                           { return LexerScheme::StyleType::DEFAULT; }
 
-[a-zA-Z0-9]+\.[^a-zA-Z0-9]+   { return LexerScheme::StyleType::ILLEGAL; }
+
 
 �*                            {
                                 yyleng = 1;
