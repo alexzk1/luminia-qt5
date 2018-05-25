@@ -8,6 +8,7 @@
 #include <Qsci/qsciapis.h>
 #include "no_copy.h"
 #include <QStringList>
+#include <QPointer>
 
 //------------------------------------------------------------------------------
 /// @file QsciLexerGlsl.h
@@ -79,19 +80,19 @@ protected:
     //----------------------------------------------------------------------------
     /// @brief parent QScintilla instance
     //----------------------------------------------------------------------------
-    QsciScintilla   *m_parent;
+    QPointer<QsciScintilla>   m_parent{nullptr};
     //----------------------------------------------------------------------------
     /// @brief GLSL API instance
     //----------------------------------------------------------------------------
-    QsciAPIs        *m_API;
+    QPointer<QsciAPIs>  m_API{nullptr};
 
 private:
     //----------------------------------------------------------------------------
     /// @brief flex lexer instance
     //----------------------------------------------------------------------------
-    ScannerPtr     m_flexScanner;
+    ScannerPtr     m_flexScanner{};
     //----------------------------------------------------------------------------
-    std::vector<char> dataBuf; //avoiding memory reallocations on each lexing call
+    std::vector<char> dataBuf{}; //avoiding memory reallocations on each lexing call
 };
 
 #endif // LEXERSCHEME_H
