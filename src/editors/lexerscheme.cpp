@@ -53,11 +53,36 @@ void LexerScheme::styleText(const int start, const int end)
         tok = flex->yylex();
     }
 
-    int tokensCount = tokens.size();
-    for (int i = 0; i < tokensCount; i = i + 3)
+    bool is_mlc{false};
+
+    const auto update_mlc = [&is_mlc](int s)
+    {
+        if (StyleType::MLC_START == s)
+            is_mlc = true;
+
+        if (StyleType::MLC_END == s)
+            is_mlc = false;
+    };
+
+    if (start > 0)
+        update_mlc(editor()->SendScintilla(QsciScintilla::SCI_GETSTYLEAT, start - 1));
+
+
+
+    for (int i = 0, tokensCount = tokens.size(); i < tokensCount; i = i + 3)
     {
         startStyling(start + tokens[i + 1]);
-        setStyling(tokens[i + 2], tokens[i]);
+        int style = tokens[i];
+
+        if (!is_mlc && style == StyleType::MLC_END)
+            style = StyleType::ILLEGAL;
+
+        update_mlc(style);
+
+        if (is_mlc)
+            style = StyleType::MLC_START;
+
+        setStyling(tokens[i + 2], style);
     }
 }
 
@@ -144,6 +169,8 @@ QColor LexerScheme::defaultColor(const int style) const
         {
             return {166, 226, 46};
         }
+        case StyleType::MLC_START:
+        case StyleType::MLC_END:
         case StyleType::COMMENT:
         {
             return {117, 113, 94};

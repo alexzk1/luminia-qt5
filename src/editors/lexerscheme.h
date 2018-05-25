@@ -40,6 +40,8 @@ public:
         DATATYPE,     ///<GLSL datatypes
         HASHCOMMENT,  ///<Preprocessor commands starting with #
         GLOBAL,       ///<Global gl_ variables
+        MLC_START,    ///multiline comment start
+        MLC_END,      ///multiline comment end
         ILLEGAL       ///<Illegal GLSL characters
     };
 

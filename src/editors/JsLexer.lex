@@ -16,54 +16,74 @@
 
 %%
 
-"attribute"               |
-"const"                   |
-"uniform"                 |
-"varying"                 |
-"layout"                  |
-"centroid"                |
-"flat"                    |
-"smooth"                  |
-"noperspective"           |
-"break"                   |
-"continue"                |
-"do"                      |
-"for"                     |
-"while"                   |
-"switch"                  |
-"case"                    |
-"default"                 |
-"if"                      |
-"else"                    |
-"in"                      |
-"out"                     |
-"inout"                   |
-"return"                  |
-"invariant"               |
-["low""medium""high"]"p"  |
-"discard"                 |
-"precision"               |
-"struct"                  { return LexerScheme::StyleType::KEYWORD; }
+"abstract"      |
+"break"         |
+"case"          |
+"catch"         |
+"class"         |
+"const"         |
+"continue"      |
+"debugger"      |
+"default"       |
+"delete"        |
+"do"            |
+"double"        |
+"else"          |
+"enum"          |
+"export"        |
+"extends"       |
+"final"         |
+"finally"       |
+"for"           |
+"function"      |
+"goto"          |
+"if"            |
+"implements"    |
+"import"        |
+"in"            |
+"interface"     |
+"native"        |
+"new"           |
+"package"       |
+"private"       |
+"protected"     |
+"public"        |
+"return"        |
+"static"        |
+"super"         |
+"switch"        |
+"synchronized"  |
+"this"          |
+"throw"         |
+"throws"        |
+"transient"     |
+"try"           |
+"var"           |
+"volatile"      |
+"while"         |
+"with"           { return LexerScheme::StyleType::KEYWORD; }
 
-\".*\"                    {return LexerScheme::StyleType::STRING;}
-'.*'                      {return LexerScheme::StyleType::STRING;}
+\"(\\.|[^"\\])*\"         {return LexerScheme::StyleType::STRING;}
+'(\\.|[^'\\])*'           {return LexerScheme::StyleType::STRING;}
+
+"boolean"|"int"|"byte"|"char"|"float"|"long"|"short"|"void"|"..."/.?     { return LexerScheme::StyleType::DATATYPE; }
 
 "//".*                        { return LexerScheme::StyleType::COMMENT; }
-^#.*                          { return LexerScheme::StyleType::HASHCOMMENT; }
+"/*"			                    { return LexerScheme::StyleType::MLC_START;}
+"*/"			                    { return LexerScheme::StyleType::MLC_END;}
+
 [ \t\n\r]                     { return LexerScheme::StyleType::WHITESPACE; }
 
+"typeof"        |
+"instanceof"    |
 [\*\+\-\/\>\<\%\^\|\&\!\=]?\=? |
 &&   |
 \|\| |
-\^\^ |
 \.\= |
 \?:  |
-">>"|"<<"\=?                  { return LexerScheme::StyleType::OPERATOR; }
+">>"|">>>"|"<<"\=?|"==="|"=="|"!==" { return LexerScheme::StyleType::OPERATOR; }
 
-gl_[a-zA-Z0-9]+               { return LexerScheme::StyleType::GLOBAL; } 
-
-[Tt]rue |
-[Ff]alse |
+"true" |"false" | "null" |
 -?+?[0-9]+"."?[0-9]*f?l?u?    { return LexerScheme::StyleType::NUMBER; }
 
 [a-zA-Z0-9]+/\(               { return LexerScheme::StyleType::FUNCTION; }

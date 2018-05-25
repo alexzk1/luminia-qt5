@@ -1,0 +1,4 @@
+#!/bin/bash
+#if u need makewords for linux, it's here (same as origin unix's promotional video): https://github.com/alexzk1/makewords
+cat js_words.txt | makewords | sort | while read -r line; do echo "\"$line\"           |"; done > lex.txt
+

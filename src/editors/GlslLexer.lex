@@ -53,6 +53,8 @@ mat[234](x[234])?/.?                                      { return LexerScheme::
 (u?int)|"float"|"bool"|"void"/.?                          { return LexerScheme::StyleType::DATATYPE; }
 
 "//".*                        { return LexerScheme::StyleType::COMMENT; }
+"/*"			                    { return LexerScheme::StyleType::MLC_START;}
+"*/"			                    { return LexerScheme::StyleType::MLC_END;}
 ^#.*                          { return LexerScheme::StyleType::HASHCOMMENT; }
 [ \t\n\r]                     { return LexerScheme::StyleType::WHITESPACE; }
 
