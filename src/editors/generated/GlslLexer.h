@@ -416,7 +416,7 @@ static int yy_flex_strlen ( const char * );
 #undef yyTABLES_NAME
 #endif
 
-#line 83 "../luminia-qt5/src/editors/GlslLexer.lex"
+#line 85 "../luminia-qt5/src/editors/GlslLexer.lex"
 
 
 #line 422 "/home/alex/Work/OpenSource/luminia-qt5/src/editors/generated/GlslLexer.h"

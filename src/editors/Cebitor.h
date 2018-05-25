@@ -20,7 +20,6 @@ class SearchBox;
 class Cebitor : public QsciScintilla
 {
     Q_OBJECT;
-
 public:
     //----------------------------------------------------------------------------
     /// @brief Enum for supported marker types
@@ -33,9 +32,19 @@ public:
     //----------------------------------------------------------------------------
     /// @brief Cebitor constructor, initialises default values
     //----------------------------------------------------------------------------
-    Cebitor(SearchBox* searchbox, bool isGLSL, QWidget *_parent );
+    Cebitor(SearchBox* searchbox, QWidget *_parent );
     //----------------------------------------------------------------------------
     QSize sizeHint() const override;
+
+    template<class LexerT>
+    QPointer<LexerT> makeLexer()
+    {
+        auto L = new LexerT(this);
+        setLexer(L);
+        initAfterLexer();
+        return L;
+    }
+
 public slots:
     //----------------------------------------------------------------------------
     /// @brief Removes all error and warning line markers
@@ -103,7 +112,8 @@ protected slots:
     //----------------------------------------------------------------------------
     void resetHighlightColour();
     //----------------------------------------------------------------------------
-
+private:
+    void initAfterLexer();
 }; // end class
 
 #endif  // _CEBITOR_H__

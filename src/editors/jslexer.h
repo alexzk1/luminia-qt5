@@ -1,15 +1,16 @@
-#ifndef _QSCILEXERGLSL_H__
-#define _QSCILEXERGLSL_H__
+#ifndef JSLEXER_H
+#define JSLEXER_H
+
 #include "lexerscheme.h"
 
-class QsciLexerGLSL: public LexerScheme
+class JSLexer: public LexerScheme
 {
 public:
-    QsciLexerGLSL( QsciScintilla *_parent = nullptr );
+    JSLexer( QsciScintilla *_parent = nullptr );
     //----------------------------------------------------------------------------
     /// @brief QsciLexerGLSL destructor.
     //----------------------------------------------------------------------------
-    ~QsciLexerGLSL() override = default;
+    ~JSLexer() override = default;
     //----------------------------------------------------------------------------
     const char* language() const override;
     //----------------------------------------------------------------------------
@@ -17,4 +18,5 @@ protected:
     ScannerPtr createScanner() const override;
 };// end class
 
-#endif
+
+#endif // JSLEXER_H

@@ -21,7 +21,7 @@
 #include "item.h"
 #include "editors/Cebitor.h"
 #include "editors/searchbox.h"
-
+#include "editors/QsciLexerGlsl.h"
 Item_shader::Item_shader( Item *parent, const QString& name, int _shadertype) :
     Item_edit(1, parent, name)
 {
@@ -52,5 +52,7 @@ QString Item_shader::statusText() const
 
 QWidget *Item_shader::createTextEditor(QWidget *parent) const
 {
-    return new Cebitor(searchBox, true, parent);
+    auto l = new Cebitor(searchBox, parent);
+    l->makeLexer<QsciLexerGLSL>();
+    return l;
 }

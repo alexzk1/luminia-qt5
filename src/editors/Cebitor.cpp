@@ -26,50 +26,16 @@
 //------------------------------------------------------------------------------
 
 //------------------------------------------------------------------------------
-Cebitor::Cebitor(SearchBox *searchbox, bool isGLSL, QWidget *_parent) :
+Cebitor::Cebitor(SearchBox *searchbox, QWidget *_parent) :
     QsciScintilla(_parent),
     m_searchBox(searchbox)
 {
+    setUtf8(true);
 
     connect(searchbox, &SearchBox::searchNext,  this, &Cebitor::searchNext);
     connect(searchbox, &SearchBox::searchPrev,   this, &Cebitor::searchPrev);
     connect(searchbox, &SearchBox::highlightAll, this, &Cebitor::highlightAllSearch);
 
-    // Create and assign the lexer
-    QsciLexer* lex = new QsciLexerGLSL(this);
-    setLexer(lex);
-
-    setUtf8(true);
-    // Set the margin defaults
-    setMarginType(0, MarginType::NumberMargin);
-    setMarginWidth(0, " 012");
-    setMarginsForegroundColor(QColor(128, 128, 128));
-    // Set the symbol margin defaults
-    setMarginType(1, MarginType::SymbolMargin);
-    setMarginWidth(1, 12);
-    setMarginMarkerMask(1,
-                        1 << MarkerType::ERROR |
-                        1 << MarkerType::WARNING
-                       );
-
-    // Set the caret defaults
-    setCaretForegroundColor(QColor(247, 247, 241));
-    setCaretWidth(2);
-    // Set the brace defaults
-    //----------------------------------------------------------------------------
-    /// @bug brace matching matches "<" and ">" characters
-    //----------------------------------------------------------------------------
-    setBraceMatching(BraceMatch::SloppyBraceMatch);
-    setMatchedBraceBackgroundColor(QColor(62, 61, 50));
-    setUnmatchedBraceBackgroundColor(QColor(249, 38, 114));
-
-    // Set auto-indent
-    setAutoIndent(true);
-    setTabIndents(true);
-    setBackspaceUnindents(true);
-    setTabWidth(4);
-    setIndentationsUseTabs(false);
-    setIndentationWidth(4);
 
     // Enable scroll width tracking and set the scroll width to a low number
     // Scintilla doesn't track line length, so if we wanted automated scrollbar
@@ -407,4 +373,42 @@ void Cebitor::resetHighlightColour()
 {
     setSelectionBackgroundColor(QColor(61, 61, 52));
     resetSelectionForegroundColor();
+}
+
+void Cebitor::initAfterLexer()
+{
+    // Set the margin defaults
+    setMarginType(0, MarginType::NumberMargin);
+    setMarginWidth(0, " 012");
+    setMarginsForegroundColor(QColor(128, 128, 128));
+    // Set the symbol margin defaults
+    setMarginType(1, MarginType::SymbolMargin);
+    setMarginWidth(1, 12);
+    setMarginMarkerMask(1,
+                        1 << MarkerType::ERROR |
+                        1 << MarkerType::WARNING
+                       );
+
+    // Set the caret defaults
+    setCaretForegroundColor(QColor(247, 247, 241));
+    setCaretWidth(2);
+    // Set the brace defaults
+    //----------------------------------------------------------------------------
+    /// @bug brace matching matches "<" and ">" characters
+    //----------------------------------------------------------------------------
+    setBraceMatching(BraceMatch::SloppyBraceMatch);
+    setMatchedBraceBackgroundColor(QColor(62, 61, 50));
+    setUnmatchedBraceBackgroundColor(QColor(249, 38, 114));
+
+    // Set auto-indent
+    setAutoIndent(true);
+    setTabIndents(true);
+    setBackspaceUnindents(true);
+    setIndentationsUseTabs(false);
+    setIndentationWidth(4);
+
+    setAutoCompletionThreshold(2);
+    setAutoCompletionReplaceWord(true);
+    setAutoCompletionFillupsEnabled(true);
+    setAutoCompletionSource(QsciScintilla::AcsAPIs);
 }

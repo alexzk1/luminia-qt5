@@ -29,6 +29,8 @@
 #include "prohibited_filter.h"
 #include "editors/Cebitor.h"
 #include "editors/searchbox.h"
+#include "editors/jslexer.h"
+
 Item_script::Item_script( Item *parent, const QString& name) :
     Item_edit(1, parent, name),
     running(false),
@@ -60,7 +62,9 @@ void Item_script::deleteEngine()
 
 QWidget *Item_script::createTextEditor(QWidget *parent) const
 {
-    return new Cebitor(searchBox, false, parent);
+    auto l = new Cebitor(searchBox, parent);
+    l->makeLexer<JSLexer>();
+    return l;
 }
 
 Item_script::~Item_script()

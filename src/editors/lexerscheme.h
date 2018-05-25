@@ -1,0 +1,97 @@
+#ifndef LEXERSCHEME_H
+#define LEXERSCHEME_H
+
+#include <memory>
+
+#include <Qsci/qscilexercustom.h>
+#include <Qsci/qscistyle.h>
+#include <Qsci/qsciapis.h>
+#include "no_copy.h"
+#include <QStringList>
+
+//------------------------------------------------------------------------------
+/// @file QsciLexerGlsl.h
+/// @brief Custom QScintilla lexer for GLSL
+/// @author Phil Rouse
+/// @version 1.0
+/// @date 07/05/2016
+//------------------------------------------------------------------------------
+
+//------------------------------------------------------------------------------
+/// Predeclare FlexLexer class here since including GlslLexer.h in header breaks
+/// flex, including in .cpp works fine though...?
+//------------------------------------------------------------------------------
+class FlexLexer;
+class LexerScheme: public QsciLexerCustom, public utility::NoCopyAssignMove
+{
+public:
+    enum StyleType
+    {
+        NONE,         ///<No styling
+        DEFAULT,      ///<Default
+        NUMBER,       ///<Numbers
+        KEYWORD,      ///<GLSL Keywords
+        FUNCTION,     ///<Functions
+        STRING,       ///<Strings
+        COMMENT,      ///<Comments
+        OPERATOR,     ///<Operators
+        WHITESPACE,   ///<Whitespace
+        DATATYPE,     ///<GLSL datatypes
+        HASHCOMMENT,  ///<Preprocessor commands starting with #
+        GLOBAL,       ///<Global gl_ variables
+        ILLEGAL       ///<Illegal GLSL characters
+    };
+
+    LexerScheme(const QStringList &apisToLoad, QsciScintilla *_parent = nullptr);
+    //----------------------------------------------------------------------------
+    /// @brief QsciLexerGLSL destructor.
+    //----------------------------------------------------------------------------
+    ~LexerScheme() override = default;
+
+    void styleText( const int _start, const int _end ) final;
+
+    QColor defaultColor( const int _style ) const override;
+    //----------------------------------------------------------------------------
+    /// @brief virtual function reimplemented from QsciLexer.
+    /// @param [in] _style  style number.
+    /// @return Default paper colour for style \a _style.
+    //----------------------------------------------------------------------------
+    QColor defaultPaper( const int _style ) const override;
+    //----------------------------------------------------------------------------
+    /// @brief virtual function reimplemented from QsciLexer.
+    /// @param [in] _style  style number.
+    /// @return Default font for style \a _style.
+    //----------------------------------------------------------------------------
+    QFont defaultFont( const int _style ) const override;
+    //----------------------------------------------------------------------------
+    /// @brief virtual function reimplemented from QsciLexer.
+    /// @param [in] _style  style number.
+    /// @return Descriptive for style \a _style.
+    //----------------------------------------------------------------------------
+    QString description(const int style ) const override;
+
+protected:
+    using ScannerPtr = std::shared_ptr<FlexLexer>;
+
+    //each lexer must have own include to own generated cpp from lex.
+    virtual ScannerPtr createScanner() const = 0;
+    ScannerPtr getFlex();
+    //----------------------------------------------------------------------------
+    /// @brief parent QScintilla instance
+    //----------------------------------------------------------------------------
+    QsciScintilla   *m_parent;
+    //----------------------------------------------------------------------------
+    /// @brief GLSL API instance
+    //----------------------------------------------------------------------------
+    QsciAPIs        *m_API;
+
+private:
+    //----------------------------------------------------------------------------
+    /// @brief flex lexer instance
+    //----------------------------------------------------------------------------
+    ScannerPtr     m_flexScanner;
+    //----------------------------------------------------------------------------
+    std::vector<char> dataBuf; //avoiding memory reallocations on each lexing call
+};
+
+#endif // LEXERSCHEME_H

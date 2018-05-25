@@ -1,17 +1,19 @@
 HEADERS += \
-    $$PWD/sci_incs.h \
     $$PWD/QsciLexerGlsl.h \
-    $$PWD/FlexLexer.h \
     $$PWD/Cebitor.h \
     $$PWD/CebErrors.h \
-    $$PWD/searchbox.h
+    $$PWD/searchbox.h \
+    $$PWD/jslexer.h \
+    $$PWD/lexerscheme.h
 
 SOURCES += \
     $$PWD/QsciLexerGlsl.cpp \
     $$PWD/font_family_picker.cpp \
     $$PWD/Cebitor.cpp \
     $$PWD/CebErrors.cpp \
-    $$PWD/searchbox.cpp
+    $$PWD/searchbox.cpp \
+    $$PWD/jslexer.cpp \
+    $$PWD/lexerscheme.cpp
 
 #GSLS support from https://github.com/NCCA/ShaderEnvironmentBuilde
 
@@ -32,7 +34,7 @@ isEmpty(FLEX_BIN) {
     # The following section is from :-
     # hipersayan_x (March 1, 2013)  The Samurai Code: Using Flex and Bison with Qt. [online]
     # [Accessed 18 Feb. 2016] Available at: <http://hipersayanx.blogspot.co.uk/2013/03/using-flex-and-bison-with-qt.html>.
-    FLEXSOURCES = $$PWD/GlslLexer.lex
+    FLEXSOURCES += $$PWD/GlslLexer.lex
 
     flexsource.input = FLEXSOURCES
     flexsource.output = $$PWD/generated/${QMAKE_FILE_BASE}.cpp
