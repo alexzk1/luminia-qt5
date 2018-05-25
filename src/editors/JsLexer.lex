@@ -8,7 +8,7 @@
 
 
 %option c++
-%option prefix="GLSL"
+%option prefix="JS"
 
 %{
   #include "../lexerscheme.h"
@@ -45,12 +45,8 @@
 "precision"               |
 "struct"                  { return LexerScheme::StyleType::KEYWORD; }
 
-(?#/* "/.?" added to override function rule*/)
-[iu]?sampler(([123]D)|Cube)|([12]DArray)|2DRect|Buffer/.? { return LexerScheme::StyleType::DATATYPE; }
-sampler(([123]D)|Cube)|([12]DArray)|((2DRect)Shadow)/.?   { return LexerScheme::StyleType::DATATYPE; }
-[ibu]?vec[234]/.?                                         { return LexerScheme::StyleType::DATATYPE; }
-mat[234](x[234])?/.?                                      { return LexerScheme::StyleType::DATATYPE; }
-(u?int)|"float"|"bool"|"void"/.?                          { return LexerScheme::StyleType::DATATYPE; }
+\".*\"                    {return LexerScheme::StyleType::STRING;}
+'.*'                      {return LexerScheme::StyleType::STRING;}
 
 "//".*                        { return LexerScheme::StyleType::COMMENT; }
 ^#.*                          { return LexerScheme::StyleType::HASHCOMMENT; }

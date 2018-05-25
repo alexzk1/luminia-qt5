@@ -1,7 +1,10 @@
 #include "jslexer.h"
 
 //this is most important personal include, it contains geberanated code. For another lexer must be another include
-#include "generated/GlslLexer.h"
+#undef yyFlexLexer
+#define yyFlexLexer JSFlexLexer
+
+#include "generated/JsLexer.h"
 //------------------------------------------------------------------------------
 JSLexer::JSLexer(QsciScintilla *_parent):
     LexerScheme({}, _parent)

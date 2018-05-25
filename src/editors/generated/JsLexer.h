@@ -1,10 +1,10 @@
-#ifndef GLSLHEADER_H
-#define GLSLHEADER_H 1
-#define GLSLIN_HEADER 1
+#ifndef JSHEADER_H
+#define JSHEADER_H 1
+#define JSIN_HEADER 1
 
-#line 5 "/home/alex/Work/OpenSource/luminia-qt5/src/editors/generated/GlslLexer.h"
+#line 5 "/home/alex/Work/OpenSource/luminia-qt5/src/editors/generated/JsLexer.h"
 
-#line 7 "/home/alex/Work/OpenSource/luminia-qt5/src/editors/generated/GlslLexer.h"
+#line 7 "/home/alex/Work/OpenSource/luminia-qt5/src/editors/generated/JsLexer.h"
 
 #define  YY_INT_ALIGNED short int
 
@@ -24,24 +24,24 @@
      * We will address this in a future release of flex, or omit the C++ scanner
      * altogether.
      */
-    #define yyFlexLexer GLSLFlexLexer
+    #define yyFlexLexer JSFlexLexer
 
 #ifdef yyalloc
-#define GLSLalloc_ALREADY_DEFINED
+#define JSalloc_ALREADY_DEFINED
 #else
-#define yyalloc GLSLalloc
+#define yyalloc JSalloc
 #endif
 
 #ifdef yyrealloc
-#define GLSLrealloc_ALREADY_DEFINED
+#define JSrealloc_ALREADY_DEFINED
 #else
-#define yyrealloc GLSLrealloc
+#define yyrealloc JSrealloc
 #endif
 
 #ifdef yyfree
-#define GLSLfree_ALREADY_DEFINED
+#define JSfree_ALREADY_DEFINED
 #else
-#define yyfree GLSLfree
+#define yyfree JSfree
 #endif
 
 /* First, we deal with  platform-specific or compiler-specific issues. */
@@ -289,154 +289,154 @@ static int yy_flex_strlen ( const char * );
 #undef YY_DECL
 #endif
 
-#ifndef GLSL_create_buffer_ALREADY_DEFINED
+#ifndef JS_create_buffer_ALREADY_DEFINED
 #undef yy_create_buffer
 #endif
-#ifndef GLSL_delete_buffer_ALREADY_DEFINED
+#ifndef JS_delete_buffer_ALREADY_DEFINED
 #undef yy_delete_buffer
 #endif
-#ifndef GLSL_scan_buffer_ALREADY_DEFINED
+#ifndef JS_scan_buffer_ALREADY_DEFINED
 #undef yy_scan_buffer
 #endif
-#ifndef GLSL_scan_string_ALREADY_DEFINED
+#ifndef JS_scan_string_ALREADY_DEFINED
 #undef yy_scan_string
 #endif
-#ifndef GLSL_scan_bytes_ALREADY_DEFINED
+#ifndef JS_scan_bytes_ALREADY_DEFINED
 #undef yy_scan_bytes
 #endif
-#ifndef GLSL_init_buffer_ALREADY_DEFINED
+#ifndef JS_init_buffer_ALREADY_DEFINED
 #undef yy_init_buffer
 #endif
-#ifndef GLSL_flush_buffer_ALREADY_DEFINED
+#ifndef JS_flush_buffer_ALREADY_DEFINED
 #undef yy_flush_buffer
 #endif
-#ifndef GLSL_load_buffer_state_ALREADY_DEFINED
+#ifndef JS_load_buffer_state_ALREADY_DEFINED
 #undef yy_load_buffer_state
 #endif
-#ifndef GLSL_switch_to_buffer_ALREADY_DEFINED
+#ifndef JS_switch_to_buffer_ALREADY_DEFINED
 #undef yy_switch_to_buffer
 #endif
-#ifndef GLSLpush_buffer_state_ALREADY_DEFINED
+#ifndef JSpush_buffer_state_ALREADY_DEFINED
 #undef yypush_buffer_state
 #endif
-#ifndef GLSLpop_buffer_state_ALREADY_DEFINED
+#ifndef JSpop_buffer_state_ALREADY_DEFINED
 #undef yypop_buffer_state
 #endif
-#ifndef GLSLensure_buffer_stack_ALREADY_DEFINED
+#ifndef JSensure_buffer_stack_ALREADY_DEFINED
 #undef yyensure_buffer_stack
 #endif
-#ifndef GLSLlex_ALREADY_DEFINED
+#ifndef JSlex_ALREADY_DEFINED
 #undef yylex
 #endif
-#ifndef GLSLrestart_ALREADY_DEFINED
+#ifndef JSrestart_ALREADY_DEFINED
 #undef yyrestart
 #endif
-#ifndef GLSLlex_init_ALREADY_DEFINED
+#ifndef JSlex_init_ALREADY_DEFINED
 #undef yylex_init
 #endif
-#ifndef GLSLlex_init_extra_ALREADY_DEFINED
+#ifndef JSlex_init_extra_ALREADY_DEFINED
 #undef yylex_init_extra
 #endif
-#ifndef GLSLlex_destroy_ALREADY_DEFINED
+#ifndef JSlex_destroy_ALREADY_DEFINED
 #undef yylex_destroy
 #endif
-#ifndef GLSLget_debug_ALREADY_DEFINED
+#ifndef JSget_debug_ALREADY_DEFINED
 #undef yyget_debug
 #endif
-#ifndef GLSLset_debug_ALREADY_DEFINED
+#ifndef JSset_debug_ALREADY_DEFINED
 #undef yyset_debug
 #endif
-#ifndef GLSLget_extra_ALREADY_DEFINED
+#ifndef JSget_extra_ALREADY_DEFINED
 #undef yyget_extra
 #endif
-#ifndef GLSLset_extra_ALREADY_DEFINED
+#ifndef JSset_extra_ALREADY_DEFINED
 #undef yyset_extra
 #endif
-#ifndef GLSLget_in_ALREADY_DEFINED
+#ifndef JSget_in_ALREADY_DEFINED
 #undef yyget_in
 #endif
-#ifndef GLSLset_in_ALREADY_DEFINED
+#ifndef JSset_in_ALREADY_DEFINED
 #undef yyset_in
 #endif
-#ifndef GLSLget_out_ALREADY_DEFINED
+#ifndef JSget_out_ALREADY_DEFINED
 #undef yyget_out
 #endif
-#ifndef GLSLset_out_ALREADY_DEFINED
+#ifndef JSset_out_ALREADY_DEFINED
 #undef yyset_out
 #endif
-#ifndef GLSLget_leng_ALREADY_DEFINED
+#ifndef JSget_leng_ALREADY_DEFINED
 #undef yyget_leng
 #endif
-#ifndef GLSLget_text_ALREADY_DEFINED
+#ifndef JSget_text_ALREADY_DEFINED
 #undef yyget_text
 #endif
-#ifndef GLSLget_lineno_ALREADY_DEFINED
+#ifndef JSget_lineno_ALREADY_DEFINED
 #undef yyget_lineno
 #endif
-#ifndef GLSLset_lineno_ALREADY_DEFINED
+#ifndef JSset_lineno_ALREADY_DEFINED
 #undef yyset_lineno
 #endif
-#ifndef GLSLget_column_ALREADY_DEFINED
+#ifndef JSget_column_ALREADY_DEFINED
 #undef yyget_column
 #endif
-#ifndef GLSLset_column_ALREADY_DEFINED
+#ifndef JSset_column_ALREADY_DEFINED
 #undef yyset_column
 #endif
-#ifndef GLSLwrap_ALREADY_DEFINED
+#ifndef JSwrap_ALREADY_DEFINED
 #undef yywrap
 #endif
-#ifndef GLSLget_lval_ALREADY_DEFINED
+#ifndef JSget_lval_ALREADY_DEFINED
 #undef yyget_lval
 #endif
-#ifndef GLSLset_lval_ALREADY_DEFINED
+#ifndef JSset_lval_ALREADY_DEFINED
 #undef yyset_lval
 #endif
-#ifndef GLSLget_lloc_ALREADY_DEFINED
+#ifndef JSget_lloc_ALREADY_DEFINED
 #undef yyget_lloc
 #endif
-#ifndef GLSLset_lloc_ALREADY_DEFINED
+#ifndef JSset_lloc_ALREADY_DEFINED
 #undef yyset_lloc
 #endif
-#ifndef GLSLalloc_ALREADY_DEFINED
+#ifndef JSalloc_ALREADY_DEFINED
 #undef yyalloc
 #endif
-#ifndef GLSLrealloc_ALREADY_DEFINED
+#ifndef JSrealloc_ALREADY_DEFINED
 #undef yyrealloc
 #endif
-#ifndef GLSLfree_ALREADY_DEFINED
+#ifndef JSfree_ALREADY_DEFINED
 #undef yyfree
 #endif
-#ifndef GLSLtext_ALREADY_DEFINED
+#ifndef JStext_ALREADY_DEFINED
 #undef yytext
 #endif
-#ifndef GLSLleng_ALREADY_DEFINED
+#ifndef JSleng_ALREADY_DEFINED
 #undef yyleng
 #endif
-#ifndef GLSLin_ALREADY_DEFINED
+#ifndef JSin_ALREADY_DEFINED
 #undef yyin
 #endif
-#ifndef GLSLout_ALREADY_DEFINED
+#ifndef JSout_ALREADY_DEFINED
 #undef yyout
 #endif
-#ifndef GLSL_flex_debug_ALREADY_DEFINED
+#ifndef JS_flex_debug_ALREADY_DEFINED
 #undef yy_flex_debug
 #endif
-#ifndef GLSLlineno_ALREADY_DEFINED
+#ifndef JSlineno_ALREADY_DEFINED
 #undef yylineno
 #endif
-#ifndef GLSLtables_fload_ALREADY_DEFINED
+#ifndef JStables_fload_ALREADY_DEFINED
 #undef yytables_fload
 #endif
-#ifndef GLSLtables_destroy_ALREADY_DEFINED
+#ifndef JStables_destroy_ALREADY_DEFINED
 #undef yytables_destroy
 #endif
-#ifndef GLSLTABLES_NAME_ALREADY_DEFINED
+#ifndef JSTABLES_NAME_ALREADY_DEFINED
 #undef yyTABLES_NAME
 #endif
 
-#line 86 "../luminia-qt5/src/editors/GlslLexer.lex"
+#line 82 "../luminia-qt5/src/editors/JsLexer.lex"
 
 
-#line 440 "/home/alex/Work/OpenSource/luminia-qt5/src/editors/generated/GlslLexer.h"
-#undef GLSLIN_HEADER
-#endif /* GLSLHEADER_H */
+#line 440 "/home/alex/Work/OpenSource/luminia-qt5/src/editors/generated/JsLexer.h"
+#undef JSIN_HEADER
+#endif /* JSHEADER_H */
