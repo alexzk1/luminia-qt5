@@ -58,7 +58,6 @@
 "throws"        |
 "transient"     |
 "try"           |
-"var"           |
 "volatile"      |
 "while"         |
 "with"           { return LexerScheme::StyleType::KEYWORD; }
@@ -66,7 +65,7 @@
 \"(\\.|[^"\\])*\"         {return LexerScheme::StyleType::STRING;}
 '(\\.|[^'\\])*'           {return LexerScheme::StyleType::STRING;}
 
-"boolean"|"int"|"byte"|"char"|"float"|"long"|"short"|"void"|"..."/.?     { return LexerScheme::StyleType::DATATYPE; }
+"var"|"boolean"|"int"|"byte"|"char"|"float"|"long"|"short"|"void"|"..."/.?     { return LexerScheme::StyleType::DATATYPE; }
 
 "//".*                        { return LexerScheme::StyleType::COMMENT; }
 "/*"			                    { return LexerScheme::StyleType::MLC_START;}
@@ -86,7 +85,7 @@
 true |
 false |
 null |
--?+?[0-9]+"."?[0-9]*f?l?u?    { return LexerScheme::StyleType::NUMBER; }
+-?+?[0-9]+"."?[0-9]*          { return LexerScheme::StyleType::NUMBER; }
 
 [a-zA-Z0-9]+/\(               { return LexerScheme::StyleType::FUNCTION; }
 [\(\)\{\}\[\]] |
