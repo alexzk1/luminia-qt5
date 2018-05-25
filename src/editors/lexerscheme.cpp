@@ -22,7 +22,6 @@ LexerScheme::LexerScheme(const QStringList& apisToLoad, QsciScintilla *_parent)
 
 void LexerScheme::styleText(const int start, const int end)
 {
-    m_parent->autoCompleteFromAll();
     //return if no QsciScintilla editor
     if (!editor())
         return;

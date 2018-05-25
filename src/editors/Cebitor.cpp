@@ -9,6 +9,7 @@
 #include <QTextStream>
 #include <QFile>
 #include <QLineEdit>
+#include <QTimer>
 
 #include <Qsci/qscicommand.h>
 #include <Qsci/qscicommandset.h>
@@ -71,6 +72,14 @@ Cebitor::Cebitor(SearchBox *searchbox, QWidget *_parent) :
 
     // work-around since using built-in focusInEvent causes caret to be invisible
     connect(this, SIGNAL(SCN_FOCUSIN()), this, SLOT(resetHighlightColour()));
+
+
+    //autocomplete triggers
+    autoCompleteTrigger = new QTimer(this);
+    autoCompleteTrigger->setSingleShot(true);
+    autoCompleteTrigger->setInterval(1700);
+    connect(autoCompleteTrigger, &QTimer::timeout, this, &Cebitor::toggleAutocomplete);
+    new QShortcut(QKeySequence("ctrl+space"), this, SLOT(toggleAutocomplete()), SLOT(toggleAutocomplete()), Qt::WidgetShortcut);
 }
 //------------------------------------------------------------------------------
 QSize Cebitor::sizeHint() const
@@ -316,50 +325,63 @@ void Cebitor::braceIndent()
 
 void Cebitor::charAdded(int _c)
 {
-    switch (_c)
+    const auto c = static_cast<char>(_c);
+    if ((c >= 'A' && c <= 'z') || (c >= '0' || c <= '9') || c == '.' || c == '_')
+        autoCompleteTrigger->start();
+    else
+        autoCompleteTrigger->stop();
+
+    switch (c)
     {
-        case (int) '(':
+        case '(':
         {
             autoClose(QString(')'));
             break;
         }
-        case (int) '{':
+        case '{':
         {
             autoClose(QString('}'));
             break;
         }
-        case (int) '[':
+        case '[':
         {
             autoClose(QString(']'));
             break;
         }
 
-        case (int) ')':
+        case ')':
         {
             closing(QString(')'));
             break;
         }
-        case (int) '}':
+        case '}':
         {
             closing(QString('}'));
             break;
         }
-        case (int) ']':
+        case ']':
         {
             closing(QString(']'));
             break;
         }
 
         // special case since " opens and closes
-        case (int) '"':
+        case '"':
         {
             if (!closing(QString('"')))
                 autoClose(QString('"'));
             break;
         }
 
+        case '\'':
+        {
+            if (!closing(QString('\'')))
+                autoClose(QString('\''));
+            break;
+        }
+
         // auto indent for braces
-        case (int) '\n':
+        case '\n':
         {
             braceIndent();
             break;
@@ -373,6 +395,14 @@ void Cebitor::resetHighlightColour()
 {
     setSelectionBackgroundColor(QColor(61, 61, 52));
     resetSelectionForegroundColor();
+}
+
+void Cebitor::toggleAutocomplete()
+{
+    autoCompleteTrigger->stop();
+
+    if (isVisible())
+        autoCompleteFromAll();
 }
 
 void Cebitor::initAfterLexer()
@@ -407,7 +437,7 @@ void Cebitor::initAfterLexer()
     setIndentationsUseTabs(false);
     setIndentationWidth(4);
 
-    setAutoCompletionThreshold(2);
+    setAutoCompletionThreshold(0);
     setAutoCompletionReplaceWord(true);
     setAutoCompletionFillupsEnabled(true);
     setAutoCompletionSource(QsciScintilla::AcsAPIs);

@@ -434,7 +434,7 @@ static int yy_flex_strlen ( const char * );
 #undef yyTABLES_NAME
 #endif
 
-#line 103 "../luminia-qt5/src/editors/JsLexer.lex"
+#line 106 "../luminia-qt5/src/editors/JsLexer.lex"
 
 
 #line 440 "/home/alex/Work/OpenSource/luminia-qt5/src/editors/generated/JsLexer.h"

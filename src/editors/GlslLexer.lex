@@ -78,6 +78,8 @@ gl_[a-zA-Z0-9]+               { return LexerScheme::StyleType::GLOBAL; }
 [a-zA-Z0-9]+   |
 "."                           { return LexerScheme::StyleType::DEFAULT; }
 
+[a-zA-Z0-9]+\.[^a-zA-Z0-9]+   { return LexerScheme::StyleType::ILLEGAL; }
+
 �*                            {
                                 yyleng = 1;
                                 return LexerScheme::StyleType::ILLEGAL;

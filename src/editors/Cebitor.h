@@ -17,6 +17,7 @@
 /// @brief CEB text editor class inherits from QsciScintilla
 //------------------------------------------------------------------------------
 class SearchBox;
+class QTimer;
 class Cebitor : public QsciScintilla
 {
     Q_OBJECT;
@@ -112,8 +113,10 @@ protected slots:
     //----------------------------------------------------------------------------
     void resetHighlightColour();
     //----------------------------------------------------------------------------
+    void toggleAutocomplete();
 private:
     void initAfterLexer();
+    QPointer<QTimer> autoCompleteTrigger;
 }; // end class
 
 #endif  // _CEBITOR_H__
