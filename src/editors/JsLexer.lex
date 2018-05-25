@@ -83,7 +83,9 @@
 \?:  |
 ">>"|">>>"|"<<"\=?|"==="|"=="|"!==" { return LexerScheme::StyleType::OPERATOR; }
 
-"true" |"false" | "null" |
+true |
+false |
+null |
 -?+?[0-9]+"."?[0-9]*f?l?u?    { return LexerScheme::StyleType::NUMBER; }
 
 [a-zA-Z0-9]+/\(               { return LexerScheme::StyleType::FUNCTION; }
