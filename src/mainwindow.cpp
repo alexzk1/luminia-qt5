@@ -352,10 +352,10 @@ void MainWindow::createActions()
     connect(hide_all_editors_Act, SIGNAL(triggered()), this, SLOT(hide_all_editors()));
 
     run_all_scripts_Act = new QAction(QIcon(":/images/xpm/run.xpm"), tr("Enable All Scripts"), this);
-    run_all_scripts_Act->setShortcut(QKeySequence("F5"));
+    run_all_scripts_Act->setShortcut(QKeySequence("ctrl+F5"));
     connect(run_all_scripts_Act, SIGNAL(triggered()), this, SLOT(run_all_scripts()));
 
-    stop_all_scripts_Act = new QAction(QIcon(":/images/xpm/stop.xpm"), tr("Disable All Spripts"), this);
+    stop_all_scripts_Act = new QAction(QIcon(":/images/xpm/stop.xpm"), tr("Disable All Scripts"), this);
     stop_all_scripts_Act->setShortcut(QKeySequence("ctrl+F2"));
     connect(stop_all_scripts_Act, SIGNAL(triggered()), this, SLOT(stop_all_scripts()));
 

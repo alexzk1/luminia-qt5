@@ -36,8 +36,11 @@ class TimeWidget : public QWidget
     Q_OBJECT
 public:
     TimeWidget(QWidget *parent);
-    ~TimeWidget();
-    bool isPlaying(){return playing;}
+    ~TimeWidget() override;
+    bool isPlaying()
+    {
+        return playing;
+    }
 
 private slots:
     void valueChanget(int);
@@ -54,8 +57,8 @@ protected:
     bool loop;
     bool playing;
     QTime len;
-
-    virtual void timerEvent( QTimerEvent * ) override;
+    int local_timer{0};
+    void timerEvent( QTimerEvent * ) override;
 
 signals:
     void timeChanged(double);

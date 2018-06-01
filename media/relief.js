@@ -1,8 +1,8 @@
-shader = gl.Shader(Vertexshader,Fragmentshader);
+var shader = gl.Shader(Vertexshader,Fragmentshader);
 shader.Uniformi("Colormap",0);
 shader.Uniformi("Normalmap",1);
 shader.Uniformi("Depthmap",2);
-tan = shader.Loc("Tangent");
+var tan = shader.Loc("Tangent");
 
 function render(){
 	Colormap.Bind(0);
@@ -25,4 +25,4 @@ function render(){
 	Sphere.Normal.Unbind();
 
 	shader.Unbind();
-	}
+}

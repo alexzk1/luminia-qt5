@@ -24,9 +24,9 @@
 #include <QLabel>
 #include <QSpinBox>
 #include <QTimeEdit>
+#include <QDialogButtonBox>
 
-
-TimeWidget::TimeWidget(QWidget *parent):QWidget(parent)
+TimeWidget::TimeWidget(QWidget *parent): QWidget(parent)
 {
     layout = new QHBoxLayout();
     layout->setSpacing (0);
@@ -35,13 +35,14 @@ TimeWidget::TimeWidget(QWidget *parent):QWidget(parent)
     play = new QPushButton(this);
     play->setFlat(true);
     play->setIcon(QIcon(":/images/xpm/start.xpm"));
+    play->setToolTip(tr("Run"));
 
     config = new QPushButton(this);
     config->setFlat(true);
     config->setIcon(QIcon(":/images/xpm/config.xpm"));
-    config->setToolTip("Configure time bar");
+    config->setToolTip(tr("Configure time bar"));
 
-    timeslider = new QSlider(Qt::Horizontal,this);
+    timeslider = new QSlider(Qt::Horizontal, this);
     timeslider->setMaximum ( 150);
     timeslider->setMinimum ( 0);
     timeslider->setValue ( 0 );
@@ -51,28 +52,30 @@ TimeWidget::TimeWidget(QWidget *parent):QWidget(parent)
 
     this->setLayout(layout);
 
-    connect (config, SIGNAL(clicked()),this,SLOT (timeconfig()));
-    connect (play, SIGNAL(clicked()),this,SLOT (playPressed()));
-    connect (timeslider, SIGNAL(valueChanged (int)),this,SLOT (valueChanget(int)));
+    connect (config, SIGNAL(clicked()), this, SLOT (timeconfig()));
+    connect (play, SIGNAL(clicked()), this, SLOT (playPressed()));
+    connect (timeslider, SIGNAL(valueChanged (int)), this, SLOT (valueChanget(int)));
 
     playing = false;
     fps = 25;
     len = QTime ( 0, 0, 6, 0 );
+    setToolTip(tr("World time. When it runs on each tick it calls render() for each enabled script."));
+}
 
-    }
-
-TimeWidget::~TimeWidget(){
+TimeWidget::~TimeWidget()
+{
     delete layout;
     delete play;
     delete config;
     delete timeslider;
-    }
+}
 
 /*!
 A smal configuration dialog
 */
-void TimeWidget::timeconfig(){
-     QDialog d;
+void TimeWidget::timeconfig()
+{
+    QDialog d;
 
     //QWidget *vbox = new QWidget();
     QVBoxLayout vboxlayout;
@@ -85,79 +88,79 @@ void TimeWidget::timeconfig(){
     //grid.cellRect(2, column)
     //gridwidget.setLayout(&grid);
 
-    QLabel l1("FPS",0);
-    grid.addWidget(&l1,0,0);
+    QLabel l1(tr("FPS"), nullptr);
+    grid.addWidget(&l1, 0, 0);
 
-    QSpinBox f(0);
-    grid.addWidget(&f,0,1);
+    QSpinBox f(nullptr);
+    grid.addWidget(&f, 0, 1);
     f.setValue(fps);
-    f.setRange(0,100);
+    f.setRange(0, 100);
 
-    QLabel l2("Time",0);
-    grid.addWidget(&l2,1,0);
+    QLabel l2(tr("Time"), nullptr);
+    grid.addWidget(&l2, 1, 0);
 
-    QTimeEdit t(len, 0);
-    grid.addWidget(&t,1,1);
+    QTimeEdit t(len, nullptr);
+    grid.addWidget(&t, 1, 1);
     t.setTime(len);
 
-/*
-    QCheckBox l("Loop", 0);
-    l.setChecked(loop);
-    grid.addWidget(&l,2,1);
-*/
+    /*
+        QCheckBox l("Loop", 0);
+        l.setChecked(loop);
+        grid.addWidget(&l,2,1);
+    */
 
-    QWidget buttonwidget;
-    vboxlayout.addWidget(&buttonwidget);
-    QHBoxLayout buttons;
-    buttonwidget.setLayout(&buttons);
+    QDialogButtonBox btns(nullptr);
+    btns.setStandardButtons({QDialogButtonBox::Ok, QDialogButtonBox::Cancel});
+    vboxlayout.addWidget(&btns);
 
-    QPushButton cancel("Cancel",0);
-    connect (&cancel, SIGNAL(clicked()),&d,SLOT (reject()));
-    buttons.addWidget(&cancel);
+    connect(&btns, &QDialogButtonBox::accepted, &d, &QDialog::accept);
+    connect(&btns, &QDialogButtonBox::rejected, &d, &QDialog::reject);
 
-    QPushButton ok("OK",0);
-    connect (&ok, SIGNAL(clicked()),&d,SLOT (accept()));
-    buttons.addWidget(&ok);
-
-    if (d.exec()==QDialog::Accepted){
-        printf ("Accepted\n");
-
+    if (d.exec() == QDialog::Accepted)
+    {
+        bool p = playing;
+        if (p)
+            playPressed();
         fps = f.value();
         //loop = l.isChecked();
         len = t.time();
-        timeslider->setMaximum ((len.hour ()* 3600 + len.minute ()*60 + len.second ())*fps);
+        timeslider->setMaximum ((len.hour () * 3600 + len.minute () * 60 + len.second ())*fps);
         timeslider->setPageStep(fps);
-        }
+        if (p)
+            playPressed();
     }
+}
 
-
-void TimeWidget::timerEvent( QTimerEvent* ){
-    timeslider->setValue( (timeslider->value() +1 ) % timeslider->maximum());
-    }
+void TimeWidget::timerEvent( QTimerEvent* )
+{
+    timeslider->setValue( (timeslider->value() + 1 ) % timeslider->maximum());
+}
 
 /*!
 signal to trigger a new frame rendering
 */
-void TimeWidget::valueChanget(int in){
+void TimeWidget::valueChanget(int in)
+{
     emit timeChanged((double)in / (double)fps);
-    }
+}
 
 /*!
 toggles play/pause
 */
-void TimeWidget::playPressed(){
-    static int local_timer=0;
-
-    if (!playing){
-        local_timer = startTimer(1000/fps);
+void TimeWidget::playPressed()
+{
+    if (!playing)
+    {
+        local_timer = startTimer(1000 / fps);
         playing = true;
         play->setIcon(QIcon(":/images/xpm/breaks.xpm"));
-        play->setToolTip("Stop");
-        }
-    else{
+        play->setToolTip(tr("Stop"));
+    }
+    else
+    {
         killTimer(local_timer);
         playing = false;
         play->setIcon(QIcon(":/images/xpm/start.xpm"));
-        play->setToolTip("Run");
-        }
+        play->setToolTip(tr("Run"));
     }
+}
