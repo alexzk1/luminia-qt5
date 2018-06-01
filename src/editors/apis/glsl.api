@@ -1,3 +1,21 @@
+gl_VertexID
+gl_InstanceID
+gl_DrawID
+gl_BaseVertex
+gl_BaseInstance
+gl_Position
+gl_PointSize
+gl_ClipDistance
+gl_FragCoord
+gl_FrontFacing
+gl_PointCoord
+gl_SampleID
+gl_SamplePosition
+gl_SampleMaskIn
+gl_Layer
+gl_ViewportIndex
+gl_FragDepth
+gl_SampleMask
 radians (genType degrees)
 degrees (genType radians)
 sin (genType angle)

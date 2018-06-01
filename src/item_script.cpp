@@ -127,7 +127,7 @@ void Item_script::makeAutocomplete()
 
         insert_apis(world);
         insert_apis(engine->getGl());
-        //doing kinda local bind, so no need full path from root
+
         QList<Item*> directs = parent()->findChildren<Item*>(QString(), Qt::FindChildrenRecursively);
         for (const auto& o : directs)
             insert_apis(o);
