@@ -351,6 +351,7 @@ private:
     QPointer<SEngine> engine;
     const QMetaObject *meta;
     QStringList getApis(QObject *object) const;
+    void makeAutocomplete();
 protected:
     QWidget * createTextEditor(QWidget * parent) const override;
 };

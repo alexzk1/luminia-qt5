@@ -34,9 +34,11 @@
 Item_script::Item_script( Item *parent, const QString& name) :
     Item_edit(1, parent, name),
     running(false),
-    engine(nullptr)
+    engine(new SEngine(parent)) //need engine for auto-complete
 {
     initParent(); //this allows to properly call createTextEditor
+    makeAutocomplete();
+
     switchIcon(false);
 
     const auto addAction = [this](auto a, auto b, auto c)
@@ -102,6 +104,38 @@ QStringList Item_script::getApis(QObject * object) const
     return result;
 }
 
+void Item_script::makeAutocomplete()
+{
+    auto ed   = getEditor<Cebitor>();
+    if (ed && ed->lexer())
+    {
+        auto aold = ed->lexer()->apis();
+        if (aold)
+            aold->deleteLater();
+
+        auto apis = new QsciAPIs(ed->lexer());
+
+        auto insert_apis = [&apis, this](QObject * obj)
+        {
+            if (apis)
+            {
+                auto funcs = getApis(obj);
+                for (const auto& a : funcs)
+                    apis->add(a);
+            }
+        };
+
+        insert_apis(world);
+        insert_apis(engine->getGl());
+        //doing kinda local bind, so no need full path from root
+        QList<Item*> directs = parent()->findChildren<Item*>(QString(), Qt::FindChildrenRecursively);
+        for (const auto& o : directs)
+            insert_apis(o);
+        ed->lexer()->setAPIs(apis);
+        apis->prepare();
+    }
+}
+
 /*!
 Start a script. QT-4.3 part is not full compatible to QSA
 */
@@ -117,30 +151,12 @@ void Item_script::run()
         //deleteEngine();
     });
 
-    auto ed   = getEditor<Cebitor>();
-    auto apis = new QsciAPIs(ed->lexer());
-
-    auto insert_apis = [&apis, this](QObject * obj)
-    {
-        if (apis)
-        {
-            auto funcs = getApis(obj);
-            for (const auto& a : funcs)
-                apis->add(a);
-        }
-    };
-
-    insert_apis(world);
-    insert_apis(engine->getGl());
     //doing kinda local bind, so no need full path from root
     QList<Item*> directs = parent()->findChildren<Item*>(QString(), Qt::FindDirectChildrenOnly);
     for (const auto& o : directs)
-    {
         engine->bindItem(o, true);
-        insert_apis(o);
-    }
-    ed->lexer()->setAPIs(apis);
-    apis->prepare();
+
+    makeAutocomplete();
 
     switchIcon(true);
     engine->run(raw_text());
