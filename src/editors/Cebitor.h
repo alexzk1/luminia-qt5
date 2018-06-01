@@ -117,6 +117,9 @@ protected slots:
 private:
     void initAfterLexer();
     QPointer<QTimer> autoCompleteTrigger;
+signals:
+    void F5pressed(); //F5 pressed
+    void F2pressed(); //F2 pressed
 }; // end class
 
 #endif  // _CEBITOR_H__

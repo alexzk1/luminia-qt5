@@ -80,6 +80,9 @@ Cebitor::Cebitor(SearchBox *searchbox, QWidget *_parent) :
     autoCompleteTrigger->setInterval(1700);
     connect(autoCompleteTrigger, &QTimer::timeout, this, &Cebitor::toggleAutocomplete);
     new QShortcut(QKeySequence("ctrl+space"), this, SLOT(toggleAutocomplete()), SLOT(toggleAutocomplete()), Qt::WidgetShortcut);
+
+    new QShortcut(QKeySequence("F5"), this, SIGNAL(F5pressed()), SIGNAL(F5pressed()), Qt::WidgetShortcut);
+    new QShortcut(QKeySequence("F2"), this, SIGNAL(F2pressed()), SIGNAL(F2pressed()), Qt::WidgetShortcut);
 }
 //------------------------------------------------------------------------------
 QSize Cebitor::sizeHint() const

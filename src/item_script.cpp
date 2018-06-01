@@ -30,6 +30,7 @@
 #include "editors/Cebitor.h"
 #include "editors/searchbox.h"
 #include "editors/jslexer.h"
+#include <QShortcut>
 
 Item_script::Item_script( Item *parent, const QString& name) :
     Item_edit(1, parent, name),
@@ -66,6 +67,9 @@ QWidget *Item_script::createTextEditor(QWidget *parent) const
 {
     auto l = new Cebitor(searchBox, parent);
     l->makeLexer<JSLexer>();
+    connect(l, &Cebitor::F5pressed, this, &Item_script::run);
+    connect(l, &Cebitor::F2pressed, this, &Item_script::stop);
+
     return l;
 }
 
