@@ -76,7 +76,7 @@ public:
     //----------------------------------------------------------------------------
     QString description(const int style ) const override;
 
-    virtual void setIdentifiers(const QSet<QString>& newOnes);
+    virtual void addIdentifiers(const QSet<QString>& newOnes);
 protected:
     using ScannerPtr = std::shared_ptr<FlexLexer>;
 

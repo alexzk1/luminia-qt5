@@ -35,31 +35,38 @@ glwrapper::glwrapper(QObject * parent, const QString &name ):
 /*!
 internal used slot. don't use...
 */
-void glwrapper::cleartrasher(){
+void glwrapper::cleartrasher()
+{
 }
 
 /*!
 void Clear(Enum bits)\n
 gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT | gl.GL_DEPTH_BUFFER_BIT | gl.STENCIL_BUFFER_BIT
 */
-void glwrapper::Clear(GLenum mode){
-    glClear(mode); GL_CHECK_ERROR();
+void glwrapper::Clear(GLenum mode)
+{
+    glClear(mode);
+    GL_CHECK_ERROR();
 }
 
 /*!
 void Enable(Enum state)\n
 Enable an OpenGL state like gl.DEPTH_TEST, gl.ALPHA_TEST, gl.BLEND or gl.CULL_FACE
 */
-void glwrapper::Enable(GLenum v){
-    glEnable(v); GL_CHECK_ERROR();
+void glwrapper::Enable(GLenum v)
+{
+    glEnable(v);
+    GL_CHECK_ERROR();
 }
 
 /*!
 void Disable(Enum state)\n
 Disable an OpenGL state like gl.DEPTH_TEST, gl.ALPHA_TEST, gl.BLEND or gl.CULL_FACE
 */
-void glwrapper::Disable(GLenum v){
-    glDisable(v); GL_CHECK_ERROR();
+void glwrapper::Disable(GLenum v)
+{
+    glDisable(v);
+    GL_CHECK_ERROR();
 }
 
 /*!
@@ -68,7 +75,8 @@ Set the culface mode gl.FRONT or gl.BACK
 */
 void glwrapper::CullFace(GLenum v)
 {
-    glCullFace(v); GL_CHECK_ERROR();
+    glCullFace(v);
+    GL_CHECK_ERROR();
 }
 /*!
 void AlphaFunc(Enum func, number ref)\n
@@ -76,7 +84,8 @@ Enum: gl.LESS, gl.[L|G|NOT]EQUAL, gl.GREATER, gl.ALWAYS. ref: Reference value
 */
 void glwrapper::AlphaFunc(GLenum func, double ref)
 {
-    glAlphaFunc(func,ref); GL_CHECK_ERROR();
+    glAlphaFunc(func, ref);
+    GL_CHECK_ERROR();
 }
 
 /*!
@@ -85,7 +94,8 @@ gl.BLEND, gl.ZERO, gl.ONE, gl.DST_COLOR, gl.SRC_COLOR, gl.ONE_MINUS_DST_COLOR, g
 */
 void glwrapper::BlendFunc (GLenum a, GLenum b)
 {
-    glBlendFunc(a,b); GL_CHECK_ERROR();
+    glBlendFunc(a, b);
+    GL_CHECK_ERROR();
 }
 
 /*!
@@ -94,7 +104,8 @@ set the functions to: gl.KEEP, gl.ZERO, gl.REPLACE, gl_INCR, gl.DECR, gl.INVERT
 */
 void glwrapper::StencilOp (GLenum a, GLenum b, GLenum c)
 {
-    glStencilOp(a,b,c); GL_CHECK_ERROR();
+    glStencilOp(a, b, c);
+    GL_CHECK_ERROR();
 }
 
 /*!
@@ -103,7 +114,8 @@ func: Enum: gl.NEVER, gl.LESS, gl.[L|G|NOT]EQUAL, gl.GREATER, gl.ALWAYS.
 */
 void glwrapper::StencilFunc(GLenum func, int ref, GLuint mask)
 {
-    glStencilFunc(func, ref, mask); GL_CHECK_ERROR();
+    glStencilFunc(func, ref, mask);
+    GL_CHECK_ERROR();
 }
 
 /*!
@@ -113,7 +125,8 @@ Don't forget to restore the default gl.LESS
 */
 void glwrapper::DepthFunc(GLenum func)
 {
-    glDepthFunc(func);GL_CHECK_ERROR();
+    glDepthFunc(func);
+    GL_CHECK_ERROR();
 }
 /*!
 void DepthMask(bool b);\n
@@ -122,7 +135,7 @@ Don't forget to restore the default "true"
 */
 void glwrapper::DepthMask(bool b)
 {
-    glDepthMask(b?GL_TRUE:GL_FALSE);
+    glDepthMask(b ? GL_TRUE : GL_FALSE);
 }
 
 /*!
@@ -131,7 +144,7 @@ set the polygonofset. Enable also gl.POLYGON_OFFSET_[FILL|LINE|POINT]
 */
 void glwrapper::PolygonOffset(float factor, float units)
 {
-    glPolygonOffset(factor,units);
+    glPolygonOffset(factor, units);
 }
 
 /*!
@@ -149,7 +162,8 @@ End drawing primitives
 */
 void glwrapper::End()
 {
-    glEnd(); GL_CHECK_ERROR();
+    glEnd();
+    GL_CHECK_ERROR();
 }
 
 /*!
@@ -192,8 +206,9 @@ void glwrapper::Color (double r, double g, double b, double a)
 void Color (QColor color)\n
 Set the color. Only valid between Begin() and End()
 */
-void glwrapper::Color (const QColor& c){
-    glColor3d(c.red()/255.0, c.green()/255.0, c.blue()/255.0);
+void glwrapper::Color (const QColor& c)
+{
+    glColor3d(c.red() / 255.0, c.green() / 255.0, c.blue() / 255.0);
 }
 
 /*!
@@ -272,11 +287,14 @@ void glwrapper::DrawArrays(GLenum mode, int first, int count)
 void Light(number Lightnum, enum mode, number x=0, number y=0, number z=0, number w=0)\n
 Set light parameters.
 */
-void glwrapper::Light(GLenum l, GLenum n, float x , float y, float z, float w)
+void glwrapper::Light(GLenum l, GLenum n, float x, float y, float z, float w)
 {
     float val[4];
-    val[0]=x; val[1]=y; val[2]=z; val[3] = w;
-    ::glLightfv(GL_LIGHT0 +l, n, val);
+    val[0] = x;
+    val[1] = y;
+    val[2] = z;
+    val[3] = w;
+    ::glLightfv(GL_LIGHT0 + l, n, val);
 }
 
 /*!
@@ -286,11 +304,11 @@ Set light parameters. (Color version)
 void glwrapper::Light(GLenum l, GLenum n, const QColor & col)
 {
     float val[4];
-    val[0]= col.red()/255.0f;
-    val[1]= col.green()/255.0f;
-    val[2]= col.blue()/255.0f;
+    val[0] = col.red() / 255.0f;
+    val[1] = col.green() / 255.0f;
+    val[2] = col.blue() / 255.0f;
     val[3] = 1.0f;
-    ::glLightfv(GL_LIGHT0 +l, n, val);
+    ::glLightfv(GL_LIGHT0 + l, n, val);
 }
 
 
@@ -300,13 +318,16 @@ Set point parameter. Not recommend to use.
 */
 void glwrapper::PointParameter(int mode, float x, float y, float z)
 {
-    switch (mode){
-        case GL_POINT_DISTANCE_ATTENUATION_ARB:{
-            float p[3] = {x,y,z};
+    switch (mode)
+    {
+        case GL_POINT_DISTANCE_ATTENUATION_ARB:
+        {
+            float p[3] = {x, y, z};
             glPointParameterfvARB( GL_POINT_DISTANCE_ATTENUATION_ARB, p);
             break;
         }
-        case GL_POINT_SIZE_MAX_ARB:{
+        case GL_POINT_SIZE_MAX_ARB:
+        {
             float maxSize = 0.0;
             glGetFloatv( GL_POINT_SIZE_MAX_ARB, &maxSize );
             if (x > maxSize) x = maxSize;
@@ -326,9 +347,9 @@ compile all shaders at the beginning of a script.
 */
 QObject* glwrapper::Shader(QObject* _inVertex)
 {
-    Item_shader* inVertex = dynamic_cast<Item_shader*>(_inVertex);
+    auto* inVertex = dynamic_cast<Item_shader*>(_inVertex);
 
-    glwrapper_shader* tmp = new glwrapper_shader(this,inVertex->text());
+    glwrapper_shader* tmp = new glwrapper_shader(this, inVertex->text());
     return tmp;
 }
 
@@ -336,9 +357,9 @@ QObject* glwrapper::Shader(QObject* _inVertex)
 Object Shader(String|Item vertexshader);
 compile all shaders at the beginning of a script.
 */
-QObject* glwrapper::Shader(QString vertex)
+QObject* glwrapper::Shader(const QString& vertex)
 {
-    glwrapper_shader* tmp = new glwrapper_shader(this,vertex);
+    auto* tmp = new glwrapper_shader(this, vertex);
     return tmp;
 }
 
@@ -348,10 +369,10 @@ compile all shaders at the beginning of a script.
 */
 QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inFragment)
 {
-    Item_shader* inVertex = dynamic_cast<Item_shader*>(_inVertex);
-    Item_shader* inFragment = dynamic_cast<Item_shader*>(_inFragment);
+    auto* inVertex = dynamic_cast<Item_shader*>(_inVertex);
+    auto* inFragment = dynamic_cast<Item_shader*>(_inFragment);
 
-    glwrapper_shader* tmp = new glwrapper_shader(this,inVertex->text(),inFragment->text());
+    glwrapper_shader* tmp = new glwrapper_shader(this, inVertex->text(), inFragment->text());
     return tmp;
 }
 
@@ -359,9 +380,9 @@ QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inFragment)
 Object Shader(String|Item vertexshader, String|Item fragmentshader);
 compile all shaders at the beginning of a script.
 */
-QObject* glwrapper::Shader(QString vertex, QString fragment)
+QObject* glwrapper::Shader(const QString& vertex, const QString& fragment)
 {
-    glwrapper_shader* tmp = new glwrapper_shader(this, vertex, fragment);
+    auto* tmp = new glwrapper_shader(this, vertex, fragment);
     return tmp;
 }
 
@@ -370,11 +391,12 @@ QObject* glwrapper::Shader(QString vertex, QString fragment)
 Object Shader(String|Item vertexshader, String|Item geometryshader, enum inPrimitive, enum outPrimitive, number maxOutVertices);
 compile all shaders at the beginning of a script.
 */
-QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inGeometric, int inPrimitive, int outPrimitive, int outVertices){
-    Item_shader* inVertex = dynamic_cast<Item_shader*>(_inVertex);
-    Item_shader* inGeometric = dynamic_cast<Item_shader*>(_inGeometric);
+QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inGeometric, int inPrimitive, int outPrimitive, int outVertices)
+{
+    auto* inVertex = dynamic_cast<Item_shader*>(_inVertex);
+    auto* inGeometric = dynamic_cast<Item_shader*>(_inGeometric);
 
-    glwrapper_shader* tmp = new glwrapper_shader(this,inVertex->text(),inGeometric->text(), inPrimitive, outPrimitive, outVertices);
+    glwrapper_shader* tmp = new glwrapper_shader(this, inVertex->text(), inGeometric->text(), inPrimitive, outPrimitive, outVertices);
 
     return tmp;
 }
@@ -382,8 +404,9 @@ QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inGeometric, int inPrim
 Object Shader(String|Item vertexshader, String|Item geometryshader, enum inPrimitive, enum outPrimitive, number maxOutVertices);
 compile all shaders at the beginning of a script.
 */
-QObject* glwrapper::Shader(QString vertex, QString geometric, int inPrimitive, int outPrimitive, int outVertices){
-    glwrapper_shader* tmp = new glwrapper_shader(this,vertex,geometric,  inPrimitive, outPrimitive, outVertices);
+QObject* glwrapper::Shader(const QString& vertex, const QString& geometric, int inPrimitive, int outPrimitive, int outVertices)
+{
+    auto* tmp = new glwrapper_shader(this, vertex, geometric,  inPrimitive, outPrimitive, outVertices);
     return tmp;
 }
 
@@ -392,12 +415,13 @@ QObject* glwrapper::Shader(QString vertex, QString geometric, int inPrimitive, i
 Object Shader(String|Item vertexshader, String|Item geometryshader, String|Item fragmentshader, enum inPrimitive, enum outPrimitive, number maxOutVertices);
 compile all shaders at the beginning of a script.
 */
-QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inGeometric, QObject* _inFragment, int inPrimitive, int outPrimitive, int outVertices){
-    Item_shader* inVertex = dynamic_cast<Item_shader*>(_inVertex);
-    Item_shader* inGeometric = dynamic_cast<Item_shader*>(_inGeometric);
-    Item_shader* inFragment = dynamic_cast<Item_shader*>(_inFragment);
+QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inGeometric, QObject* _inFragment, int inPrimitive, int outPrimitive, int outVertices)
+{
+    auto* inVertex = dynamic_cast<Item_shader*>(_inVertex);
+    auto* inGeometric = dynamic_cast<Item_shader*>(_inGeometric);
+    auto* inFragment = dynamic_cast<Item_shader*>(_inFragment);
 
-    glwrapper_shader* tmp = new glwrapper_shader(this,inVertex->text(),inGeometric->text(),inFragment->text(), inPrimitive, outPrimitive, outVertices);
+    glwrapper_shader* tmp = new glwrapper_shader(this, inVertex->text(), inGeometric->text(), inFragment->text(), inPrimitive, outPrimitive, outVertices);
     return tmp;
 }
 
@@ -405,8 +429,9 @@ QObject* glwrapper::Shader(QObject* _inVertex, QObject* _inGeometric, QObject* _
 Object Shader(String|Item vertexshader, String|Item geometryshader, String|Item fragmentshader, enum inPrimitive, enum outPrimitive, number maxOutVertices);
 compile all shaders at the beginning of a script.
 */
-QObject* glwrapper::Shader(QString vertex, QString geometric, QString fragment, int inPrimitive, int outPrimitive, int outVertices){
-    glwrapper_shader* tmp = new glwrapper_shader(this,vertex,geometric,fragment,  inPrimitive, outPrimitive, outVertices);
+QObject* glwrapper::Shader(const QString& vertex, const QString& geometric, const QString& fragment, int inPrimitive, int outPrimitive, int outVertices)
+{
+    auto* tmp = new glwrapper_shader(this, vertex, geometric, fragment,  inPrimitive, outPrimitive, outVertices);
 
     return tmp;
 }
@@ -416,8 +441,9 @@ QObject* glwrapper::Shader(QString vertex, QString geometric, QString fragment, 
 void Framebuffer()\n
 Create a new Framebuffer object. This is usefull for multiple rendertarget
 */
-QObject* glwrapper::Framebuffer(){
-    glwrapper_framebuffer* tmp = new glwrapper_framebuffer(this);
+QObject* glwrapper::Framebuffer()
+{
+    auto* tmp = new glwrapper_framebuffer(this);
     return tmp;
 }
 
@@ -429,16 +455,17 @@ void glwrapper::Screenshot(const QString& filename)
 {
     glFinish();
     GLint viewport[4];
-    glGetIntegerv(GL_VIEWPORT,viewport);
+    glGetIntegerv(GL_VIEWPORT, viewport);
     auto w = viewport[2];
     auto h = viewport[3];
 
-    unsigned char* buffer = new unsigned char[w * h * 4];
+    auto* buffer = new unsigned char[w * h * 4];
     glReadPixels(0, 0, w, h, GL_BGRA, GL_UNSIGNED_BYTE, buffer);
     QImage image(w, h, QImage::Format_ARGB32);
-    for (int y = 0; y < h; y++) {
+    for (int y = 0; y < h; y++)
+    {
         int OpenGL_y = h - y - 1;
-        memcpy(image.scanLine(y),&buffer[OpenGL_y * w * 4],   w * 4);
+        memcpy(image.scanLine(y), &buffer[OpenGL_y * w * 4],   w * 4);
     }
     delete[] buffer;
     if (!filename.isEmpty())
@@ -452,36 +479,41 @@ void glwrapper::Screenshot(const QString& filename)
 BeginTransformFeedback();\n
 Begin of transform feedback
 */
-void glwrapper::BeginTransformFeedback(int primitive, bool discard){
-    if(!GLEW_NV_transform_feedback){
+void glwrapper::BeginTransformFeedback(int primitive, bool discard)
+{
+    if (!GLEW_NV_transform_feedback)
+    {
         qDebug() << "Transform Feedback not suported";
         return;
     }
-    if(!currentShader){
+    if (!currentShader)
+    {
         qDebug() << "A shader have to be bound for Transform Feedback";
         return;
     }
     static GLint max = 0;
     if (!max)glGetIntegerv( GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS_NV, &max);
 
-    GLint *a = new GLint[max];
+    auto *a = new GLint[max];
 
 
-    int n= 0;
-    for (int i = 0; i < Item_buffer::boundedTransformFeedback.size(); ++i) {
-        QString name = Item_buffer::boundedTransformFeedback.at(i)->transformFeedbackName;
+    int n = 0;
+    for (const auto& i : Item_buffer::boundedTransformFeedback)
+    {
+        QString name = i->transformFeedbackName;
 
         int loc = glGetVaryingLocationNV( currentShader->getShaderHandle(), name.toLatin1());
         //qDebug() << name << loc;
 
-        if(loc < 0)continue;
-        if(n >= max){
+        if (loc < 0)continue;
+        if (n >= max)
+        {
             qDebug() << "to many GL_MAX_TRANSFORM_FEEDBACK_SEPARATE_ATTRIBS_NV";
             break;
         }
         a[n] = loc;
 
-        Item_buffer::boundedTransformFeedback.at(i)->transformFeedbackBindPrivate(n);
+        i->transformFeedbackBindPrivate(n);
         n++;
     }
 
@@ -490,7 +522,7 @@ void glwrapper::BeginTransformFeedback(int primitive, bool discard){
     delete[] a;
 
     glBeginTransformFeedbackNV(primitive);
-    if(discard)glEnable(GL_RASTERIZER_DISCARD_NV);
+    if (discard)glEnable(GL_RASTERIZER_DISCARD_NV);
 }
 
 
@@ -498,8 +530,9 @@ void glwrapper::BeginTransformFeedback(int primitive, bool discard){
 EndTransformFeedback();\n
 End of transform feedback
 */
-void glwrapper::EndTransformFeedback(){
-    if(!GLEW_NV_transform_feedback)return;
+void glwrapper::EndTransformFeedback()
+{
+    if (!GLEW_NV_transform_feedback)return;
 
     glDisable(GL_RASTERIZER_DISCARD_NV);
     glEndTransformFeedbackNV();

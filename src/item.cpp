@@ -364,7 +364,7 @@ QList<Item *> Item::findChildrenByType( const QString & typen) const
     auto l = findChildren<Item*>();
     for (int i = l.size() - 1; i >= 0; i--)
     {
-        if (Item* it = dynamic_cast<Item*>( l[i] ) )
+        if (auto* it = dynamic_cast<Item*>( l[i] ) )
         {
             if (it->getType() != typen) l.removeAt(i);
         }

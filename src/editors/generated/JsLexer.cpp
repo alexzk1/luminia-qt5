@@ -678,11 +678,11 @@ static const flex_int16_t yy_chk[696] =
 #define YY_MORE_ADJ 0
 #define YY_RESTORE_YY_MORE_OFFSET
 #line 1 "../luminia-qt5/src/editors/JsLexer.lex"
-/*! @file GlslLexer.lex
- * @brief Flex definitions for generating the GLSL lexer
- * @author Phil Rouse
+/*! @file JsLexer.lex
+ * @brief Flex definitions for generating the JavaScript lexer
+ * @author Phil Rouse (original GLSL), JS by Oleksiy Zaharov
  * @version 1.0
- * @date 07/05/2016
+ * @date 25/May/2018
  */
 #line 23 "../luminia-qt5/src/editors/JsLexer.lex"
   #include "../lexerscheme.h"

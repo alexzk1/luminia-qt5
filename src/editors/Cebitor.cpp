@@ -437,8 +437,10 @@ void Cebitor::initAfterLexer()
     setIndentationsUseTabs(false);
     setIndentationWidth(4);
 
-    setAutoCompletionThreshold(0);
+    setAutoCompletionThreshold(1);
     setAutoCompletionReplaceWord(true);
     setAutoCompletionFillupsEnabled(true);
-    setAutoCompletionSource(QsciScintilla::AcsAPIs);
+    setAutoCompletionSource(QsciScintilla::AcsAll);
+    setCallTipsStyle(CallTipsStyle::CallTipsNoContext);
+    setCallTipsVisible(5);
 }

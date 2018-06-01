@@ -72,6 +72,36 @@ Item_script::~Item_script()
     deleteEngine();
 }
 
+QStringList Item_script::getApis(QObject * object) const
+{
+    QStringList result;
+    //listing meta-methods "add*", despite what documentation says, it does not list parent's methods. So have to do long way...
+    std::set<QString> once; //ensuring that if they fix qt, program will be working yet
+    const auto processObject = [&object, &result, &once](const QMetaObject * metaObject)
+    {
+        for (int i = metaObject->methodOffset(); i < metaObject->methodCount(); ++i)
+        {
+            const auto method = metaObject->method(i);
+            auto n = QString::fromLatin1(method.methodSignature());
+
+            if (!once.count(n) && !n.contains("_q_") && !n.contains("deleteLater") && !n.contains("destroyed") && !n.contains("objectNameChanged"))
+            {
+                once.insert(n);
+                auto ip = qobject_cast<Item*>(object);
+                result.push_back(QString("%1.%2").arg((ip) ? ip->getName() : object->objectName()).arg(n));
+            }
+        };
+    };
+
+    auto meta = object->metaObject();
+    while (meta)
+    {
+        processObject(meta);
+        meta = meta->superClass();
+    }
+    return result;
+}
+
 /*!
 Start a script. QT-4.3 part is not full compatible to QSA
 */
@@ -86,11 +116,31 @@ void Item_script::run()
         //damn, do not delete engine on error
         //deleteEngine();
     });
+
+    auto ed   = getEditor<Cebitor>();
+    auto apis = new QsciAPIs(ed->lexer());
+
+    auto insert_apis = [&apis, this](QObject * obj)
+    {
+        if (apis)
+        {
+            auto funcs = getApis(obj);
+            for (const auto& a : funcs)
+                apis->add(a);
+        }
+    };
+
+    insert_apis(world);
+    insert_apis(engine->getGl());
     //doing kinda local bind, so no need full path from root
     QList<Item*> directs = parent()->findChildren<Item*>(QString(), Qt::FindDirectChildrenOnly);
     for (const auto& o : directs)
+    {
         engine->bindItem(o, true);
-
+        insert_apis(o);
+    }
+    ed->lexer()->setAPIs(apis);
+    apis->prepare();
 
     switchIcon(true);
     engine->run(raw_text());

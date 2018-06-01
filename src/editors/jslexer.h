@@ -14,7 +14,7 @@ public:
     //----------------------------------------------------------------------------
     const char* language() const override;
     //----------------------------------------------------------------------------
-    void setIdentifiers(const QSet<QString>& newOnes) override;
+    QStringList autoCompletionWordSeparators() const override;
 protected:
     ScannerPtr createScanner() const override;
 };// end class

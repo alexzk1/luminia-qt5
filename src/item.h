@@ -64,6 +64,8 @@ public:
 
     QString saveDock() const;
     void    restoreSavedDock(const QString& src);
+    void hideDock();
+    void contextmenu(const QPoint&);
 
 public slots:
     QObject *findChild(const QString& name) const;
@@ -73,11 +75,11 @@ public slots:
     {
         return parent();
     }
-    void contextmenu(const QPoint&);
     virtual QString getType()const;
     virtual void destroyAll();//destroys all childs
 
-    void hideDock();
+
+
 protected:
     virtual void addMenu(QMenu *menu)
     {
@@ -283,6 +285,11 @@ protected:
 
     Item_edit(int derived, Item *parent, const QString& label1);
     void initParent();
+    template<class EditorT>
+    EditorT* getEditor() const
+    {
+        return qobject_cast<EditorT*>(editor);
+    }
 private:
     QPointer<QWidget>   hostWidget;
     QPointer<QWidget>   editor;
@@ -318,6 +325,7 @@ protected:
 
 class QSInterpreter;
 class glwrapper;
+class Cebitor;
 /*!
 The script editor, including the completation handler
 and scriptinterpreter
@@ -342,8 +350,9 @@ private:
     bool running;
     QPointer<SEngine> engine;
     const QMetaObject *meta;
+    QStringList getApis(QObject *object) const;
 protected:
-    QWidget* createTextEditor(QWidget *parent) const override;
+    QWidget * createTextEditor(QWidget * parent) const override;
 };
 
 
@@ -359,11 +368,11 @@ class Item_uniform: public Item
     friend class glwrapper;
     friend class glwrapper_shader;
 public:
-    Item_uniform( Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT);
+    Item_uniform( Item * parent, const QString & label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT);
     ~Item_uniform() override;
     QString statusText()const override;
 
-    double& operator()(unsigned dim = 0, unsigned index = 0, unsigned keyframe = 0);
+    double & operator()(unsigned dim = 0, unsigned index = 0, unsigned keyframe = 0);
 
     void setData(const QString&);
     QString getData();
@@ -372,13 +381,13 @@ public:
 public slots:
     virtual void setDim( int dimension = 1, int size = 1, int keyframes = 1, int format = GL_FLOAT);
     void setInKeyFrame(int keyframe, int index, double x, double y = 0.0, double z = 0.0, double w = 0.0);
-    void setInKeyFrame(int keyframe, int index, const QList<double>& l);
+    void setInKeyFrame(int keyframe, int index, const QList<double> & l);
     void set(int index, double x, double y = 0.0, double z = 0.0, double w = 0.0);
-    void set(int index, const QList<double>& l);
+    void set(int index, const QList<double> & l);
 
-    void Uniform(QObject* _shader, QString var);
-    void UniformInterpolator( QObject* _shader, const QString& var, float pos);
-    void UniformInterpolator( QObject* _shader, const QString& var, float mix, int keyframe1, int keyframe2);
+    void Uniform(QObject * _shader, QString var);
+    void UniformInterpolator( QObject * _shader, const QString & var, float pos);
+    void UniformInterpolator( QObject * _shader, const QString & var, float mix, int keyframe1, int keyframe2);
 
     void PropertiesDialog();
 
@@ -403,9 +412,9 @@ protected:
     union Buf
     {
         int *i;
-        float *f;
+        float * f;
     } buf, tmp_buf;
-    void addMenu(QMenu *menu) override;
+    void addMenu(QMenu * menu) override;
 private:
     double ref_buf; //doublebuffering for reference
     int ref_pos; //position in double buffer
@@ -423,11 +432,11 @@ class Item_buffer: public Item
     friend class glwrapper;
     friend class glwrapper_shader;
 public:
-    Item_buffer(Item *parent, const QString& label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT, bool normalized_int = true);
+    Item_buffer(Item * parent, const QString & label1, unsigned dim = 1, unsigned size = 1, unsigned keyframes = 1, int type = GL_FLOAT, bool normalized_int = true);
     ~Item_buffer() override;
     QString statusText()const override;
 
-    double& operator()(unsigned dim = 1, unsigned index = 1, unsigned keyframe = 1);
+    double & operator()(unsigned dim = 1, unsigned index = 1, unsigned keyframe = 1);
 
     void setData(const QString&);
     QString getData();
@@ -436,9 +445,9 @@ public:
 public slots:
     virtual void setDim(unsigned dimension = 1, unsigned size = 1, unsigned keyframes = 1, unsigned format = GL_FLOAT, bool normalized_int = true);
     void setInKeyFrame(int keyframe, int index, double x, double y = 0.0, double z = 0.0, double w = 0.0);
-    void setInKeyFrame(int keyframe, int index, const QList<double>& l);
+    void setInKeyFrame(int keyframe, int index, const QList<double> & l);
     void set(int index, double x, double y = 0.0, double z = 0.0, double w = 0.0);
-    void set(int index, const QList<double>& l);
+    void set(int index, const QList<double> & l);
     void TextureBind(unsigned tmu);
 
     static void Unbind(int location);
@@ -447,7 +456,7 @@ public slots:
     void Bind(int location);
     void BindKeyFrame(unsigned key, int location);
 
-    void TransformFeedbackBind(const QString& name, int keyframe = 0);
+    void TransformFeedbackBind(const QString & name, int keyframe = 0);
 
     void PropertiesDialog();
 
@@ -482,13 +491,13 @@ protected:
     {
         char *b;
         unsigned char *ub;
-        short *s;
-        unsigned short *us;
+        short * s;
+        unsigned short * us;
         int *i;
         unsigned int *ui;
-        float *f;
-        half *h;
-        GLvoid *v;
+        float * f;
+        half * h;
+        GLvoid * v;
     } buf, tmp_buf;
 
     unsigned glbuf, gltexture;
@@ -496,7 +505,7 @@ protected:
     bool bound_by_GPU; // bound by GPU
     bool is_mapped;
 
-    void addMenu(QMenu *menu) override;
+    void addMenu(QMenu * menu) override;
 private:
     double ref_buf, ref_buf_old; //doublebuffering for reference, old to detect writing.
     int ref_pos; //position in double buffer
@@ -513,16 +522,16 @@ class Item_bone : public Item
     Q_OBJECT
     friend class Item_armature;
 protected:
-    Item_bone(Item *parent, const QString& label1); //should be used by armature
+    Item_bone(Item * parent, const QString & label1); //should be used by armature
 public:
     using id_t = int64_t;
-    Item_bone(Item *parent, const QString& label1, Item_armature *armature, id_t id = -1);
+    Item_bone(Item * parent, const QString & label1, Item_armature * armature, id_t id = -1);
     ~Item_bone() override = default;
 
     QString statusText() const override;
     bool dragAccept(Item*) override;
     virtual QPointer<Item_armature> getArmature() const;
-    float* getJoint()
+    float * getJoint()
     {
         return initJoint;
     }

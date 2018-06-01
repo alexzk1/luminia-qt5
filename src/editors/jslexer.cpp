@@ -7,9 +7,9 @@
 #include "generated/JsLexer.h"
 //------------------------------------------------------------------------------
 JSLexer::JSLexer(QsciScintilla *_parent):
-    LexerScheme({}, _parent)
+    LexerScheme({"apis/obj_gl.api"}, _parent)
 {
-    setIdentifiers({});
+    addIdentifiers({"World", "gl"});
 }
 //------------------------------------------------------------------------------
 const char *JSLexer::language() const
@@ -17,10 +17,9 @@ const char *JSLexer::language() const
     return "JavaScript";
 }
 
-void JSLexer::setIdentifiers(const QSet<QString> &newOnes)
+QStringList JSLexer::autoCompletionWordSeparators() const
 {
-    const static QSet<QString> tmp{"World", "gl"};
-    LexerScheme::setIdentifiers(tmp + newOnes);
+    return {"."}; //objects support
 }
 //------------------------------------------------------------------------------
 LexerScheme::ScannerPtr JSLexer::createScanner() const

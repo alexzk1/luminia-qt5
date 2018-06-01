@@ -38,7 +38,7 @@ class SEngine: public QObject, public utility::NoCopyAssignMove
 public:
     SEngine(QObject *o);
     SEngine(QObject *o, QString  fileName);
-    virtual ~SEngine() override;
+    ~SEngine() override;
     bool equals(const SEngine *c) const;
 
     QScriptValue run();

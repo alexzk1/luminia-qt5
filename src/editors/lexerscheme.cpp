@@ -86,8 +86,8 @@ void LexerScheme::styleText(const int start, const int end)
         {
             if (style == StyleType::DEFAULT)
                 style = StyleType::IDENTIFIER;
-            //else
-            // style = style | StyleType::ITALIC;
+            //            else
+            //                style += StyleType::ITALIC;
         }
         setStyling(tokens[i + 2], style);
     }
@@ -148,9 +148,9 @@ QString LexerScheme::description(const int style) const
     }
 }
 
-void LexerScheme::setIdentifiers(const QSet<QString> &newOnes)
+void LexerScheme::addIdentifiers(const QSet<QString> &newOnes)
 {
-    identifiers = newOnes;
+    identifiers += newOnes;
 }
 
 QColor LexerScheme::defaultColor(const int style) const
