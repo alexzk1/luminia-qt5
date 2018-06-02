@@ -32,7 +32,7 @@ package() {
   install -D -m755 lumina $pkgdir/usr/bin/lumina
   install -D -m644 Blenderexporter/luminaexporter.py  $pkgdir/usr/share/blender/scripts/luminaexporter.py
   install -d $pkgdir/usr/share/lumina
-  cp -R examples media plugins $pkgdir/usr/share/lumina
+  cp -R examples media plugins scripts images $pkgdir/usr/share/lumina
 
   install -d $pkgdir/usr/share/applications
   install -m644 $srcdir/luminia-qt5/arch/lumina.desktop $pkgdir/usr/share/applications
