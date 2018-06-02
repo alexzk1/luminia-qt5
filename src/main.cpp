@@ -45,7 +45,7 @@ int main(int argc, char **argv)
     QApplication app(argc, argv);
 
     app.setApplicationName("Luminia Modern");
-    //app.setApplicationVersion("0.1");
+    app.setApplicationVersion("0.1");
     app.setApplicationDisplayName("Luminia Modern");
     app.setOrganizationDomain("pasteover.net");
     app.setOrganizationName("pasteover.net");

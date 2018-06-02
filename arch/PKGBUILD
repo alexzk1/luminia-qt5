@@ -2,8 +2,8 @@
 # Contributor: Oleksiy Zakharov <alexzkhr@gmail.com>
 
 pkgname=lumina-modern-2018
-pkgver=0.5.0
-pkgrel=3
+pkgver=0.1.0
+pkgrel=1
 pkgdesc="Free cross-platform development environment for GLSL shaders"
 
 provides=('luminia')
@@ -23,15 +23,13 @@ source=(git://github.com/alexzk1/luminia-qt5)
 md5sums=('SKIP')
 
 build() {
-  cd $srcdir/Lumina-$pkgver
-  patch -p1 < ../search_paths.patch
-  patch -p1 < ../source_edit.patch
+  cd $srcdir/lumina-qt-$pkgver
   qmake
   make || return 1
 }
 
 package() {
-  cd $srcdir/Lumina-$pkgver
+  cd $srcdir/lumina-qt-$pkgver
   install -D -m755 lumina $pkgdir/usr/bin/lumina
   install -D -m644 Blenderexporter/luminaexporter.py  $pkgdir/usr/share/blender/scripts/luminaexporter.py
   install -d $pkgdir/usr/share/lumina
