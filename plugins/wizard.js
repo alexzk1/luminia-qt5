@@ -33,14 +33,19 @@ static char *wizzard[]={
 </XPM>
 */
 
-World.destroyAll();
-World.addNode("Wizard");
-World.Wizard.addScript().load("media/relief.js");;
-World.Wizard.addVertexshader().load("media/simpletex.vert");
-World.Wizard.addFragmentshader().load("media/simpletex.frag");
-World.Wizard.addTexture("Colormap").load("media/test5.png");
-World.Wizard.addTexture("Normalmap");
-World.Wizard.addTexture("Depthmap");
-
-World.Wizard.createSphere(5);
-World.Wizard.Script.run();
+var f = requestCreatorFunction('WizardObj');
+if (f!==null) {
+    World.destroyAll();
+    World.addNode("Wizard");
+    World.Wizard.addScript().load("media/relief.js");;
+    World.Wizard.addVertexshader().load("media/simpletex.vert");
+    World.Wizard.addFragmentshader().load("media/simpletex.frag");
+    World.Wizard.addTexture("Colormap").load("media/test5.png");
+    World.Wizard.addTexture("Normalmap");
+    World.Wizard.addTexture("Depthmap");
+    var t = obj;
+    obj = World.Wizard;
+    f();
+    obj = t;
+    World.Wizard.Script.run();
+}

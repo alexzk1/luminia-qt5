@@ -1,28 +1,29 @@
 var shader = gl.Shader(Vertexshader,Fragmentshader);
 shader.Uniformi("Colormap",0);
-shader.Uniformi("Normalmap",1);
-shader.Uniformi("Depthmap",2);
+//shader.Uniformi("Normalmap",1);
+//shader.Uniformi("Depthmap",2);
 var tan = shader.Loc("Tangent");
 
 function render(){
 	Colormap.Bind(0);
 	//Normalmap.Bind(1);
 	//Depthmap.Bind(2);
-	gl.Rotate(60 * World.getTime(), 0,1,0);
+	var now = World.getTime();
+	gl.Rotate(60 * now, 0, 1, 0);
 
 	shader.Bind();
 
-	Sphere.UvCoords.Bind();
-	Sphere.Tangent.Bind(tan);
-	Sphere.Vertex.Bind();
-	Sphere.Normal.Bind();
+	WizardObj.UvCoords.Bind();
+	WizardObj.Tangent.Bind(tan);
+	WizardObj.Vertex.Bind();
+	WizardObj.Normal.Bind();
 
-	Sphere.Index.Draw();
+	WizardObj.Index.Draw();
 
-	Sphere.UvCoords.Unbind();
-	Sphere.Tangent.Unbind();
-	Sphere.Vertex.Unbind();
-	Sphere.Normal.Unbind();
+	WizardObj.UvCoords.Unbind();
+	WizardObj.Tangent.Unbind();
+	WizardObj.Vertex.Unbind();
+	WizardObj.Normal.Unbind();
 
 	shader.Unbind();
 }

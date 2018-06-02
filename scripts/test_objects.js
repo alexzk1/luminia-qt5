@@ -50,7 +50,8 @@ static char *test[]={
 </ACTION>
 */
 
-function createTestObjectDialog(){
+
+function requestCreatorFunction(name) {
 	var d = new Dialog();	
 	d.okButtonText = "Create";
 	d.cancelButtonText = "Cancel";
@@ -83,19 +84,29 @@ function createTestObjectDialog(){
 
 	if (d.exec()){
 		if (sphere.checked){
-			createSphere(spin.value);
+			return function(){createSphere(spin.value, name);};
 		}
 		else if	(torus.checked){
-			createTorus(spin.value);
+			return function(){createTorus(spin.value, name);};
 		}
 		else if	(quadric.checked){
-			createQuadric(spin.value);
-		}
+			return function(){createQuadric(spin.value, name);};
+		}		
 	}
+	return null;
+}
+
+function createTestObjectDialog(name){
+	var f = requestCreatorFunction(name);
+	if (f!==null) return f();
+	return null;
 }
 
 
-function createSphere(res){
+function createSphere(res, name){
+    if (typeof(name)!=='string') {
+        name = 'Sphere';
+    }
 	if(res <2) res = 2;
 	if(res >8) res = 8;
 
@@ -105,22 +116,22 @@ function createSphere(res){
 	//print ("Create Sphere" );
 	//print ('Valu: ',valu, 'Res: ', res);
 	
-	var Sphere = obj.addMesh("Sphere");
+	var Sphere = obj.addMesh(name);
 	Sphere.addVertex();
 	Sphere.addUvCoords();
 	// enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
 	// bugfix hardcoded values
-	Sphere.addComponent(2,"Normal",3);
-	Sphere.addComponent(2,"Tangent",3);
+	Sphere.addComponent(2,"Normal", 3);
+	Sphere.addComponent(2,"Tangent", 3);
 	Sphere.setNumOfVertices(valu1 * (valu + 2 )/2);
 
 	var v = 0; 
 	var i = 1;
 	with ( Math )for (var y = 0;y <= valu ; y += 2) for (var x = 0;x <= valu ; x++){
-		i=  2 * PI * (x / valu) ;
-		var j=   PI *  (y / valu)  - PI/2 ;
+		i      = 2 * PI * (x / valu) ;
+		var j  = PI *  (y / valu)  - PI/2 ;
 		var si = sin (i); 
-		var ci=cos(i); 
+		var ci = cos(i); 
 		var sj = sin(j); 
 		var cj = cos(j);
 
@@ -140,7 +151,10 @@ function createSphere(res){
 	return Sphere;
 }
 
-function createTorus(res){
+function createTorus(res, name){
+	if (typeof(name)!=='string') {
+        name = 'Torus';
+    }
 	if(res <2) res = 2;
 	if(res >8) res = 8;
 
@@ -148,13 +162,13 @@ function createTorus(res){
 	
 	var valu1 = valu +1 ;
 
-	var Torus = obj.addMesh("Torus");
+	var Torus = obj.addMesh(name);
 	Torus.addVertex();
 	Torus.addUvCoords();
 	// enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
 	// bugfix hardcoded values
-	Torus.addComponent(2,"Normal",3);
-	Torus.addComponent(2,"Tangent",3);
+	Torus.addComponent(2,"Normal",  3);
+	Torus.addComponent(2,"Tangent", 3);
 
 	Torus.setNumOfVertices(valu1 * valu1);
 
@@ -168,7 +182,7 @@ function createTorus(res){
 		Torus.Normal.set(v, cj * ci, cj * si , sj); 
 		Torus.Tangent.set(v, -si,  ci,0); 
 		Torus.UvCoords.set(v, ( x / valu ), ( y / valu ));
-		v ++;
+		v++;
 	}
 	Torus.addIndex("Index",4);
 	with ( Math )for(y = 0;y < valu ; y ++) for(x = 0;x < valu ; x++){
@@ -180,32 +194,40 @@ function createTorus(res){
 	return Torus;
 }
 
-function createQuadric(res){
-	if(res <2) res = 2;
-	if(res >8) res = 8;
-
-	var valu = Math.pow(2,res);
-	var valu1 = valu +1 ;
-
-	var Quadric = obj.addMesh("Quadric");
-	Quadric.setNumOfVertices(valu1 * valu1);
-	Quadric.addVertex(); // Only position required
-	var v = 0;
-	with ( Math )for (var y = 0;y <= valu ; y ++)for (var x = 0;x <= valu ; x++){
-		var nx = x / valu;
-		var ny = y / valu;
-		Quadric.Vertex.set(v,nx, ny, 0);
-		v++;
-	}
-
-	Quadric.addIndex("Index",4);
-	with ( Math )for(y = 0;y < valu ; y ++) for(x = 0;x < valu ; x++){
+function createQuadric(res, name){
+	if (typeof(name)!=='string') {
+        name = 'Quadric';
+    }
+	
+	var Quadric = obj.addMesh(name);	
+	var vert = Quadric.addVertex();				
+	var uvc = Quadric.addUvCoords();
+	// enum comptype{VERTEX, GENERIC, VECTOR, COLOR, UVCOORDS, BONEDEP, QUATERNION};
+	// bugfix hardcoded values
+	Quadric.addComponent(2,"Normal",  3);
+	Quadric.addComponent(2,"Tangent", 3);
+	
+	Quadric.setNumOfVertices(4);
+	
+	vert.set(0, -1, -1, 0);
+	vert.set(1, -1,  1, 0);
+	vert.set(2,  1,  1, 0);
+	vert.set(3,  1, -1, 0);
+	
+	
+	uvc.set(0, 0, 0);
+	uvc.set(1, 0, 1);
+	uvc.set(2, 1, 1);
+	uvc.set(3, 1, 0);
+	
+	for (var n = 0; n < 4; ++n) {
+		Quadric.Normal.set(n, 0, 0, 1);
 		
-		var tmp  = x +      valu1 * y;
-		var tmp2 = x + 1 +  valu1 * y ;
-		Quadric.Index.add (tmp ,tmp2 ,tmp2 + valu1, tmp + valu1 );
 	}
-
+	
+	Quadric.addIndex("Index", 4);
+	Quadric.Index.add(0, 1, 2, 3);
+		
 	return Quadric;
 }
 
