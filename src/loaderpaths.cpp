@@ -7,6 +7,7 @@
 #include <algorithm>
 #include <set>
 #include <QProcess>
+#include <QStandardPaths>
 
 const QString LoaderPaths::PLUGINS = "plugins";
 const QString LoaderPaths::SCRIPTS = "scripts";
@@ -44,8 +45,9 @@ QStringList LoaderPaths::buildDirsList(const QString &forWhat, QStringList relTo
     const static QStringList search_pathches =
     {
         QFileInfo(QCoreApplication::arguments().at(0)).absolutePath(),
-        QDir::homePath() + QDir::separator() + ".luminia",
-        "/usr/share/luminia",
+        QStandardPaths::writableLocation(QStandardPaths::AppLocalDataLocation),
+        QDir::homePath() + QDir::separator() + ".lumina",
+        "/usr/share/lumina",
         ":", //search in root of compiled in resources too with lowest priority
     };
     relTo.append(search_pathches);

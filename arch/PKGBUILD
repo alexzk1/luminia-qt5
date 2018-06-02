@@ -15,10 +15,9 @@ arch=('i686' 'x86_64')
 url="git://github.com/alexzk1/luminia-qt5"
 
 license=('GPL')
-depends=('qt5-base lz4 qt5-script qscintilla-qt5')
-makedepends=('glew flex')
+depends=(qt5-base lz4 qt5-script qscintilla-qt5)
+makedepends=(glew flex)
 optdepends=('blender: for mesh export script')
-install=lumina.install
 source=(git://github.com/alexzk1/luminia-qt5)
 md5sums=('SKIP')
 
@@ -36,7 +35,7 @@ package() {
   cp -R examples media plugins $pkgdir/usr/share/lumina
 
   install -d $pkgdir/usr/share/applications
-  install -m644 $srcdir/lumina.desktop $pkgdir/usr/share/applications
+  install -m644 $srcdir/luminia-qt5/arch/lumina.desktop $pkgdir/usr/share/applications
   install -d $pkgdir/usr/share/pixmaps
   install -m644 images/lumina.png $pkgdir/usr/share/pixmaps
 }
