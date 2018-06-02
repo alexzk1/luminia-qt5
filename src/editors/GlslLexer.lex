@@ -59,7 +59,8 @@ NWORD    [^a-zA-Z_]
 sampler(([123]D)|Cube)|([12]DArray)|((2DRect)Shadow)/{NID}   { return LexerScheme::StyleType::DATATYPE; }
 [ibu]?vec[234]/{NID}                                         { return LexerScheme::StyleType::DATATYPE; }
 mat[234](x[234])?/{NID}                                      { return LexerScheme::StyleType::DATATYPE; }
-(u?int)/{NID}|"float"|"bool"|"void"                                { return LexerScheme::StyleType::DATATYPE; }
+(u?int)/{NID}                                                { return LexerScheme::StyleType::DATATYPE; }
+"float"|"bool"|"void"                                        { return LexerScheme::StyleType::DATATYPE; }
 
 "//".*                        { return LexerScheme::StyleType::COMMENT; }
 "/*"			                    { return LexerScheme::StyleType::MLC_START;}
