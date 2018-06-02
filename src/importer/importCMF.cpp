@@ -29,7 +29,7 @@
 
 namespace cmf
 {
-
+#pragma pack(1)
     struct vec3_t
     {
         float x;
@@ -65,6 +65,7 @@ namespace cmf
         int bone_id;
         float weight;
     };
+#pragma pack()
 
     class Vertex
     {
@@ -77,7 +78,7 @@ namespace cmf
             file->read((char*)&face_colapse_count, sizeof(int));
 
             num_of_uvcoods = _num_of_uvcoods;
-            uvcoords = NULL;
+            uvcoords = nullptr;
             if (num_of_uvcoods > 0)
             {
                 uvcoords = new vec2_t[num_of_uvcoods];
@@ -85,7 +86,7 @@ namespace cmf
             }
 
             file->read((char*)&num_of_influences, sizeof(int));
-            influences = NULL;
+            influences = nullptr;
             if (num_of_influences > 0)
             {
                 influences = new influence_t[num_of_influences];

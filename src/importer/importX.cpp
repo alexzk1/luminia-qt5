@@ -1,3 +1,5 @@
+#include <utility>
+
 /********************************************************************************
 ** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
@@ -180,7 +182,7 @@ namespace x
         Face()
         {
             num_of_indices = 0;
-            indices = NULL;
+            indices = nullptr;
         }
         ~Face()
         {
@@ -207,15 +209,15 @@ namespace x
     public:
         Mesh(QString _name, Stuff *_stuff)
         {
-            name = _name;
+            name = std::move(_name);
             stuff = _stuff;
             num_of_vertices = 0;
-            vertices = NULL;
+            vertices = nullptr;
             num_of_texcoords = 0;
-            texcoords = NULL;
+            texcoords = nullptr;
             num_of_faces = 0;
-            faces = NULL;
-            normals = NULL;
+            faces = nullptr;
+            normals = nullptr;
         }
         ~Mesh()
         {
@@ -276,7 +278,7 @@ namespace x
                     {
                         if (!m.stuff) throw "MeshNormals in MeshNormals";
                         qDebug() << "MeshNormals";
-                        m.normals = new Mesh("Normals", NULL);
+                        m.normals = new Mesh("Normals", nullptr);
                         in >> m.normals[0]; // fake to get a reference
                     }
                     else
@@ -306,16 +308,16 @@ namespace x
                                 {
                                     QString s3;
                                     in >> s3 >> c;
-                                    for ( int k = 0; k < m.stuff->materials.size(); k++)
+                                    for (const auto& material : m.stuff->materials)
                                     {
-                                        if (m.stuff->materials.at(k)->name == s3)
-                                            mat_ptr_list.append(m.stuff->materials.at(k));
+                                        if (material->name == s3)
+                                            mat_ptr_list.append(material);
                                     }
                                 }
                                 else
                                     if (tag2 == "Material")
                                     {
-                                        Material *material = new Material();
+                                        auto *material = new Material();
                                         m.stuff->materials.append(material);
                                         mat_ptr_list.append(material);
                                         in >> material[0];
@@ -453,7 +455,7 @@ void Item_node::importX(const QString& fn)
             else
                 if (tag == "Material")
                 {
-                    Material *material = new Material();
+                    auto *material = new Material();
                     stuff.materials.append(material);
                     s >> material[0];
                 }
@@ -470,7 +472,7 @@ void Item_node::importX(const QString& fn)
                     else
                         if (tag == "Frame")
                         {
-                            Frame *frame = new Frame(&stuff);
+                            auto *frame = new Frame(&stuff);
                             stuff.frames.append(frame);
                             s >> frame[0];
                         }
@@ -487,22 +489,18 @@ void Item_node::importX(const QString& fn)
         {
 
             int vert_count = 1;
-            for (int m = 0; m < stuff.frames.at(f)->meshes.size(); m++)
+            for (const auto& mesh : stuff.frames.at(f)->meshes)
             {
-                Mesh *mesh = stuff.frames.at(f)->meshes.at(m);
                 for (int i = 0 ; i < mesh->num_of_faces ; i++)
                     vert_count += mesh->faces[i].num_of_indices;
             }
 
 
             // create mesh object
-#define v (*I_position)
-#define n (*I_normal)
-#define u (*I_uvcoord)
-            Item_mesh* I_model = new Item_mesh(this, stuff.frames.at(f)->name, vert_count);
-            Item_component v = new Item_component(I_model, "Vertex", Item_component::VERTEX, 3);
-            Item_component n = new Item_component(I_model, "Normal", Item_component::VECTOR, 3);
-            Item_component u = new Item_component(I_model, "UvCoords", Item_component::UVCOORDS, 2);
+            auto I_model = new Item_mesh(this, stuff.frames.at(f)->name, vert_count);
+            auto v = new Item_component(I_model, "Vertex", Item_component::VERTEX, 3);
+            auto n = new Item_component(I_model, "Normal", Item_component::VECTOR, 3);
+            auto u = new Item_component(I_model, "UvCoords", Item_component::UVCOORDS, 2);
 
             vert_count = 0;
 
@@ -523,7 +521,7 @@ void Item_node::importX(const QString& fn)
                 if (triangle_count == 0)continue; //skip unused materials
                 qDebug() << stuff.materials.at(mat)->name << triangle_count;
 
-                Item_index *I_index = new Item_index(I_model, stuff.materials.at(mat)->name, 3, triangle_count);
+                auto I_index = new Item_index(I_model, stuff.materials.at(mat)->name, 3, triangle_count);
 
                 triangle_count = 0;
 
@@ -548,18 +546,18 @@ void Item_node::importX(const QString& fn)
                         {
 
                             Vector3d *vertex = mesh->vertices + face->indices[k];
-                            v(0, vert_count, 0) = vertex->x;
-                            v(1, vert_count, 0) = vertex->y;
-                            v(2, vert_count, 0) = vertex->z;
+                            v->at(0, vert_count, 0) = vertex->x;
+                            v->at(1, vert_count, 0) = vertex->y;
+                            v->at(2, vert_count, 0) = vertex->z;
 
                             Vector2d *uvcoord = mesh->texcoords + face->indices[k];
-                            u(0, vert_count, 0) = uvcoord->x;
-                            u(1, vert_count, 0) = uvcoord->y;
+                            u->at(0, vert_count, 0) = uvcoord->x;
+                            u->at(1, vert_count, 0) = uvcoord->y;
 
                             Vector3d *normal = mesh->normals->vertices + mesh->normals->faces[i].indices[k];
-                            n(0, vert_count, 0) = normal->x;
-                            n(1, vert_count, 0) = normal->y;
-                            n(2, vert_count, 0) = normal->z;
+                            n->at(0, vert_count, 0) = normal->x;
+                            n->at(1, vert_count, 0) = normal->y;
+                            n->at(2, vert_count, 0) = normal->z;
                             vert_count++;
                         }
                     }

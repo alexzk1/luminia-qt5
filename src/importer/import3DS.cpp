@@ -23,21 +23,19 @@
 #include "../item.h"
 #include "../item_mesh.h"
 
-#include <math.h>
+#include <cmath>
 #include <QFile>
 
 namespace ds
 {
-
 #pragma pack(1)
-
     struct chunk_t
     {
         short id;
         int length;
     };
 
-    struct vec3_t
+    struct  vec3_t
     {
         float x;
         float y;
@@ -57,7 +55,6 @@ namespace ds
         float u;
         float v;
     };
-
 #pragma pack()
 
     QFile *file;

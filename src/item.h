@@ -438,6 +438,7 @@ public:
     ~Item_buffer() override;
     QString statusText()const override;
 
+    double& at(unsigned _dim = 1, unsigned _index = 1, unsigned _keyframe = 1);
     double & operator()(unsigned dim = 1, unsigned index = 1, unsigned keyframe = 1);
 
     void setData(const QString&);

@@ -24,7 +24,7 @@ md5sums=('SKIP')
 
 build() {
   cd $srcdir/luminia-qt5
-  qmake lumina.pro
+  qmake-qt5 lumina.pro -spec linux-g++
   make || return 1
 }
 

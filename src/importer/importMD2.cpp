@@ -29,33 +29,33 @@
 
 namespace md2
 {
-
+#pragma pack(1)
     struct header_t
     {
-        int ident;                  // magic number: "IDP2"
-        int version;                // version: must be 8
+        uint32_t ident;                  // magic number: "IDP2"
+        uint32_t version;                // version: must be 8
 
-        int skinwidth;              // texture width
-        int skinheight;             // texture height
+        uint32_t skinwidth;              // texture width
+        uint32_t skinheight;             // texture height
 
-        int framesize;              // size in bytes of a frame
+        uint32_t framesize;              // size in bytes of a frame
 
-        int num_skins;              // number of skins
-        int num_vertices;           // number of vertices per frame
-        int num_texCoords;          // number of texture coordinates/
-        int num_triangles;          // number of triangles
-        int num_glcmds;             // number of opengl commands
-        int num_frames;             // number of frames
+        uint32_t num_skins;              // number of skins
+        uint32_t num_vertices;           // number of vertices per frame
+        uint32_t num_texCoords;          // number of texture coordinates/
+        uint32_t num_triangles;          // number of triangles
+        uint32_t num_glcmds;             // number of opengl commands
+        uint32_t num_frames;             // number of frames
 
-        int offset_skins;           // offset skin data
-        int offset_st;              // offset texture coordinate data
-        int offset_tris;            // offset triangle data
-        int offset_frames;          // offset frame data
-        int offset_glcmds;          // offset OpenGL command data
-        int offset_end;             // offset end of file
+        uint32_t offset_skins;           // offset skin data
+        uint32_t offset_st;              // offset texture coordinate data
+        uint32_t offset_tris;            // offset triangle data
+        uint32_t offset_frames;          // offset frame data
+        uint32_t offset_glcmds;          // offset OpenGL command data
+        uint32_t offset_end;             // offset end of file
     };
 
-    typedef float vec3_t[3];
+    using vec3_t = float[3];
 
     struct skin_t
     {
@@ -64,8 +64,8 @@ namespace md2
 
     struct texCoord_t
     {
-        short s;
-        short t;
+        int16_t s;
+        int16_t t;
     };
 
     struct frame_t
@@ -78,21 +78,23 @@ namespace md2
 
     struct vertex_t
     {
-        unsigned char v[3];         // position
-        unsigned char normalIndex;  // normal vector index
+        uint8_t v[3];         // position
+        uint8_t normalIndex;  // normal vector index
     };
 
     struct glcmd_t
     {
         float s;                    // s texture coord.
         float t;                    // t texture coord.
-        int index;                  // vertex index
+        uint32_t index;                  // vertex index
     };
+#pragma pack()
 
     vec3_t anorms_table[162] =
     {
 #include "anorms.h"
     };
+
 }
 
 using namespace md2;
@@ -110,10 +112,10 @@ void Item_node::importMD2(const QString& fn)
         return;
     }
 
-    skin_t* skins = NULL;
-    texCoord_t* texCoords = NULL;
-    int *glcmds = NULL;
-    vertex_t *vertices = NULL;
+    skin_t* skins = nullptr;
+    texCoord_t* texCoords = nullptr;
+    int *glcmds = nullptr;
+    vertex_t *vertices = nullptr;
 
     try
     {
@@ -200,7 +202,7 @@ void Item_node::importMD2(const QString& fn)
 
         frame_t frame;
 
-        for (int f = 0; f < header.num_frames; ++f)
+        for (uint32_t f = 0; f < header.num_frames; ++f)
         {
             file.read((char*)&frame.scale, sizeof (vec3_t));
             file.read((char*)&frame.translate, sizeof (vec3_t));
@@ -238,8 +240,12 @@ void Item_node::importMD2(const QString& fn)
     }
 
     file.close();
-    if (skins != NULL)delete[] skins;
-    if (texCoords != NULL)delete[] texCoords;
-    if (vertices != NULL) delete[] vertices;
-    if (glcmds != NULL)delete[] glcmds;
+    if (skins)
+        delete[] skins;
+    if (texCoords)
+        delete[] texCoords;
+    if (vertices)
+        delete[] vertices;
+    if (glcmds)
+        delete[] glcmds;
 }

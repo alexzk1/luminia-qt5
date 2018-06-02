@@ -238,11 +238,9 @@ QString Item_buffer::statusText() const
             return QString(tr("%5; %1 %2 Float%3")).arg(k).arg(size).arg(dim).arg(Item::statusText());
     }
 }
+
 #include <QGLContext>
-/*!
-Operator to acces the content with a up to 3 dimensional index.
-*/
-double& Item_buffer::operator()( unsigned _dim, unsigned _index, unsigned _keyframe)
+double &Item_buffer::at(unsigned _dim, unsigned _index, unsigned _keyframe)
 {
     /*if(bound_by_GPU){
         qDebug() << "Item_buffer::operator(): VBO is bound to GPU, can't read/write!";
@@ -261,10 +259,10 @@ double& Item_buffer::operator()( unsigned _dim, unsigned _index, unsigned _keyfr
     GL_CHECK_ERROR();
     if (!buf.v)
     {
-        qDebug() << "Item_buffer::operator()" << buf.v << is_mapped << "buf.v == NULL !";
-        qDebug() << glIsBuffer(glbuf);
+        //        qDebug() << "Item_buffer::operator()" << buf.v << is_mapped << "buf.v == NULL !";
+        //        qDebug() << glIsBuffer(glbuf);
 
-        qDebug() << QGLContext::currentContext ();
+        //        qDebug() << QGLContext::currentContext ();
         is_mapped = false;
 
         return ref_buf;
@@ -275,7 +273,7 @@ double& Item_buffer::operator()( unsigned _dim, unsigned _index, unsigned _keyfr
 
     if (element > dim * size * keyframes)
     {
-        qDebug() << objectName() << " Item_buffer::operator(): Index out of range";
+        // qDebug() << objectName() << " Item_buffer::operator(): Index out of range";
         return ref_buf;
     }
 
@@ -325,6 +323,13 @@ double& Item_buffer::operator()( unsigned _dim, unsigned _index, unsigned _keyfr
     ref_pos = element;
     need_refresh = true;
     return ref_buf;
+}
+/*!
+Operator to acces the content with a up to 3 dimensional index.
+*/
+double& Item_buffer::operator()( unsigned _dim, unsigned _index, unsigned _keyframe)
+{
+    return at(_dim, _index, _keyframe);
 }
 
 /*!

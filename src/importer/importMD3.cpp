@@ -1,3 +1,7 @@
+#include <cmath>
+#include <cstdint>
+#include <algorithm>
+
 /********************************************************************************
 ** Lumina is a flexible plattform independent development envrionment for
 ** GLSL shaders. It uses ECMA-script for tools and emulating opengl engines.
@@ -27,26 +31,26 @@
 #include "../item.h"
 #include "../item_mesh.h"
 
-#include <math.h>
+#include <cmath>
 #include <QFile>
 
 namespace md3
 {
-
+#pragma pack(1)
     struct header_t
     {
-        int ident;                  // magic number: "IDP2"
-        int version;                // version: must be 8
+        uint32_t ident;                  // magic number: "IDP2"
+        uint32_t version;                // version: must be 8
         char name[64];              // name in pk3 file
-        int flags;                  // ??
-        int num_frames;             // Number of frames
-        int num_tags;               // Number of Tags
-        int num_surfaces;           // Number of surface objects
-        int num_skins;              // NUmber of skins
-        int ofs_frames;
-        int ofs_tags;
-        int ofs_surfaces;
-        int ofs_eof;
+        uint32_t flags;                  // ??
+        uint32_t num_frames;             // Number of frames
+        uint32_t num_tags;               // Number of Tags
+        uint32_t num_surfaces;           // Number of surface objects
+        uint32_t num_skins;              // NUmber of skins
+        uint32_t ofs_frames;
+        uint32_t ofs_tags;
+        uint32_t ofs_surfaces;
+        uint32_t ofs_eof;
     };
 
     struct vec3_t
@@ -74,29 +78,29 @@ namespace md3
 
     struct surface_t
     {
-        int ident;                   // Magic number IDP3
+        uint32_t ident;                   // Magic number IDP3
         char name[64];               // Name of Surface object
-        int flags;                   // ???
-        int num_frames;              // Number of frames
-        int num_shaders;             // Number of shaders
-        int num_vertices;            // number of vertices
-        int num_triangles;           // number of triangles
-        int ofs_triangles;           //
-        int ofs_shaders;             //
-        int ofs_st;                  //
-        int ofs_xyznormal;           //
-        int ofs_end;                 //
+        uint32_t flags;                   // ???
+        uint32_t num_frames;              // Number of frames
+        uint32_t num_shaders;             // Number of shaders
+        uint32_t num_vertices;            // number of vertices
+        uint32_t num_triangles;           // number of triangles
+        uint32_t ofs_triangles;           //
+        uint32_t ofs_shaders;             //
+        uint32_t ofs_st;                  //
+        uint32_t ofs_xyznormal;           //
+        uint32_t ofs_end;                 //
     };
 
     struct shader_t
     {
         char name[64];
-        int shader_index;
+        int32_t shader_index;
     };
 
     struct triangle_t
     {
-        int index[3];
+        int32_t index[3];
     };
 
     struct texcoord_t
@@ -107,20 +111,21 @@ namespace md3
 
     struct vertex_t
     {
-        short x;
-        short y;
-        short z;
-        short normal;
+        int16_t x;
+        int16_t y;
+        int16_t z;
+        int16_t normal;
     };
+#pragma pack()
 
     vec3_t dec_normal(short normal)
     {
         float lat = ((normal >> 8) & 255) * 6.2831853 / 256.0;
         float lng = (normal & 255) * 6.2831853 / 256.0;
         vec3_t n;
-        n.x = cos(lat) * sin(lng);
-        n.y = sin(lat) * sin(lng);
-        n.z = cos(lng);
+        n.x = std::cos(lat) * std::sin(lng);
+        n.y = std::sin(lat) * std::sin(lng);
+        n.z = std::cos(lng);
         return n;
     }
 }
@@ -139,9 +144,9 @@ void Item_node::importMD3(const QString& fn)
         return;
     }
 
-    triangle_t *triangles = NULL;
-    texcoord_t *texcoords = NULL;
-    vertex_t *vertices = NULL;
+    triangle_t *triangles = nullptr;
+    texcoord_t *texcoords = nullptr;
+    vertex_t *vertices    = nullptr;
 
     try
     {
@@ -153,17 +158,17 @@ void Item_node::importMD3(const QString& fn)
 
 
         surface_t surface;
-        int vert_count = 0;
-        int max_index = 0;
+        uint32_t vert_count = 0;
+        uint32_t max_index = 0;
 
         int surface_start = header.ofs_surfaces;
         file.seek(surface_start);
-        for (int s = 0; s < header.num_surfaces; s++)
+        for (uint32_t s = 0; s < header.num_surfaces; ++s)
         {
             file.read((char*)&surface, sizeof(surface_t));
             if (surface.ident != 860898377) throw "Not a surface header";
             vert_count += surface.num_vertices;
-            max_index = (max_index < surface.num_triangles) ? surface.num_triangles : max_index;
+            max_index   = std::max(max_index, surface.num_triangles);
 
             //qDebug () << "Frames" << surface.num_frames << "Shaders" << surface.num_shaders << "Vertices" <<  surface.num_vertices << "Triangles" << surface.num_triangles;
             file.seek(surface_start += surface.ofs_end);
@@ -181,7 +186,7 @@ void Item_node::importMD3(const QString& fn)
         surface_start = header.ofs_surfaces;
         file.seek(surface_start);
         vert_count = 0;
-        for (int s = 0; s < header.num_surfaces; s++)
+        for (uint32_t s = 0; s < header.num_surfaces; ++s)
         {
             file.read((char*)&surface, sizeof(surface_t));
             if (surface.ident != 860898377) throw "Not a surface header";
@@ -190,7 +195,7 @@ void Item_node::importMD3(const QString& fn)
 
             file.seek(surface_start + surface.ofs_triangles);
             file.read((char*)triangles, sizeof(triangle_t) * surface.num_triangles);
-            for (int t = 0; t < surface.num_triangles; t++)
+            for (uint32_t t = 0; t < surface.num_triangles; ++t)
             {
                 I_index->set(t, triangles[t].index[0] + vert_count, triangles[t].index[1] + vert_count, triangles[t].index[2] + vert_count);
                 //qDebug() << triangles[t].index[0] << triangles[t].index[1] << triangles[t].index[2];
@@ -198,17 +203,17 @@ void Item_node::importMD3(const QString& fn)
 
             file.seek(surface_start + surface.ofs_st);
             file.read((char*)texcoords, sizeof(texcoord_t) * surface.num_vertices);
-            for ( int t = 0; t < surface.num_vertices; t++)
+            for (uint32_t t = 0; t < surface.num_vertices; ++t)
             {
                 I_uvcoord->set(t + vert_count, texcoords[t].s, texcoords[t].t);
                 //qDebug() << texcoords[t].s<< texcoords[t].t;
             }
 
             file.seek(surface_start + surface.ofs_xyznormal);
-            for ( int f = 0; f < surface.num_frames; f++)
+            for (uint32_t f = 0; f < surface.num_frames; ++f)
             {
                 file.read((char*)vertices, sizeof(vertex_t) * surface.num_vertices);
-                for ( int t = 0; t < surface.num_vertices; t++)
+                for (uint32_t t = 0; t < surface.num_vertices; ++t)
                 {
                     I_position->setInKeyFrame(f, t + vert_count, vertices[t].x / 64.0, vertices[t].y / 64.0, vertices[t].z / 64.0);
                     vec3_t normal = dec_normal(vertices[t].normal);
@@ -227,7 +232,7 @@ void Item_node::importMD3(const QString& fn)
         QList<Item_buffer*> Bufferlist;
 
         file.seek(tag_start);
-        for (int t = 0; t < header.num_tags;  t++)
+        for (uint32_t t = 0; t < header.num_tags;  ++t)
         {
             tag_t tag;
             file.read((char*)&tag, sizeof(tag_t));
@@ -237,9 +242,9 @@ void Item_node::importMD3(const QString& fn)
         }
 
         file.seek(tag_start);
-        for (int u = 0; u < ceil (header.num_frames / 5.0);  u++) // only 1 tag / 5 keyframe ?
+        for (uint32_t u = 0; u < ceil (header.num_frames / 5.0);  u++) // only 1 tag / 5 keyframe ?
         {
-            for ( int t = 0; t <  header.num_tags; t++)
+            for (uint32_t t = 0; t <  header.num_tags; ++t)
             {
                 tag_t tag;
                 file.read((char*)&tag, sizeof(tag_t));
@@ -268,9 +273,12 @@ void Item_node::importMD3(const QString& fn)
         qDebug() << "MD3 Importer: " << e;
     }
 
-    if (triangles != NULL) delete[] triangles;
-    if (texcoords != NULL) delete[] texcoords;
-    if (vertices != NULL) delete[] vertices;
+    if (triangles)
+        delete[] triangles;
+    if (texcoords)
+        delete[] texcoords;
+    if (vertices)
+        delete[] vertices;
 
     file.close();
 }
