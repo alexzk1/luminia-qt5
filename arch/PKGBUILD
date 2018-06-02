@@ -23,14 +23,14 @@ source=(git://github.com/alexzk1/luminia-qt5)
 md5sums=('SKIP')
 
 build() {
-  cd $srcdir/lumina-qt5
+  cd $srcdir/luminia-qt5
   qmake
   export CXX_FLAGS="$CXX_FLAGS -O3 -march=native"
   make || return 1
 }
 
 package() {
-  cd $srcdir/lumina-qt5
+  cd $srcdir/luminia-qt5
   install -D -m755 lumina $pkgdir/usr/bin/lumina
   install -D -m644 Blenderexporter/luminaexporter.py  $pkgdir/usr/share/blender/scripts/luminaexporter.py
   install -d $pkgdir/usr/share/lumina

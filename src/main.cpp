@@ -44,9 +44,9 @@ int main(int argc, char **argv)
 
     QApplication app(argc, argv);
 
-    app.setApplicationName("Luminia Modern");
+    app.setApplicationName("Lumina Modern");
     app.setApplicationVersion("0.1");
-    app.setApplicationDisplayName("Luminia Modern");
+    app.setApplicationDisplayName("Lumina Modern");
     app.setOrganizationDomain("pasteover.net");
     app.setOrganizationName("pasteover.net");
     app.setWindowIcon(QIcon(":/images/lumina.png"));
