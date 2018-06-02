@@ -45,8 +45,8 @@ CONFIG(debug, debug|release) {
 else {
     DEFINES += NDEBUG
     message( "Building the RELEASE Version" )
-    #delegated to packager
-    #QMAKE_CXXFLAGS += -O3
+    #delegated to packager - didn't work easy, let it be here
+    QMAKE_CXXFLAGS += -O3 -march=native
 }
 
 include($$PWD/src/base64/base64.pri)
