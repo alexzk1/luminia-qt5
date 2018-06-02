@@ -238,12 +238,18 @@ void MainWindow::save()
         if (!name.endsWith(".lum", Qt::CaseInsensitive))
             name += ".lum";
 
-        QFile file(name);
+        const auto oldname = name + ".new";
+        QFile file(oldname);
         if (file.open(QFile::WriteOnly | QFile::Text))
         {
             LumGenerator generator(treeview->world);
             if (generator.write(&file))
+            {
+                //saved successefully without crash, now rename
                 statusBar()->showMessage(tr("File saved."), 2000);
+                QFile::remove(name);
+                QFile::rename(oldname, name);
+            }
             fileName = name;
             lastPath = QFileInfo(fileName).absolutePath();
             updateTitle();
