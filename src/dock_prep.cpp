@@ -51,7 +51,7 @@ QDockWidget* nsDocks::createDockFromWidget(QWidget *srcWidget, const QString &do
             {
                 //giving user some time to move it around
                 dock->setAllowedAreas(Qt::NoDockWidgetArea);
-                dock->setWindowTitle(QString(QObject::tr("^%1").arg(dockName)));
+                dock->setWindowTitle(QString(QObject::tr("[^] %1").arg(dockName)));
                 QTimer::singleShot(3000, MainWindow::instance, [dock, dockName]()
                 {
                     if (dock)

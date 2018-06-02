@@ -1,13 +1,3 @@
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
-#include <utility>
-
 //------------------------------------------------------------------------------
 /// @file CebErrors.h
 /// @brief Contains all the code for generating and handling errors for CEB.
@@ -21,13 +11,12 @@
 // INCLUDES
 //------------------------------------------------------------------------------
 // System includes
+#include <utility>
 #include <exception>
-
-// Engine includes
-
-
-#include "../incgl.h"
 #include <QFileDevice>
+// Engine includes
+#include "../incgl.h"
+
 
 // Project includes
 
@@ -508,7 +497,7 @@ namespace CEBRaise
     /// @param [in] _e the exception or error caused by the file
     /// @param [in] _path the file location
     //------------------------------------------------------------------------------
-    void QtFileError(QFileDevice::FileError _e, QString _path);
+    void QtFileError(QFileDevice::FileError _e, const QString& _path);
     //------------------------------------------------------------------------------
     /// @fn GlError
     /// @brief Used to throw the corresponding openGL error using a openGL enum

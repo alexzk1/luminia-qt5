@@ -46,6 +46,8 @@ public:
         return L;
     }
 
+    QString getSelectedText() const;
+
 public slots:
     //----------------------------------------------------------------------------
     /// @brief Removes all error and warning line markers
@@ -114,6 +116,7 @@ protected slots:
     void resetHighlightColour();
     //----------------------------------------------------------------------------
     void toggleAutocomplete();
+
 private:
     void initAfterLexer();
     QPointer<QTimer> autoCompleteTrigger;
@@ -121,6 +124,7 @@ signals:
     void F5pressed(); //F5 pressed
     void F2pressed(); //F2 pressed
     void F1pressed(); //F1 pressed
+
 }; // end class
 
 #endif  // _CEBITOR_H__

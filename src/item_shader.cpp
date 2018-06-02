@@ -52,7 +52,16 @@ QString Item_shader::statusText() const
 
 QWidget *Item_shader::createTextEditor(QWidget *parent) const
 {
-    auto l = new Cebitor(searchBox, parent);
-    l->makeLexer<QsciLexerGLSL>();
-    return l;
+    QPointer<Cebitor> ed = new Cebitor(searchBox, parent);
+    ed->makeLexer<QsciLexerGLSL>();
+    connect(ed, &Cebitor::F1pressed, this, [this, ed]()
+    {
+        if (ed)
+        {
+            QString sel = ed->getSelectedText();
+            if (!sel.isEmpty())
+                callGoogle("glsl " + sel);
+        }
+    });
+    return ed;
 }

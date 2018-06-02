@@ -290,6 +290,7 @@ protected:
     {
         return qobject_cast<EditorT*>(editor);
     }
+    void callGoogle(const QString& text) const;
 private:
     QPointer<QWidget>   hostWidget;
     QPointer<QWidget>   editor;

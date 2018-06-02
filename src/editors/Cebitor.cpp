@@ -91,6 +91,21 @@ QSize Cebitor::sizeHint() const
     return {800, 600};
 }
 //------------------------------------------------------------------------------
+QString Cebitor::getSelectedText() const
+{
+    QString res;
+    if (hasSelectedText())
+    {
+        int ls, le;
+        int is, ie;
+        getSelection(&ls, &is, &le, &ie);
+        auto start = positionFromLineIndex(ls, is);
+        auto end   = positionFromLineIndex(le, ie);
+        res        = text(start, end);
+    }
+    return res;
+}
+//------------------------------------------------------------------------------
 
 void Cebitor::clearErrors()
 {

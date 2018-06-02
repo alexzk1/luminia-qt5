@@ -28,6 +28,9 @@
 #include <QHBoxLayout>
 #include <QVBoxLayout>
 #include <QToolBar>
+#include <QUrl>
+#include <QDesktopServices>
+
 #include "editors/searchbox.h"
 
 #include "loaderpaths.h"
@@ -127,6 +130,20 @@ void Item_edit::initParent()
 
     for (const auto& a : commonActions)
         appendActionToBar(a, nullptr);
+}
+
+
+#include <cctype>
+#include <iomanip>
+#include <sstream>
+#include <string>
+
+
+void Item_edit::callGoogle(const QString &text) const
+{
+    const QString query = QUrl::toPercentEncoding(text);
+    const auto us = QString("https://www.google.com/search?q=%1").arg(query);
+    QDesktopServices::openUrl(QUrl(us));
 }
 
 /*!
