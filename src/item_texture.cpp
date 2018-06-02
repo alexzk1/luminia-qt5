@@ -26,6 +26,7 @@
 
 #include <QFileInfo>
 #include <QDir>
+#include <QFile>
 #include <QFileDialog>
 #include <QCoreApplication>
 #include <QDebug>
@@ -198,10 +199,16 @@ Load a texture from a file. JPG, BMP, PNG and DDS(flipped in Y direction) are su
 */
 void Item_texture::load(const QString& filename)
 {
+    QString tmp;
     if (filename.isEmpty())
-        fn = QFileDialog::getOpenFileName(Item::ws, tr("Open File"), "", tr("All Files (*.jpg *.png *.dds)"));
+        tmp = QFileDialog::getOpenFileName(Item::ws, tr("Open File"), "", tr("All Files (*.jpg *.png *.dds)"));
     else
-        fn = LoaderPaths::findObject(filename);
+        tmp = LoaderPaths::findObject(filename);
+
+    if (tmp.isEmpty() && !QFile::exists(tmp))
+        return;
+
+    fn = tmp;
     reload();
 }
 /*!

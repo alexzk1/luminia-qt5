@@ -35,15 +35,15 @@ static char *gear[]={
 
 */
 
-dock = 0;
+texture_tool_dock = 0;
 
-vert = "void main(void){ \n"+
+texture_tool_vert = "void main(void){ \n"+
 	"gl_Position =  gl_Vertex * 2.0 - 1.0; \n" +
 	"gl_TexCoord[0]  = gl_Vertex; \n" +
 	"}";
 
 
-frag=	"uniform sampler2D Src;\n" +
+texture_tool_frag=	"uniform sampler2D Src;\n" +
 	"uniform vec4 r,g,b;\n" +
 	"uniform float lum;\n" +
 	"uniform float alpha;\n" +
@@ -57,23 +57,23 @@ frag=	"uniform sampler2D Src;\n" +
 	"}\n";
 
 
-Shader = gl.Shader(vert,frag);
-Shader.Uniform("r",1,0,0,0);
-Shader.Uniform("g",0,1,0,0);
-Shader.Uniform("b",0,0,1,0);
-Shader.Uniform("lum", 1.0);
-Shader.Uniform("alpha", 0.0);
+texture_tool_Shader = gl.Shader(texture_tool_vert,texture_tool_frag);
+texture_tool_Shader.Uniform("r",1,0,0,0);
+texture_tool_Shader.Uniform("g",0,1,0,0);
+texture_tool_Shader.Uniform("b",0,0,1,0);
+texture_tool_Shader.Uniform("lum", 1.0);
+texture_tool_Shader.Uniform("alpha", 0.0);
 
 function close(){
-	dock.deleteLater(); // delete the dialog and widgets
-	dock = 0;
+	texture_tool_dock.deleteLater(); // delete the dialog and widgets
+	texture_tool_dock = 0;
 }
 
 
 
 
 function changed() {
-
+	var Shader = texture_tool_Shader;
 	switch(combo.currentItem){
 		case "RGB":
 			Shader.Uniform("r",1,0,0,0);
@@ -114,6 +114,7 @@ function changed() {
 
 function paintGL(){
 	//gl.Clear();
+	var Shader = texture_tool_Shader;
 	obj.Bind(0);
 	Shader.Bind();
 	gl.Begin(gl.QUADS);
@@ -130,44 +131,44 @@ function resizeGL(){
 
 
 function textureTool(){	
-	if (dock == 0){
-		dock = new Dock();
-		dock.title = obj.objectName;
+	if (texture_tool_dock == 0){
+		texture_tool_dock = new Dock();
+		texture_tool_dock.title = obj.objectName;
 
 		glw = new GLWidget();
 		glw.paintGL.connect(paintGL);
 		glw.resizeGL.connect(resizeGL);
-		dock.add(glw);
+		texture_tool_dock.add(glw);
 	
-		dock.newColumn();
-		dock.newTab("General");
+		texture_tool_dock.newColumn();
+		texture_tool_dock.newTab("General");
 
 		cb = new Button();
 		cb.text = "Close" ;
 		cb.clicked.connect(close);
-		dock.add(cb);
+		texture_tool_dock.add(cb);
 
 		lb = new Button();
 		lb.text = "Load" ;
 		lb.clicked.connect(obj.load); //this is C++ slot
-		dock.add(lb);
+		texture_tool_dock.add(lb);
 
 
 		btb = new Button();
 		btb.text = "BRDF factor";				
 		btb.clicked.connect(obj, brdfToolDialog); //this is  engine variable now, so syntax differs
 		
-		dock.add(btb);
+		texture_tool_dock.add(btb);
 
 
 
-		dock.newTab("View");
+		texture_tool_dock.newTab("View");
 
 		combo = new ComboBox();
 		combo.itemList = Array("RGB","R","G","B","A");
 		combo.label = "";
 		combo.changed.connect(changed);
-		dock.add(combo);
+		texture_tool_dock.add(combo);
 
 		lumslider = new Slider()
 		lumslider.minimum = -10;
@@ -175,16 +176,16 @@ function textureTool(){
 		lumslider.value = 0;
 		lumslider.changed.connect(changed);
 		lumslider.label = "Lum";
-		dock.add(lumslider);
+		texture_tool_dock.add(lumslider);
 
 		alphacheck = new CheckBox();
 
 		alphacheck.text = "RGB * A";
 		alphacheck.checked = false;
 		alphacheck.clicked.connect(changed);
-		dock.add(alphacheck);				
+		texture_tool_dock.add(alphacheck);				
 		}
-	    dock.show();
+	    texture_tool_dock.show();
 }
 
 
