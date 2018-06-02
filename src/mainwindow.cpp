@@ -177,8 +177,11 @@ void MainWindow::reloadLastFilesList()
         historyMenu->clear();
         for (const auto& fn : stored)
         {
-            auto act = historyMenu->addAction(fn);
-            connect(act, &QAction::triggered, this, std::bind(&MainWindow::open, this, fn));
+            if (QFile::exists(fn))
+            {
+                auto act = historyMenu->addAction(fn);
+                connect(act, &QAction::triggered, this, std::bind(&MainWindow::open, this, fn));
+            }
         }
     }
 }
