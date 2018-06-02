@@ -34,7 +34,7 @@ macx: QMAKE_LFLAGS += -lc++
 macx: QMAKE_CXXFLAGS += -mmacosx-version-min=10.10
 macx: QMAKE_MACOSX_DEPLOYMENT_TARGET=10.10
 
-CONFIG(debug) {
+CONFIG(debug, debug|release) {
      message( "Building the DEBUG Version" )
      #lets optimize for CPU on debug, for release - packager should do
      QMAKE_CXXFLAGS +=  -march=native -O0 -g

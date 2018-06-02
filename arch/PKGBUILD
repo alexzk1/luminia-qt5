@@ -24,8 +24,7 @@ md5sums=('SKIP')
 
 build() {
   cd $srcdir/luminia-qt5
-  qmake
-  export CXX_FLAGS="$CXX_FLAGS -O3 -march=native"
+  qmake QMAKE_CXXFLAGS="${CXXFLAGS} -O3 -march=native"  
   make || return 1
 }
 
