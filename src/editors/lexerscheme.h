@@ -77,6 +77,7 @@ public:
     QString description(const int style ) const override;
 
     virtual void addIdentifiers(const QSet<QString>& newOnes);
+    void setEditor(QsciScintilla *editor) override;
 protected:
     using ScannerPtr = std::shared_ptr<FlexLexer>;
 
@@ -92,6 +93,7 @@ protected:
     //----------------------------------------------------------------------------
     QPointer<QsciAPIs>  m_API{nullptr};
 
+    virtual bool shouldBeLink(int lexerID, const QString& value) const;
 private:
     //----------------------------------------------------------------------------
     /// @brief flex lexer instance

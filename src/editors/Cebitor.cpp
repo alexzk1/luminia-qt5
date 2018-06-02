@@ -83,6 +83,7 @@ Cebitor::Cebitor(SearchBox *searchbox, QWidget *_parent) :
 
     new QShortcut(QKeySequence("F5"), this, SIGNAL(F5pressed()), SIGNAL(F5pressed()), Qt::WidgetShortcut);
     new QShortcut(QKeySequence("F2"), this, SIGNAL(F2pressed()), SIGNAL(F2pressed()), Qt::WidgetShortcut);
+    new QShortcut(QKeySequence("F1"), this, SIGNAL(F1pressed()), SIGNAL(F1pressed()), Qt::WidgetShortcut);
 }
 //------------------------------------------------------------------------------
 QSize Cebitor::sizeHint() const
@@ -432,6 +433,7 @@ void Cebitor::initAfterLexer()
     setBraceMatching(BraceMatch::SloppyBraceMatch);
     setMatchedBraceBackgroundColor(QColor(62, 61, 50));
     setUnmatchedBraceBackgroundColor(QColor(249, 38, 114));
+    setAnnotationDisplay(AnnotationDisplay::AnnotationStandard);
 
     // Set auto-indent
     setAutoIndent(true);

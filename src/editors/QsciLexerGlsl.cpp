@@ -20,4 +20,3 @@ LexerScheme::ScannerPtr QsciLexerGLSL::createScanner() const
 {
     return LexerScheme::ScannerPtr(new yyFlexLexer);
 }
-//------------------------------------------------------------------------------

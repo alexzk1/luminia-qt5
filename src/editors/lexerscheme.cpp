@@ -6,7 +6,10 @@
 #include <FlexLexer.h>
 #include <QDebug>
 
-LexerScheme::LexerScheme(const QStringList& apisToLoad, QsciScintilla *_parent)
+constexpr int LEX_IND_LINK_STYLE = 1;
+
+LexerScheme::LexerScheme(const QStringList& apisToLoad, QsciScintilla *_parent):
+    QsciLexerCustom(_parent), utility::NoCopyAssignMove()
 {
     m_parent = _parent;
     m_API = new QsciAPIs(this);
@@ -86,10 +89,13 @@ void LexerScheme::styleText(const int start, const int end)
         {
             if (style == StyleType::DEFAULT)
                 style = StyleType::IDENTIFIER;
-            //            else
-            //                style += StyleType::ITALIC;
         }
         setStyling(tokens[i + 2], style);
+        editor()->SendScintilla(QsciScintilla::SCI_SETINDICATORCURRENT, LEX_IND_LINK_STYLE);
+        if (shouldBeLink(style, tmp))
+            editor()->SendScintilla(QsciScintilla::SCI_INDICATORFILLRANGE, start + tokens[i + 1], tokens[i + 2]);
+        else
+            editor()->SendScintilla(QsciScintilla::SCI_INDICATORCLEARRANGE, start + tokens[i + 1], tokens[i + 2]);
     }
 }
 
@@ -151,6 +157,13 @@ QString LexerScheme::description(const int style) const
 void LexerScheme::addIdentifiers(const QSet<QString> &newOnes)
 {
     identifiers += newOnes;
+}
+
+void LexerScheme::setEditor(QsciScintilla *editor)
+{
+    QsciLexerCustom::setEditor(editor);
+    if (editor)
+        editor->setIndicatorHoverStyle(QsciScintilla::PlainIndicator, LEX_IND_LINK_STYLE);
 }
 
 QColor LexerScheme::defaultColor(const int style) const
@@ -260,4 +273,11 @@ LexerScheme::ScannerPtr LexerScheme::getFlex()
     if (!m_flexScanner)
         m_flexScanner = createScanner();
     return m_flexScanner;
+}
+
+bool LexerScheme::shouldBeLink(int lexerID, const QString &value) const
+{
+    Q_UNUSED(lexerID);
+    Q_UNUSED(value);
+    return false;
 }
