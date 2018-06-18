@@ -91,7 +91,8 @@ HEADERS	+=	src/mainwindow.h \
     src/globals.h \
     src/dock_prep.h \
     src/prohibited_filter.h \
-    src/texture2lum.h
+    src/texture2lum.h \
+    src/endianness.h
 
 SOURCES +=	src/main.cpp \
                 src/mainwindow.cpp \

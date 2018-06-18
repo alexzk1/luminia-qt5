@@ -3,6 +3,7 @@
 #include <QFile>
 #include <vector>
 #include <type_traits>
+#include "endianness.h"
 
 namespace utility
 {
@@ -28,29 +29,13 @@ namespace utility
         return out;
     }
 
-    template <class T>
-    T swapBytes(T src);
-
-    template<>
-    uint32_t inline swapBytes(uint32_t src)
-    {
-        return __builtin_bswap32 (src);
-    }
-
-    template<>
-    uint64_t inline swapBytes(uint64_t src)
-    {
-        return __builtin_bswap64(src);
-    }
-
     //need for DDS, microsoft always assume little-endian, butt program may be compiled on big-endian...
     template <class T>
     typename std::enable_if<std::is_integral<T>::value, T>::type le2cpu(T val)
     {
-        constexpr static bool is_little_endian  = Q_BYTE_ORDER == Q_LITTLE_ENDIAN;
-        if (is_little_endian)
+        if (endianness::HL_LITTLE_ENDIAN == endianness::endianness)
             return val;
-        return swapBytes(val);
+        return endianness::swap_<T>(val);
     }
 }
 #endif // FILE_LOADER_H

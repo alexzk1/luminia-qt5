@@ -49,11 +49,14 @@ namespace utility
 
             if (cmpBytes <= 0)
                 break;
+
+            const auto sz = static_cast<uint32_t>(cmpBytes);
+
             size_t res_off = result.size();
             result.resize(res_off + size_t( cmpBytes ) + 4);
-            utility::le2cpu(cmpBytes); //ensure writting LE
+            utility::le2cpu(sz); //ensure writting LE
             memcpy(result.data() + res_off, &cmpBytes, 4);
-            utility::le2cpu(cmpBytes);
+            utility::le2cpu(sz);
             memcpy(result.data() + res_off + 4, buffer.data(), size_t(cmpBytes));
         }
         LZ4_freeStream(lz4Stream);
