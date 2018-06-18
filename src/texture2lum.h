@@ -50,14 +50,14 @@ namespace utility
             if (cmpBytes <= 0)
                 break;
 
-            const auto sz = static_cast<uint32_t>(cmpBytes);
+            //ensure writting LE
+            const auto sz = endianness::to_little<uint32_t>(cmpBytes);
 
             size_t res_off = result.size();
-            result.resize(res_off + size_t( cmpBytes ) + 4);
-            utility::le2cpu(sz); //ensure writting LE
-            memcpy(result.data() + res_off, &cmpBytes, 4);
-            utility::le2cpu(sz);
-            memcpy(result.data() + res_off + 4, buffer.data(), size_t(cmpBytes));
+            result.resize(res_off + size_t( sz ) + 4);
+            memcpy(result.data() + res_off, &sz, sizeof (sz));
+
+            memcpy(result.data() + res_off + sizeof (sz), buffer.data(), size_t(cmpBytes));
         }
         LZ4_freeStream(lz4Stream);
 
@@ -91,8 +91,8 @@ namespace utility
             {
                 //extracting prior stored compressed block size
                 uint32_t cmpBytes = 0;
-                memcpy(&cmpBytes, decoded.data() + srcOffset, 4);
-                srcOffset += 4;
+                memcpy(&cmpBytes, decoded.data() + srcOffset, sizeof (cmpBytes));
+                srcOffset += sizeof (cmpBytes);
                 cmpBytes = le2cpu(cmpBytes); //ensuring it is LE byte order
 
                 if (shrink_delta > messageMaxBytes)
