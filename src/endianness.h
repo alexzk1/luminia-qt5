@@ -109,4 +109,12 @@ namespace endianness
                 return en_swap<T, hl_endianness::HL_BIG_ENDIAN, hl_endianness::HL_LITTLE_ENDIAN>::conv(v);
         }
     }
+
+    template <class T>
+    typename std::enable_if<std::is_integral<T>::value, T>::type le2cpu(T val)
+    {
+        if (endianness::HL_LITTLE_ENDIAN == endianness::endianness)
+            return val;
+        return endianness::swap_<T>(val);
+    }
 }

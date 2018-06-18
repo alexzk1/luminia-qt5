@@ -3,7 +3,7 @@
 
 pkgname=lumina-modern-2018
 pkgver=0.1.0
-pkgrel=2
+pkgrel=3
 pkgdesc="Free cross-platform development environment for GLSL shaders"
 
 provides=('luminia')

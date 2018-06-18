@@ -30,12 +30,5 @@ namespace utility
     }
 
     //need for DDS, microsoft always assume little-endian, butt program may be compiled on big-endian...
-    template <class T>
-    typename std::enable_if<std::is_integral<T>::value, T>::type le2cpu(T val)
-    {
-        if (endianness::HL_LITTLE_ENDIAN == endianness::endianness)
-            return val;
-        return endianness::swap_<T>(val);
-    }
 }
 #endif // FILE_LOADER_H

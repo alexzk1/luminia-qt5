@@ -93,7 +93,7 @@ namespace utility
                 uint32_t cmpBytes = 0;
                 memcpy(&cmpBytes, decoded.data() + srcOffset, sizeof (cmpBytes));
                 srcOffset += sizeof (cmpBytes);
-                cmpBytes = le2cpu(cmpBytes); //ensuring it is LE byte order
+                cmpBytes = endianness::le2cpu(cmpBytes); //ensuring it is LE byte order
 
                 if (shrink_delta > messageMaxBytes)
                     shrink_delta -= messageMaxBytes; //"virtual" resize, we already have enough space there

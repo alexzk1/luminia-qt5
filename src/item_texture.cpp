@@ -292,6 +292,8 @@ void Item_texture::reload()
         if ( file.open( QIODevice::ReadOnly ) )
         {
             using namespace utility;
+            using namespace endianness;
+
             const auto dds_magic = le2cpu(readIntegralFromFile<uint32_t>(file));
             const auto dds_size  = le2cpu(readIntegralFromFile<uint32_t>(file));
             const auto trueSize  = std::min(static_cast<size_t>(dds_size) - sizeof (dds_size), sizeof(DDS_Header_t));
